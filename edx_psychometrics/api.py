@@ -11,6 +11,7 @@ from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey, UsageKey
 from util.json_request import JsonResponse
 from lms.djangoapps.instructor.views.api import require_level, common_exceptions_400
+from .tasks import submit_get_psychometrics_data
 
 
 
@@ -35,7 +36,9 @@ def get_psychometrics_data(request, course_id):
     """
     course_key = CourseKey.from_string(course_id)
     report_type = _('get_psychometrics_data')
-    lms.djangoapps.instructor_task.api.submit_get_psychometrics_data(request, course_key)  #TODO: replace dych
+    submit_get_psychometrics_data(request, course_key)  #TODO: replace dych
     success_status = SUCCESS_MESSAGE_TEMPLATE.format(report_type=report_type)
 
     return JsonResponse({"status": success_status})
+
+
