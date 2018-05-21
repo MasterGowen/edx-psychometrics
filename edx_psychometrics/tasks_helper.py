@@ -12,7 +12,7 @@ from six import text_type
 # from .runner import TaskProgress
 # from .utils import upload_csv_to_report_store
 
-from lms.djangoapps.instructor_tasks.tasks_helper.runner import TaskProgress
+from lms.djangoapps.instructor_task.tasks_helper.runner import TaskProgress
 
 
 class PsychometricsReport(object):

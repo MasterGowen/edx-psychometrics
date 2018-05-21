@@ -68,7 +68,7 @@ setup(
         "djangorestframework>=3.1,<3.7",
         "django-ipware>=1.1.0",
         "edx-opaque-keys>=0.4",
-        "pytz>=2012h",
+        "pytz>=2016",
         "pycryptodomex>=3.4.7",
         "python-dateutil>=2.1",
         "requests",
