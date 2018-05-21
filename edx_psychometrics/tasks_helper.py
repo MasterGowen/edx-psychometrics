@@ -14,9 +14,10 @@ from lms.djangoapps.instructor_analytics.csvs import format_dictlist
 from lms.djangoapps.instructor_task.tasks_helper.runner import TaskProgress
 from lms.djangoapps.instructor_task.tasks_helper.utils import upload_csv_to_report_store
 
+log = logging.getLogger(__name__)
+
 
 class PsychometricsReport(object):
-    @classmethod
     def generate(cls, _xmodule_instance_args, _entry_id, course_id, task_input, action_name):
         """
         For a given `course_id`, generate a CSV file containing
@@ -27,7 +28,7 @@ class PsychometricsReport(object):
         num_reports = 1
         task_progress = TaskProgress(action_name, num_reports, start_time)
         current_step = {'step': 'Calculating students answers to problem'}
-        print(
+        log.warning(
             action_name,
             num_reports,
             start_time,
