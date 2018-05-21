@@ -11,7 +11,7 @@ from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey, UsageKey
 from util.json_request import JsonResponse
 from lms.djangoapps.instructor.views.api import require_level, common_exceptions_400
-from .tasks import submit_get_psychometrics_data
+from edx_psychometrics.tasks import submit_get_psychometrics_data
 
 
 
