@@ -27,23 +27,29 @@ class PsychometricsReport(object):
         num_reports = 1
         task_progress = TaskProgress(action_name, num_reports, start_time)
         current_step = {'step': 'Calculating students answers to problem'}
+        print(
+            action_name,
+            num_reports,
+            start_time,
+            current_step
+        )
         task_progress.update_task_state(extra_meta=current_step)
 
         # Compute result table and format it
         student_data = [
-        {
-            'label1': 'value-1,1',
-            'label2': 'value-1,2',
-            'label3': 'value-1,3',
-            'label4': 'value-1,4',
-        },
-        {
-            'label1': 'value-2,1',
-            'label2': 'value-2,2',
-            'label3': 'value-2,3',
-            'label4': 'value-2,4',
-        }
-    ]
+            {
+                'label1': 'value-1,1',
+                'label2': 'value-1,2',
+                'label3': 'value-1,3',
+                'label4': 'value-1,4',
+            },
+            {
+                'label1': 'value-2,1',
+                'label2': 'value-2,2',
+                'label3': 'value-2,3',
+                'label4': 'value-2,4',
+            }
+        ]
         features = ['label1', 'label4']
         header, rows = format_dictlist(student_data, features)
 
