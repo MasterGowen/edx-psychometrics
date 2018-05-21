@@ -27,7 +27,7 @@ def submit_get_psychometrics_data(request, course_key):
     AlreadyRunningError is raised if an psychometrics report is already being generated.
     """
     task_type = 'get_psychometrics_data'
-    task_class = get_psychometrics_data
+    task_class = edx_psychometrics.tasks.get_psychometrics_data
     task_input = {}
     task_key = ''
 
