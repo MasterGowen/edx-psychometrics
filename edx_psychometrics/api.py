@@ -35,7 +35,7 @@ def get_psychometrics_data(request, course_id):
     """
     course_key = CourseKey.from_string(course_id)
     report_type = _('get_psychometrics_data')
-    lms.djangoapps.instructor_task.api.submit_get_psychometrics_data(request, course_key)  #TODO: перетащить дичь
+    lms.djangoapps.instructor_task.api.submit_get_psychometrics_data(request, course_key)  #TODO: replace dych
     success_status = SUCCESS_MESSAGE_TEMPLATE.format(report_type=report_type)
 
     return JsonResponse({"status": success_status})
