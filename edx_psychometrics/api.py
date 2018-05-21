@@ -54,7 +54,7 @@ def get_psychometrics_data(request, course_id):
 
 
 @CELERY_APP.task
-def zip_student_submissions(course_id, block_id, locator_unicode, username):
+def get_psychometrics_data_task(course_id, block_id, locator_unicode, username):
     return 1 + 1
 # import logging
 # from functools import partial
