@@ -3,7 +3,7 @@ from functools import partial
 
 from celery import task
 from django.conf import settings
-from django.utils.translation import ugettext_noop
+from django.utils.translation import ugettext_lazy
 
 from lms.djangoapps.instructor_task.tasks_helper.runner import run_main_task
 from lms.djangoapps.instructor_task.tasks_base import BaseInstructorTask
@@ -18,6 +18,6 @@ def get_psychometrics_data(entry_id, xmodule_instance_args):
     """
     Generate psychometrics reports archive.
     """
-    action_name = ugettext_noop('get_psychometrics_data')
+    action_name = ugettext_lazy('get_psychometrics_data')
     task_fn = partial(PsychometricsReport.generate, xmodule_instance_args)
     return run_main_task(entry_id, task_fn, action_name)
