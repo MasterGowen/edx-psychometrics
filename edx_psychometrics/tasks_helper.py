@@ -18,6 +18,7 @@ log = logging.getLogger(__name__)
 
 
 class PsychometricsReport(object):
+    @classmethod
     def generate(cls, _xmodule_instance_args, _entry_id, course_id, task_input, action_name):
         """
         For a given `course_id`, generate a CSV file containing
