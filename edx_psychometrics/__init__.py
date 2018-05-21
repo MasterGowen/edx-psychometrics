@@ -1,9 +1,4 @@
-"""
-The psychometrics subsystem for the Open edX platform.
-"""
+from . import api, tasks, tasks_helper
 
-from __future__ import absolute_import
+__all__ = [api, tasks, tasks_helper]
 
-__version__ = '0.0.1'
-
-default_app_config = 'edx_psychometrics.apps.EdxPsychometricsConfig'  # pylint: disable=invalid-name
