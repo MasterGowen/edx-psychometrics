@@ -9,7 +9,7 @@ from django.views.decorators.http import require_http_methods, require_POST
 
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey, UsageKey
-from lms.djangoapps.instructor.views.util.json_request import JsonResponse
+from util.json_request import JsonResponse
 from lms.djangoapps.instructor.views.api import require_level, common_exceptions_400
 
 
