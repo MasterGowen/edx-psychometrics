@@ -10,7 +10,7 @@ from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey, UsageKey
 from util.json_request import JsonResponse
 from lms.djangoapps.instructor.views.api import require_level, common_exceptions_400
-from .tasks import get_psychometrics_data
+from .tasks import get_psychometrics_data as get_psychometrics_data_task
 
 from lms.djangoapps.instructor_task.api_helper import submit_task
 
@@ -27,7 +27,7 @@ def submit_get_psychometrics_data(request, course_key):
     AlreadyRunningError is raised if an psychometrics report is already being generated.
     """
     task_type = 'get_psychometrics_data'
-    task_class = get_psychometrics_data
+    task_class = get_psychometrics_data_task
     task_input = {}
     task_key = ''
 
