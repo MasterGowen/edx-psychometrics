@@ -1,6 +1,5 @@
 import logging
 
-
 from django.db import IntegrityError, transaction
 from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_control
@@ -13,7 +12,7 @@ from util.json_request import JsonResponse
 from lms.djangoapps.instructor.views.api import require_level, common_exceptions_400
 import edx_psychometrics
 
-
+from lms.djangoapps.instructor_task.api_helper import submit_task
 
 log = logging.getLogger(__name__)
 
@@ -22,6 +21,17 @@ TASK_SUBMISSION_OK = 'created'
 SUCCESS_MESSAGE_TEMPLATE = _("The {report_type} report is being created. "
                              "To view the status of the report, see Pending Tasks below.")
 
+
+def submit_get_psychometrics_data(request, course_key):
+    """
+    AlreadyRunningError is raised if an psychometrics report is already being generated.
+    """
+    task_type = 'get_psychometrics_data'
+    task_class = get_psychometrics_data
+    task_input = {}
+    task_key = ''
+
+    return submit_task(request, task_type, task_class, course_key, task_input, task_key)
 
 
 @transaction.non_atomic_requests
@@ -36,9 +46,7 @@ def get_psychometrics_data(request, course_id):
     """
     course_key = CourseKey.from_string(course_id)
     report_type = _('get_psychometrics_data')
-    edx_psychometrics.tasks.submit_get_psychometrics_data(request, course_key)
+    submit_get_psychometrics_data(request, course_key)
     success_status = SUCCESS_MESSAGE_TEMPLATE.format(report_type=report_type)
 
     return JsonResponse({"status": success_status})
-
-
