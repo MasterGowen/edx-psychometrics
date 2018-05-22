@@ -57,12 +57,10 @@ class PsychometricsReport(object):
 
         enrolled_students = CourseEnrollment.objects.users_enrolled_in(course_id, include_inactive=True)
 
-        #CSV1
+        # CSV1
         current_step = {'step': 'Calculating CSV1'}
         cls._get_csv1_data(course_id, enrolled_students, start_date, "psychometrics_report_csv1")
         task_progress.update_task_state(extra_meta=current_step)
-
-
 
         current_step = {'step': 'LOL'}
         task_progress.update_task_state(extra_meta=current_step)
@@ -80,7 +78,8 @@ class PsychometricsReport(object):
         history_entries = []
         for student, course_grade, error in CourseGradeFactory().iter(enrolled_students, course):
             for location in cls._graded_scorable_blocks_to_header(course):
-                log.warning(location, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                log.warning(str(location),
+                            "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 usage_key = UsageKey.from_string(location)
                 user_state_client = DjangoXBlockUserStateClient()
                 try:
@@ -96,21 +95,10 @@ class PsychometricsReport(object):
         Returns an OrderedDict that maps a scorable block's id to its
         headers in the final report.
         """
-        scorable_blocks_map = OrderedDict()
+        scorable_blocks_map = []
         grading_context = grading_context_for_course(course)
         for assignment_type_name, subsection_infos in grading_context['all_graded_subsections_by_type'].iteritems():
             for subsection_index, subsection_info in enumerate(subsection_infos, start=1):
                 for scorable_block in subsection_info['scored_descendants']:
-                    header_name = (
-                        u"{assignment_type} {subsection_index}: "
-                        u"{subsection_name} - {scorable_block_name}"
-                    ).format(
-                        scorable_block_name=scorable_block.display_name,
-                        assignment_type=assignment_type_name,
-                        subsection_index=subsection_index,
-                        subsection_name=subsection_info['subsection_block'].display_name,
-                    )
-                    scorable_blocks_map[scorable_block.location] = [header_name + " (Earned)",
-                                                                    header_name + " (Possible)"]
-
+                    scorable_blocks_map.append(scorable_block.location)
         return scorable_blocks_map
