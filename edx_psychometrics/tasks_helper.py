@@ -14,6 +14,8 @@ from lms.djangoapps.instructor_analytics.csvs import format_dictlist
 from lms.djangoapps.grades.context import grading_context, grading_context_for_course
 from student.models import CourseEnrollment
 from courseware.courses import get_course_by_id
+from opaque_keys.edx.keys import CourseKey, UsageKey
+from courseware.user_state_client import DjangoXBlockUserStateClient
 from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
 
 from lms.djangoapps.instructor_task.tasks_helper.runner import TaskProgress
@@ -36,6 +38,7 @@ def _user_enrollment_status(user, course_id):
         return ENROLLED_IN_COURSE
     return NOT_ENROLLED_IN_COURSE
 
+
 def _flatten(iterable):
     return list(chain.from_iterable(iterable))
 
@@ -50,80 +53,41 @@ class PsychometricsReport(object):
         start_time = time()
         start_date = datetime.now(UTC)
         num_reports = 1
-        status_interval = 100
         task_progress = TaskProgress(action_name, num_reports, start_time)
 
-        #course
-        course = get_course_by_id(course_id)
-        graded_scorable_blocks = cls._graded_scorable_blocks_to_header(course)
-
-
-        # Students
-        current_step = {'step': 'Calculating Grades'}
         enrolled_students = CourseEnrollment.objects.users_enrolled_in(course_id, include_inactive=True)
-        header_row = OrderedDict([('id', 'Student ID'), ('email', 'Email'), ('username', 'Username')])
-        rows = [list(header_row.values()) + ['Enrollment Status', 'Grade'] + _flatten(graded_scorable_blocks.values())]
-        for student, course_grade, error in CourseGradeFactory().iter(enrolled_students, course):
-            student_fields = [getattr(student, field_name) for field_name in header_row]
-            task_progress.attempted += 1
 
-            if not course_grade:
-                err_msg = text_type(error)
-                # There was an error grading this student.
-                if not err_msg:
-                    err_msg = u'Unknown error'
-                task_progress.failed += 1
-                continue
-
-            enrollment_status = _user_enrollment_status(student, course_id)
-
-            earned_possible_values = []
-            for block_location in graded_scorable_blocks:
-                try:
-                    problem_score = course_grade.problem_scores[block_location]
-                except KeyError:
-                    earned_possible_values.append([u'Not Available', u'Not Available'])
-                else:
-                    if problem_score.first_attempted:
-                        earned_possible_values.append([problem_score.earned, problem_score.possible])
-                    else:
-                        earned_possible_values.append([u'Not Attempted', problem_score.possible])
-
-            rows.append(student_fields + [enrollment_status, course_grade.percent] + _flatten(earned_possible_values))
-
-            task_progress.succeeded += 1
-            if task_progress.attempted % status_interval == 0:
-                task_progress.update_task_state(extra_meta=current_step)
-
-        current_step = {'step': 'Calculating students answers to problem'}
-        log.warning(
-            action_name,
-            num_reports,
-            start_time,
-            current_step
-        )
+        #CSV1
+        current_step = {'step': 'Calculating CSV1'}
+        cls._get_csv1_data(course_id, enrolled_students, start_date, "psychometrics_report_csv1")
         task_progress.update_task_state(extra_meta=current_step)
 
-        # Compute result table and format it
-        task_progress.attempted = task_progress.succeeded = len(rows)
-        task_progress.skipped = task_progress.total - task_progress.attempted
 
-        # rows.insert(0, header_row)
 
-        current_step = {'step': 'Uploading CSV'}
+        current_step = {'step': 'LOL'}
         task_progress.update_task_state(extra_meta=current_step)
 
         # Perform the upload
-        csv_name = u'psychometrics_report'
-        upload_csv_to_report_store(rows, csv_name, course_id, start_date)
+        # csv_name = u'psychometrics_report'
+        # upload_csv_to_report_store(rows, csv_name, course_id, start_date)
         return task_progress.update_task_state(extra_meta=current_step)
 
     @classmethod
-    def _get_csv1_data(cls, course, enrolled_students):
+    def _get_csv1_data(cls, course_id, enrolled_students, start_date, csv_name):
+        course_key = CourseKey.from_string(course_id)
+        course = get_course_by_id(course_id)
+
         rows = []
-
-
-
+        history_entries = []
+        for student, course_grade, error in CourseGradeFactory().iter(enrolled_students, course):
+            for location in cls._graded_scorable_blocks_to_header(course):
+                usage_key = UsageKey.from_string(location).map_into_course(course_key)
+                user_state_client = DjangoXBlockUserStateClient()
+                try:
+                    history_entries += list(user_state_client.get_history(student.username, usage_key))
+                except DjangoXBlockUserStateClient.DoesNotExist:
+                    pass
+        upload_csv_to_report_store(history_entries, csv_name, course_id, start_date)
 
     @classmethod
     def _graded_scorable_blocks_to_header(cls, course):
@@ -149,5 +113,3 @@ class PsychometricsReport(object):
                                                                     header_name + " (Possible)"]
 
         return scorable_blocks_map
-
-
