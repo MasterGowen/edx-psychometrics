@@ -86,6 +86,7 @@ class PsychometricsReport(object):
                     history_entries += list(user_state_client.get_history(student.username, usage_key))
                 except DjangoXBlockUserStateClient.DoesNotExist:
                     pass
+        log.warning([str(e) for e in history_entries])
         upload_csv_to_report_store(history_entries, csv_name, course_id, start_date)
 
     @classmethod
