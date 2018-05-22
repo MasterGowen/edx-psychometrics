@@ -13,11 +13,31 @@ from lms.djangoapps.instructor_analytics.csvs import format_dictlist
 
 from lms.djangoapps.grades.context import grading_context, grading_context_for_course
 from student.models import CourseEnrollment
+from courseware.courses import get_course_by_id
+from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
 
 from lms.djangoapps.instructor_task.tasks_helper.runner import TaskProgress
 from lms.djangoapps.instructor_task.tasks_helper.utils import upload_csv_to_report_store
 
 log = logging.getLogger(__name__)
+
+ENROLLED_IN_COURSE = 'enrolled'
+
+NOT_ENROLLED_IN_COURSE = 'unenrolled'
+
+
+def _user_enrollment_status(user, course_id):
+    """
+    Returns the enrollment activation status in the given course
+    for the given user.
+    """
+    enrollment_is_active = CourseEnrollment.enrollment_mode_for_user(user, course_id)[1]
+    if enrollment_is_active:
+        return ENROLLED_IN_COURSE
+    return NOT_ENROLLED_IN_COURSE
+
+def _flatten(iterable):
+    return list(chain.from_iterable(iterable))
 
 
 class PsychometricsReport(object):
@@ -30,15 +50,50 @@ class PsychometricsReport(object):
         start_time = time()
         start_date = datetime.now(UTC)
         num_reports = 1
+        status_interval = 100
+        task_progress = TaskProgress(action_name, num_reports, start_time)
 
-        #Students
+        #course
+        course = get_course_by_id(course_id)
+        graded_scorable_blocks = cls._graded_scorable_blocks_to_header(course)
+
+        # Students
+        current_step = {'step': 'Calculating Grades'}
         enrolled_students = CourseEnrollment.objects.users_enrolled_in(course_id, include_inactive=True)
         header_row = OrderedDict([('id', 'Student ID'), ('email', 'Email'), ('username', 'Username')])
-        log.warning(enrolled_students, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        rows = [list(header_row.values()) + ['Enrollment Status', 'Grade'] + _flatten(graded_scorable_blocks.values())]
+        for student, course_grade, error in CourseGradeFactory().iter(enrolled_students, course):
+            student_fields = [getattr(student, field_name) for field_name in header_row]
+            task_progress.attempted += 1
 
+            if not course_grade:
+                err_msg = text_type(error)
+                # There was an error grading this student.
+                if not err_msg:
+                    err_msg = u'Unknown error'
+                task_progress.failed += 1
+                continue
 
+            enrollment_status = _user_enrollment_status(student, course_id)
 
-        task_progress = TaskProgress(action_name, num_reports, start_time)
+            earned_possible_values = []
+            for block_location in graded_scorable_blocks:
+                try:
+                    problem_score = course_grade.problem_scores[block_location]
+                except KeyError:
+                    earned_possible_values.append([u'Not Available', u'Not Available'])
+                else:
+                    if problem_score.first_attempted:
+                        earned_possible_values.append([problem_score.earned, problem_score.possible])
+                    else:
+                        earned_possible_values.append([u'Not Attempted', problem_score.possible])
+
+            rows.append(student_fields + [enrollment_status, course_grade.percent] + _flatten(earned_possible_values))
+
+            task_progress.succeeded += 1
+            if task_progress.attempted % status_interval == 0:
+                task_progress.update_task_state(extra_meta=current_step)
+
         current_step = {'step': 'Calculating students answers to problem'}
         log.warning(
             action_name,
@@ -49,27 +104,10 @@ class PsychometricsReport(object):
         task_progress.update_task_state(extra_meta=current_step)
 
         # Compute result table and format it
-        student_data = [
-            {
-                'label1': 'value-1,1',
-                'label2': 'value-1,2',
-                'label3': 'value-1,3',
-                'label4': 'value-1,4',
-            },
-            {
-                'label1': 'value-2,1',
-                'label2': 'value-2,2',
-                'label3': 'value-2,3',
-                'label4': 'value-2,4',
-            }
-        ]
-        features = ['label1', 'label4']
-        header, rows = format_dictlist(student_data, features)
-
         task_progress.attempted = task_progress.succeeded = len(rows)
         task_progress.skipped = task_progress.total - task_progress.attempted
 
-        rows.insert(0, header)
+        rows.insert(0, header_row)
 
         current_step = {'step': 'Uploading CSV'}
         task_progress.update_task_state(extra_meta=current_step)
