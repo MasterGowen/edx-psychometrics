@@ -34,7 +34,7 @@ class PsychometricsReport(object):
         #Students
         enrolled_students = CourseEnrollment.objects.users_enrolled_in(course_id, include_inactive=True)
         header_row = OrderedDict([('id', 'Student ID'), ('email', 'Email'), ('username', 'Username')])
-        log.warning(enrolled_students)
+        log.warning(enrolled_students, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
 
 
