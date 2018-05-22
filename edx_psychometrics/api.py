@@ -35,8 +35,8 @@ def submit_get_psychometrics_data(request, course_key):
 
 
 @transaction.non_atomic_requests
-# @require_POST
-# @ensure_csrf_cookie
+@require_POST
+@ensure_csrf_cookie
 @cache_control(no_cache=True, no_store=True, must_revalidate=True)
 @require_level('staff')
 @common_exceptions_400
