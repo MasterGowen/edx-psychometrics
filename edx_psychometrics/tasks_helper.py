@@ -11,6 +11,9 @@ from six import text_type
 
 from lms.djangoapps.instructor_analytics.csvs import format_dictlist
 
+from lms.djangoapps.grades.context import grading_context, grading_context_for_course
+from student.models import CourseEnrollment
+
 from lms.djangoapps.instructor_task.tasks_helper.runner import TaskProgress
 from lms.djangoapps.instructor_task.tasks_helper.utils import upload_csv_to_report_store
 
@@ -27,6 +30,14 @@ class PsychometricsReport(object):
         start_time = time()
         start_date = datetime.now(UTC)
         num_reports = 1
+
+        #Students
+        enrolled_students = CourseEnrollment.objects.users_enrolled_in(course_id, include_inactive=True)
+        header_row = OrderedDict([('id', 'Student ID'), ('email', 'Email'), ('username', 'Username')])
+        log.warning(enrolled_students)
+
+
+
         task_progress = TaskProgress(action_name, num_reports, start_time)
         current_step = {'step': 'Calculating students answers to problem'}
         log.warning(
@@ -66,5 +77,30 @@ class PsychometricsReport(object):
         # Perform the upload
         csv_name = u'psychometrics_report'
         upload_csv_to_report_store(rows, csv_name, course_id, start_date)
+
+        @classmethod
+        def _graded_scorable_blocks_to_header(cls, course):
+            """
+            Returns an OrderedDict that maps a scorable block's id to its
+            headers in the final report.
+            """
+            scorable_blocks_map = OrderedDict()
+            grading_context = grading_context_for_course(course)
+            for assignment_type_name, subsection_infos in grading_context['all_graded_subsections_by_type'].iteritems():
+                for subsection_index, subsection_info in enumerate(subsection_infos, start=1):
+                    for scorable_block in subsection_info['scored_descendants']:
+                        header_name = (
+                            u"{assignment_type} {subsection_index}: "
+                            u"{subsection_name} - {scorable_block_name}"
+                        ).format(
+                            scorable_block_name=scorable_block.display_name,
+                            assignment_type=assignment_type_name,
+                            subsection_index=subsection_index,
+                            subsection_name=subsection_info['subsection_block'].display_name,
+                        )
+                        scorable_blocks_map[scorable_block.location] = [header_name + " (Earned)",
+                                                                        header_name + " (Possible)"]
+
+            return scorable_blocks_map
 
         return task_progress.update_task_state(extra_meta=current_step)
