@@ -57,6 +57,7 @@ class PsychometricsReport(object):
         course = get_course_by_id(course_id)
         graded_scorable_blocks = cls._graded_scorable_blocks_to_header(course)
 
+
         # Students
         current_step = {'step': 'Calculating Grades'}
         enrolled_students = CourseEnrollment.objects.users_enrolled_in(course_id, include_inactive=True)
@@ -115,6 +116,14 @@ class PsychometricsReport(object):
         # Perform the upload
         csv_name = u'psychometrics_report'
         upload_csv_to_report_store(rows, csv_name, course_id, start_date)
+        return task_progress.update_task_state(extra_meta=current_step)
+
+    @classmethod
+    def _get_csv1_data(cls, course, enrolled_students):
+        rows = []
+
+
+
 
     @classmethod
     def _graded_scorable_blocks_to_header(cls, course):
@@ -141,4 +150,4 @@ class PsychometricsReport(object):
 
         return scorable_blocks_map
 
-        return task_progress.update_task_state(extra_meta=current_step)
+
