@@ -80,7 +80,8 @@ class PsychometricsReport(object):
         history_entries = []
         for student, course_grade, error in CourseGradeFactory().iter(enrolled_students, course):
             for location in cls._graded_scorable_blocks_to_header(course):
-                usage_key = UsageKey.from_string(location).map_into_course(course.id)
+                log.warning(location, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                usage_key = UsageKey.from_string(location)
                 user_state_client = DjangoXBlockUserStateClient()
                 try:
                     history_entries += list(user_state_client.get_history(student.username, usage_key))
