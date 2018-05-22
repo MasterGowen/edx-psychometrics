@@ -74,14 +74,13 @@ class PsychometricsReport(object):
 
     @classmethod
     def _get_csv1_data(cls, course_id, enrolled_students, start_date, csv_name):
-        course_key = CourseKey.from_string(course_id)
         course = get_course_by_id(course_id)
 
         rows = []
         history_entries = []
         for student, course_grade, error in CourseGradeFactory().iter(enrolled_students, course):
             for location in cls._graded_scorable_blocks_to_header(course):
-                usage_key = UsageKey.from_string(location).map_into_course(course_key)
+                usage_key = UsageKey.from_string(location).map_into_course(course.id)
                 user_state_client = DjangoXBlockUserStateClient()
                 try:
                     history_entries += list(user_state_client.get_history(student.username, usage_key))
