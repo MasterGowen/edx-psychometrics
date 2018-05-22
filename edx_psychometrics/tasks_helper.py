@@ -107,7 +107,7 @@ class PsychometricsReport(object):
         task_progress.attempted = task_progress.succeeded = len(rows)
         task_progress.skipped = task_progress.total - task_progress.attempted
 
-        rows.insert(0, header_row)
+        # rows.insert(0, header_row)
 
         current_step = {'step': 'Uploading CSV'}
         task_progress.update_task_state(extra_meta=current_step)
