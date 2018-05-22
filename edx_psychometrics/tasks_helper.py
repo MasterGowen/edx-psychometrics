@@ -116,29 +116,29 @@ class PsychometricsReport(object):
         csv_name = u'psychometrics_report'
         upload_csv_to_report_store(rows, csv_name, course_id, start_date)
 
-        @classmethod
-        def _graded_scorable_blocks_to_header(cls, course):
-            """
-            Returns an OrderedDict that maps a scorable block's id to its
-            headers in the final report.
-            """
-            scorable_blocks_map = OrderedDict()
-            grading_context = grading_context_for_course(course)
-            for assignment_type_name, subsection_infos in grading_context['all_graded_subsections_by_type'].iteritems():
-                for subsection_index, subsection_info in enumerate(subsection_infos, start=1):
-                    for scorable_block in subsection_info['scored_descendants']:
-                        header_name = (
-                            u"{assignment_type} {subsection_index}: "
-                            u"{subsection_name} - {scorable_block_name}"
-                        ).format(
-                            scorable_block_name=scorable_block.display_name,
-                            assignment_type=assignment_type_name,
-                            subsection_index=subsection_index,
-                            subsection_name=subsection_info['subsection_block'].display_name,
-                        )
-                        scorable_blocks_map[scorable_block.location] = [header_name + " (Earned)",
-                                                                        header_name + " (Possible)"]
+    @classmethod
+    def _graded_scorable_blocks_to_header(cls, course):
+        """
+        Returns an OrderedDict that maps a scorable block's id to its
+        headers in the final report.
+        """
+        scorable_blocks_map = OrderedDict()
+        grading_context = grading_context_for_course(course)
+        for assignment_type_name, subsection_infos in grading_context['all_graded_subsections_by_type'].iteritems():
+            for subsection_index, subsection_info in enumerate(subsection_infos, start=1):
+                for scorable_block in subsection_info['scored_descendants']:
+                    header_name = (
+                        u"{assignment_type} {subsection_index}: "
+                        u"{subsection_name} - {scorable_block_name}"
+                    ).format(
+                        scorable_block_name=scorable_block.display_name,
+                        assignment_type=assignment_type_name,
+                        subsection_index=subsection_index,
+                        subsection_name=subsection_info['subsection_block'].display_name,
+                    )
+                    scorable_blocks_map[scorable_block.location] = [header_name + " (Earned)",
+                                                                    header_name + " (Possible)"]
 
-            return scorable_blocks_map
+        return scorable_blocks_map
 
         return task_progress.update_task_state(extra_meta=current_step)
