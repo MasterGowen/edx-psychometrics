@@ -83,7 +83,7 @@ class PsychometricsReport(object):
                 student=student,
                 course_id=course_id)
             for s in student_modules:
-                rows.append([s.student__id, s.state])
+                rows.append([s.student.id, s.state])
 
 
 
