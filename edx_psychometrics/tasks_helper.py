@@ -133,15 +133,10 @@ class PsychometricsReport(object):
                 module_type='problem'
             )
             for s in student_modules:
-                if "correct_map" in s.state:
-                    correct_map = json.loads(s.state)["correct_map"]
-                    for item in correct_map:
-                        rows.append([
-                            s.student.id,
-                            item,
-                            1 if correct_map[item]["correctness"] == "correct" else 0,
-                            json.loads(s.state)["last_submission_time"]
-                        ])
+                rows.append([
+                    s,
+                    1,
+                ])
         rows.insert(0, headers)
         upload_csv_to_report_store(rows, csv_name, course_id, start_date)
 
