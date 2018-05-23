@@ -64,16 +64,48 @@ class PsychometricsReport(object):
         cls._get_csv1_data(course_id, enrolled_students, start_date, "psychometrics_report_csv1")
         task_progress.update_task_state(extra_meta=current_step)
 
-        current_step = {'step': 'LOL'}
+        # CSV2
+        current_step = {'step': 'Calculating CSV2'}
+        cls._get_csv1_data(course_id, enrolled_students, start_date, "psychometrics_report_csv2")
         task_progress.update_task_state(extra_meta=current_step)
 
         # Perform the upload
         # csv_name = u'psychometrics_report'
         # upload_csv_to_report_store(rows, csv_name, course_id, start_date)
+
         return task_progress.update_task_state(extra_meta=current_step)
 
     @classmethod
     def _get_csv1_data(cls, course_id, enrolled_students, start_date, csv_name):
+        user_state_client = DjangoXBlockUserStateClient()
+        course = get_course_by_id(course_id)
+        headers = ('user_id', 'item_id', 'correct', 'time')
+        rows = []
+
+        for student, course_grade, error in CourseGradeFactory().iter(enrolled_students, course):
+            student_modules = StudentModule.objects.filter(
+                student=student,
+                course_id=course_id,
+                module_type='problem'
+            )
+
+            for s in student_modules:
+                if "correct_map" in s.state:
+                    history_entries = list(user_state_client.get_history(student.username, s.module_state_key))
+
+                    correct_map = json.loads(s.state)["correct_map"]
+                    for item in correct_map:
+                        rows.append([
+                            s.student.id,
+                            item,
+                            1 if correct_map[item]["correctness"] == "correct" else 0,
+                            json.loads(s.state)["last_submission_time"]
+                        ])
+        rows.insert(0, headers)
+        upload_csv_to_report_store(rows, csv_name, course_id, start_date)
+
+    @classmethod
+    def _get_csv2_data(cls, course_id, enrolled_students, start_date, csv_name):
         course = get_course_by_id(course_id)
         headers = ('user_id', 'item_id', 'correct', 'time')
         rows = []
