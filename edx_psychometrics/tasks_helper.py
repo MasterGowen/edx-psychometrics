@@ -82,7 +82,8 @@ class PsychometricsReport(object):
             student_modules = StudentModule.objects.filter(
                 student=student,
                 course_id=course_id)
-            rows.append([s.state for s in student_modules])
+            for s in student_modules:
+                rows.append([s.student__id, s.state])
 
 
 
