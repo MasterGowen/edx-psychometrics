@@ -19,7 +19,7 @@ from opaque_keys.edx.keys import CourseKey, UsageKey
 from courseware.user_state_client import DjangoXBlockUserStateClient
 from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
 
-from lms.djangoapps.courseware.models import StudentModule
+from courseware.models import StudentModule
 from lms.djangoapps.instructor_task.tasks_helper.runner import TaskProgress
 from lms.djangoapps.instructor_task.tasks_helper.utils import upload_csv_to_report_store
 
