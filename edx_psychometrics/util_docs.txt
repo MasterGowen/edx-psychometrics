@@ -1,0 +1,11 @@
+Получить структуру курса
+
+    import json
+    from openedx.core.djangoapps.content.course_structures.models import CourseStructure
+    structure = CourseStructure.objects.get(course_id=course_id)).structure
+
+Также полезные методы CourseStructure:
+
+    ordered_blocks  # упорядочить структуру (как отдается в courseware)
+
+
