@@ -75,7 +75,7 @@ class PsychometricsReport(object):
     @classmethod
     def _get_csv1_data(cls, course_id, enrolled_students, start_date, csv_name):
         course = get_course_by_id(course_id)
-
+        headers = ('user_id', 'item_id', 'correct', 'time')
         rows = []
 
         for student, course_grade, error in CourseGradeFactory().iter(enrolled_students, course):
@@ -94,16 +94,7 @@ class PsychometricsReport(object):
                             1 if correct_map[item]["correctness"] == "correct" else 0,
                             json.loads(s.state)["last_submission_time"]
                         ])
-
-
-
-        #         usage_key = UsageKey.from_string(location)
-        #         user_state_client = DjangoXBlockUserStateClient()
-        #         try:
-        #             history_entries += list(user_state_client.get_history(student.username, usage_key))
-        #         except DjangoXBlockUserStateClient.DoesNotExist:
-        #             pass
-        # log.warning([str(e) for e in history_entries])
+        rows.insert(0, headers)
         upload_csv_to_report_store(rows, csv_name, course_id, start_date)
 
     @ classmethod
