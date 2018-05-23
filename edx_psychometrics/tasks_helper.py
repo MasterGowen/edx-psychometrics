@@ -99,7 +99,7 @@ class PsychometricsReport(object):
                                         s.student.id,
                                         item,
                                         1 if e.state["correct_map"][item]["correctness"] == "correct" else 0,
-                                        json.loads(e.state)["last_submission_time"],
+                                        # json.loads(e.state)["last_submission_time"],
                                         # json.dumps(history_entries)
                                     ])
 
