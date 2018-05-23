@@ -81,9 +81,11 @@ class PsychometricsReport(object):
         for student, course_grade, error in CourseGradeFactory().iter(enrolled_students, course):
             student_modules = StudentModule.objects.filter(
                 student=student,
-                course_id=course_id)
+                course_id=course_id,
+                module_type='problem'
+            )
             for s in student_modules:
-                rows.append([s.student.id, s.state])
+                rows.append([s.student.id, s.state, s.grade, s.done])
 
 
 
