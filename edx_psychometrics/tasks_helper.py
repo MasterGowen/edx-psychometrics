@@ -6,6 +6,7 @@ from itertools import chain, izip, izip_longest
 from time import time
 
 from lazy import lazy
+import pytz
 from pytz import UTC
 from six import text_type
 import json
@@ -20,6 +21,7 @@ from courseware.user_state_client import DjangoXBlockUserStateClient
 from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
 
 from courseware.models import StudentModule
+from django.conf import settings
 from lms.djangoapps.instructor_task.tasks_helper.runner import TaskProgress
 from lms.djangoapps.instructor_task.tasks_helper.utils import upload_csv_to_report_store
 
@@ -99,7 +101,8 @@ class PsychometricsReport(object):
                                         s.student.id,
                                         item,
                                         1 if e.state["correct_map"][item]["correctness"] == "correct" else 0,
-                                        e.state["last_submission_time"]
+                                        e.updated.astimezone(pytz.timezone(settings.TIME_ZONE))
+                                        # e.state["last_submission_time"]
                                         # json.dumps(history_entries)
                                     ])
 
