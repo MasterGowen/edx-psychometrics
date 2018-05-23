@@ -86,8 +86,14 @@ class PsychometricsReport(object):
             )
             for s in student_modules:
                 if "correct_map" in s.state:
-                    for item in json.loads(s.state)["correct_map"]:
-                        rows.append([s.student.id, item])
+                    correct_map = json.loads(s.state)["correct_map"]
+                    for item in correct_map:
+                        rows.append([
+                            s.student.id,
+                            item,
+                            1 if correct_map[item]["correctness"] == "correct" else 0,
+                            json.loads(s.state)["last_submission_time"]
+                        ])
 
 
 
