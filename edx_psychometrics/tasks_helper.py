@@ -92,7 +92,18 @@ class PsychometricsReport(object):
             for s in student_modules:
                 if "correct_map" in s.state:
                     history_entries = list(user_state_client.get_history(student.username, s.module_state_key))
-                    rows.append([json.dumps(e.state) for e in history_entries])
+                    for e in history_entries:
+                        if "correct_map" in e.state:
+                            for item in e.state["correct_map"]:
+                                rows.append([
+                                        s.student.id,
+                                        item,
+                                        1 if e.state["correct_map"][item]["correctness"] == "correct" else 0,
+                                        json.loads(e.state)["last_submission_time"],
+                                        # json.dumps(history_entries)
+                                    ])
+
+                    # rows.append([json.dumps(e.state) for e in history_entries])
                     #
                     # correct_map = json.loads(s.state)["correct_map"]
                     # for item in correct_map:
