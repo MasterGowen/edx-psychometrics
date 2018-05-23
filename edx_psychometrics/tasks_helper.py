@@ -85,7 +85,9 @@ class PsychometricsReport(object):
                 module_type='problem'
             )
             for s in student_modules:
-                rows.append([s.student.id, s.state, s.grade, s.done])
+                if "correct_map" in s.state:
+                    for item in json.loads(s.state)["correct_map"]:
+                        rows.append([s.student.id, item])
 
 
 
