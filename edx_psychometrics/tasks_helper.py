@@ -99,7 +99,8 @@ class PsychometricsReport(object):
                             s.student.id,
                             item,
                             1 if correct_map[item]["correctness"] == "correct" else 0,
-                            json.loads(s.state)["last_submission_time"]
+                            json.loads(s.state)["last_submission_time"],
+                            history_entries
                         ])
         rows.insert(0, headers)
         upload_csv_to_report_store(rows, csv_name, course_id, start_date)
