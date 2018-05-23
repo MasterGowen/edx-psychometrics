@@ -1,0 +1,4 @@
+Получить структуру курса (первого)
+import json
+from openedx.core.djangoapps.content.course_structures.models import CourseStructure
+json.dumps(CourseStructure.objects.first().structure)
