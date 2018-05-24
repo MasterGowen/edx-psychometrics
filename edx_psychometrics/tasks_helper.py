@@ -130,9 +130,7 @@ class PsychometricsReport(object):
         BlockStructureManager.get_collected()
 
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
-        store = modulestore()
-        course_usage_key = store.make_course_usage_key(course_id)
-        blocks = BlockStructureManager(course_usage_key, store)
+        blocks = get_block_structure_manager(CourseKey.from_string(course_id)).get_collected()
         for b in blocks:
             rows.append(b)
 
