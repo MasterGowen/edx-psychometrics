@@ -140,12 +140,12 @@ class PsychometricsReport(object):
 
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
         for key, value in structure.items():
-            if value.block_type == 'problem':
+            if value["block_type"] == 'problem':
                 rows.append([
                     key,
                     value,
                     # get_student_module_as_dict()
-                    modulestore().get_item(value.usage_key)
+                    modulestore().get_item(value["usage_key"])
                 ])
 
             # for s in student_modules:
