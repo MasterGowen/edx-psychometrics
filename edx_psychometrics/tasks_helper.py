@@ -22,7 +22,6 @@ from xmodule.modulestore.django import modulestore
 from openedx.core.djangoapps.content.block_structure.manager import BlockStructureManager
 from openedx.core.djangoapps.content.block_structure.api import get_block_structure_manager
 
-
 from openedx.core.djangoapps.content.course_structures.models import CourseStructure
 
 from courseware.user_state_client import DjangoXBlockUserStateClient
@@ -106,11 +105,11 @@ class PsychometricsReport(object):
                         if "correct_map" in e.state:
                             for item in e.state["correct_map"]:
                                 rows.append([
-                                        s.student.id,
-                                        item,
-                                        1 if e.state["correct_map"][item]["correctness"] == "correct" else 0,
-                                        e.updated.astimezone(pytz.timezone(settings.TIME_ZONE))
-                                    ])
+                                    s.student.id,
+                                    item,
+                                    1 if e.state["correct_map"][item]["correctness"] == "correct" else 0,
+                                    e.updated.astimezone(pytz.timezone(settings.TIME_ZONE))
+                                ])
 
         rows.insert(0, headers)
         upload_csv_to_report_store(rows, csv_name, course_id, start_date)
@@ -127,23 +126,22 @@ class PsychometricsReport(object):
                 course_id=course_id,
                 module_type='problem'
             )
-        BlockStructureManager.get_collected()
 
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
         blocks = get_block_structure_manager(CourseKey.from_string(course_id)).get_collected()
         for b in blocks:
             rows.append(b)
 
-        # for key, value in structure.items():
-        #     if value["block_type"] == 'problem':
-        #
-        #
-        #         rows.append([
-        #             key,
-        #             value,
-        #             # get_student_module_as_dict()
-        #
-        #         ])
+            # for key, value in structure.items():
+            #     if value["block_type"] == 'problem':
+            #
+            #
+            #         rows.append([
+            #             key,
+            #             value,
+            #             # get_student_module_as_dict()
+            #
+            #         ])
 
             # for s in student_modules:
             #     rows.append([
@@ -151,12 +149,10 @@ class PsychometricsReport(object):
             #         1,
             #     ])
 
-
-
         # rows.insert(0, headers)
         upload_csv_to_report_store(rows, csv_name, course_id, start_date)
 
-    @ classmethod
+    @classmethod
     def _graded_scorable_blocks_to_header(cls, course):
         """
         Returns an OrderedDict that maps a scorable block's id to its
