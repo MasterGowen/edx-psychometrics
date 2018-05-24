@@ -19,6 +19,9 @@ from student.models import CourseEnrollment
 from courseware.courses import get_course_by_id
 from opaque_keys.edx.keys import CourseKey, UsageKey
 from xmodule.modulestore.django import modulestore
+from openedx.core.djangoapps.content.block_structure.manager import BlockStructureManager
+from openedx.core.djangoapps.content.block_structure.api import get_block_structure_manager
+
 
 from openedx.core.djangoapps.content.course_structures.models import CourseStructure
 
@@ -107,21 +110,8 @@ class PsychometricsReport(object):
                                         item,
                                         1 if e.state["correct_map"][item]["correctness"] == "correct" else 0,
                                         e.updated.astimezone(pytz.timezone(settings.TIME_ZONE))
-                                        # e.state["last_submission_time"]
-                                        # json.dumps(history_entries)
                                     ])
 
-                    # rows.append([json.dumps(e.state) for e in history_entries])
-                    #
-                    # correct_map = json.loads(s.state)["correct_map"]
-                    # for item in correct_map:
-                    #     rows.append([
-                    #         s.student.id,
-                    #         item,
-                    #         1 if correct_map[item]["correctness"] == "correct" else 0,
-                    #         json.loads(s.state)["last_submission_time"],
-                    #         json.dumps(history_entries)
-                    #     ])
         rows.insert(0, headers)
         upload_csv_to_report_store(rows, csv_name, course_id, start_date)
 
@@ -137,16 +127,25 @@ class PsychometricsReport(object):
                 course_id=course_id,
                 module_type='problem'
             )
+        BlockStructureManager.get_collected()
 
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
-        for key, value in structure.items():
-            if value["block_type"] == 'problem':
-                rows.append([
-                    key,
-                    value,
-                    # get_student_module_as_dict()
-                    modulestore().get_item(value["usage_key"])
-                ])
+        store = modulestore()
+        course_usage_key = store.make_course_usage_key(course_id)
+        blocks = BlockStructureManager(course_usage_key, store)
+        for b in blocks:
+            rows.append(b)
+
+        # for key, value in structure.items():
+        #     if value["block_type"] == 'problem':
+        #
+        #
+        #         rows.append([
+        #             key,
+        #             value,
+        #             # get_student_module_as_dict()
+        #
+        #         ])
 
             # for s in student_modules:
             #     rows.append([
@@ -156,7 +155,7 @@ class PsychometricsReport(object):
 
 
 
-        rows.insert(0, headers)
+        # rows.insert(0, headers)
         upload_csv_to_report_store(rows, csv_name, course_id, start_date)
 
     @ classmethod
