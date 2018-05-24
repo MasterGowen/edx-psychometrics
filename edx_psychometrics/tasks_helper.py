@@ -71,7 +71,7 @@ class PsychometricsReport(object):
 
         # CSV2
         current_step = {'step': 'Calculating CSV2'}
-        cls._get_csv1_data(course_id, enrolled_students, start_date, "psychometrics_report_csv2")
+        cls._get_csv2_data(course_id, enrolled_students, start_date, "psychometrics_report_csv2")
         task_progress.update_task_state(extra_meta=current_step)
 
         # Perform the upload
