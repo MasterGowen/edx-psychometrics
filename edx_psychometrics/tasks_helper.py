@@ -128,7 +128,7 @@ class PsychometricsReport(object):
             )
 
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
-        blocks = get_block_structure_manager(CourseKey.from_string(course_id)).get_collected()
+        blocks = get_block_structure_manager(CourseKey.from_string(str(course_id))).get_collected()
         for b in blocks:
             rows.append(b)
 
