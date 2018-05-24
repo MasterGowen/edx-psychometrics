@@ -17,6 +17,9 @@ from lms.djangoapps.grades.context import grading_context, grading_context_for_c
 from student.models import CourseEnrollment
 from courseware.courses import get_course_by_id
 from opaque_keys.edx.keys import CourseKey, UsageKey
+
+from openedx.core.djangoapps.content.course_structures.models import CourseStructure
+
 from courseware.user_state_client import DjangoXBlockUserStateClient
 from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
 
@@ -132,10 +135,17 @@ class PsychometricsReport(object):
                 course_id=course_id,
                 module_type='problem'
             )
-            for s in student_modules:
-                rows.append([
-                    s,
-                    1,
+            # for s in student_modules:
+            #     rows.append([
+            #         s,
+            #         1,
+            #     ])
+
+        structure = CourseStructure.objects.get(course_id=course_id)).ordered_blocks
+        rows.append([
+                structure
+            #         s,
+            #         1,
                 ])
         rows.insert(0, headers)
         upload_csv_to_report_store(rows, csv_name, course_id, start_date)
