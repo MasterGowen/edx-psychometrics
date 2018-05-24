@@ -14,9 +14,11 @@ import json
 from lms.djangoapps.instructor_analytics.csvs import format_dictlist
 
 from lms.djangoapps.grades.context import grading_context, grading_context_for_course
+from lms.djangoapps.course_blocks.utils import get_student_module_as_dict
 from student.models import CourseEnrollment
 from courseware.courses import get_course_by_id
 from opaque_keys.edx.keys import CourseKey, UsageKey
+from xmodule.modulestore.django import modulestore
 
 from openedx.core.djangoapps.content.course_structures.models import CourseStructure
 
@@ -138,12 +140,14 @@ class PsychometricsReport(object):
 
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
         for key, value in structure.items():
-            rows.append([
-                key,
-                value
-                #         s,
-                #         1,
-            ])
+            if value.block_type == 'problem':
+                rows.append([
+                    key,
+                    value,
+                    # get_student_module_as_dict()
+                    modulestore().get_item(value.usage_key)
+                ])
+
             # for s in student_modules:
             #     rows.append([
             #         s,
