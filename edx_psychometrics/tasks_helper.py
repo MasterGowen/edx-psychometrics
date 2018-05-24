@@ -135,18 +135,23 @@ class PsychometricsReport(object):
                 course_id=course_id,
                 module_type='problem'
             )
+
+        structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
+        for key, value in structure.items():
+            rows.append([
+                key,
+                value
+                #         s,
+                #         1,
+            ])
             # for s in student_modules:
             #     rows.append([
             #         s,
             #         1,
             #     ])
 
-        structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
-        rows.append([
-                structure
-            #         s,
-            #         1,
-                ])
+
+
         rows.insert(0, headers)
         upload_csv_to_report_store(rows, csv_name, course_id, start_date)
 
