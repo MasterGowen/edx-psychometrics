@@ -145,7 +145,7 @@ class PsychometricsReport(object):
                         key,
                         value,
                         # get_student_module_as_dict()
-                        str(modulestore().get_block_original_usage(key))
+                        modulestore().get_item(key)
                     ])
                 except Exception as e:
                     rows.append([str(e)])
