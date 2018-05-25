@@ -129,6 +129,7 @@ class PsychometricsReport(object):
 
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
         blocks = get_block_structure_manager(CourseKey.from_string(str(course_id))).get_collected()
+
         for block in blocks:
             pass
             # rows.append([type(modulestore().get_item(block).module_class)])
@@ -139,7 +140,7 @@ class PsychometricsReport(object):
                 rows.append([str(e)])
         for block in blocks:
             try:
-                rows.append([str(modulestore().get_item(block).max_score())])
+                rows.append([str(modulestore().get_block_original_usage(block))])
             except Exception as e:
                 rows.append([str(e)])
 
