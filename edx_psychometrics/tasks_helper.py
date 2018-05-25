@@ -130,10 +130,10 @@ class PsychometricsReport(object):
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
         blocks = get_block_structure_manager(CourseKey.from_string(str(course_id))).get_collected()
         for block in blocks:
-            rows.append([type(block), type(modulestore().get_item(block))])
+            rows.append([type(modulestore().get_item(block).module_class)])
         for block in blocks:
             try:
-                rows.append([json.dumps(str(modulestore().get_item(block).module_class))])
+                rows.append([str(modulestore().get_item(block).module_class.icon_class)])
             except Exception as e:
                 rows.append([str(e)])
 
