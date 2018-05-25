@@ -131,12 +131,28 @@ class PsychometricsReport(object):
         blocks = get_block_structure_manager(CourseKey.from_string(str(course_id))).get_collected()
         # for block in blocks:
         #     rows.append([type(block)]) # ,modulestore().get_item(block)
-        for block in blocks:
-            try:
-                rows.append([modulestore().get_block_original_usage(CourseKey.from_string(str(course_id)))])
-            except Exception as e:
-                rows.append([str(e)])
+        # for block in blocks:
+        #     try:
+        #         # rows.append([modulestore().get_block_original_usage(CourseKey.from_string(str(course_id)))])
+        #         rows.append([block])
+        #     except Exception as e:
+        #         rows.append([str(e)])
 
+        for key, value in structure.items():
+            if value["block_type"] == 'problem':
+                rows.append([
+                    key,
+                    value,
+                    # get_student_module_as_dict()
+
+                ])
+
+
+        # for block in blocks:
+        #     try:
+        #         rows.append([blocks])
+        #     except Exception as e:
+        #         rows.append([str(e)])
             # for name, field in block.fields.items():
             #     try:
             #         rows.append((name, field.read_from(block)))
