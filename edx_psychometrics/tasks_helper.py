@@ -131,7 +131,7 @@ class PsychometricsReport(object):
         blocks = get_block_structure_manager(CourseKey.from_string(str(course_id))).get_collected()
         for block in blocks:
             try:
-                rows.append([json.dumps(str(modulestore().get_item(block).input_state))])
+                rows.append([json.dumps(str(modulestore().get_item(block).get_state_for_lcp()))])
             except:
                 pass
 
