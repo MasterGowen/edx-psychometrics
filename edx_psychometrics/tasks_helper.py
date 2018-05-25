@@ -134,7 +134,7 @@ class PsychometricsReport(object):
             # rows.append([type(modulestore().get_item(block).module_class)])
         for block in blocks:
             try:
-                rows.append([str(modulestore().get_item(block).module_class.icon_class)])
+                rows.append([str(modulestore().get_item(block).module_class.get_state_for_lcp())])
             except Exception as e:
                 rows.append([str(e)])
 
