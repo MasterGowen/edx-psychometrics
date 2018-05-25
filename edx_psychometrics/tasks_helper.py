@@ -145,8 +145,8 @@ class PsychometricsReport(object):
                         key,
                         value,
                         # get_student_module_as_dict()UsageKey.from_string(item[0])
-                        str(modulestore().get_item(UsageKey.from_string(key))),
-                        str(modulestore().get_item(UsageKey.from_string(key)).get_state_for_lcp)
+                        # str(modulestore().get_item(UsageKey.from_string(key))),
+                        str(modulestore().get_item(UsageKey.from_string(key)))
 
                     ])
                 except Exception as e:
