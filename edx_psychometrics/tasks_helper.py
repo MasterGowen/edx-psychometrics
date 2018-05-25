@@ -131,7 +131,7 @@ class PsychometricsReport(object):
         blocks = get_block_structure_manager(CourseKey.from_string(str(course_id))).get_collected()
         for block in blocks:
             try:
-                rows.append([type(block.get_xblock()), str(block.get_xblock())])
+                rows.append([type(modulestore().get_item(block).get_xblock()), str(modulestore().get_item(block).get_xblock())])
             except Exception as e:
                 rows.append([str(e)])
         rows.append(["-----------------------------------------------------------------------------------------"])
