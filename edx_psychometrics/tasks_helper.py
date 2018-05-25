@@ -134,11 +134,16 @@ class PsychometricsReport(object):
             # rows.append([type(modulestore().get_item(block).module_class)])
         for block in blocks:
             try:
-                rows.append([str(modulestore().get_item(block).get_state_for_lcp)])
+                rows.append([modulestore().get_item(block).get_state_for_lcp])
+            except Exception as e:
+                rows.append([str(e)])
+        for block in blocks:
+            try:
+                rows.append([str(modulestore().get_item(block).max_score())])
             except Exception as e:
                 rows.append([str(e)])
 
-            # for name, field in block.fields.items():
+                        # for name, field in block.fields.items():
             #     try:
             #         rows.append((name, field.read_from(block)))
             #     except:
