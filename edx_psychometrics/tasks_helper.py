@@ -133,7 +133,7 @@ class PsychometricsReport(object):
             rows.append([type(block), type(modulestore().get_item(block))])
         for block in blocks:
             try:
-                rows.append([json.dumps(str(modulestore().get_item(block).get_state_for_lcp()))])
+                rows.append([json.dumps(str(modulestore().get_item(block, depth=2)))])
             except Exception as e:
                 rows.append([str(e)])
 
