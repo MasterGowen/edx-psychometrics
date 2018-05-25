@@ -140,13 +140,15 @@ class PsychometricsReport(object):
 
         for key, value in structure.items():
             if value["block_type"] == 'problem':
-                rows.append([
-                    key,
-                    value,
-                    # get_student_module_as_dict()
-
-                ])
-
+                try:
+                    rows.append([
+                        key,
+                        value,
+                        # get_student_module_as_dict()
+                        str(modulestore().get_block_original_usage(key))
+                    ])
+                except Exception as e:
+                    rows.append([str(e)])
 
         # for block in blocks:
         #     try:
