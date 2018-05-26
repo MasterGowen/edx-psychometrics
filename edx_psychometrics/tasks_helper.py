@@ -226,7 +226,7 @@ class PsychometricsReport(object):
         #         # module_type='html'
         #     )
         for i in problem_info.keys():
-            rows.append(problem_info[i])
+            rows.append([problem_info[i][e] for e in problem_info[i].keys()])
 
         # for s in student_modules:
         #     try:
