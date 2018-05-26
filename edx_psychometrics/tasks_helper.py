@@ -225,8 +225,8 @@ class PsychometricsReport(object):
         #         course_id=course_id,
         #         # module_type='html'
         #     )
-
-        rows = problem_set
+        for i in problem_info.keys():
+            rows.append(problem_info[i])
 
         # for s in student_modules:
         #     try:
