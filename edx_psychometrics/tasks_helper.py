@@ -145,19 +145,21 @@ class PsychometricsReport(object):
         #     except Exception as e:
         #         rows.append([str(e)])
 
-        # for key, value in structure.items():
-        #     if value["block_type"] == 'problem':
-        #         try:
-        #             log.debug()
-        #             rows.append([
-        #                 key,
-        #                 value,
-        #                 str(modulestore().get_item(UsageKey.from_string(key)))
-        #
-        #
-        #             ])
-        #         except Exception as e:
-        #             rows.append([str(e)])
+        for key, value in structure.items():
+            if value["block_type"] == 'problem':
+                descriptor = modulestore().get_item(UsageKey.from_string(key))
+                parent_metadata = descriptor.xblock_kvs.inherited_settings.copy()
+                try:
+                    # log.debug()
+                    rows.append([
+                        key,
+                        value,
+                        str(parent_metadata)
+
+
+                    ])
+                except Exception as e:
+                    rows.append([str(e)])
 
         for block in blocks:
             try:
