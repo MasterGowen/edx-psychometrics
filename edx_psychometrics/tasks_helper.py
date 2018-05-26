@@ -154,7 +154,7 @@ class PsychometricsReport(object):
                     rows.append([
                         key,
                         value,
-                        str(parent_metadata)
+                        str(dir(parent_metadata))
 
 
                     ])
