@@ -195,14 +195,17 @@ class PsychometricsReport(object):
     @classmethod
     def _get_csv3_data(cls, course_id, enrolled_students, start_date, csv_name):
         user_state_client = DjangoXBlockUserStateClient()
-        course = modulestore().get_course(course_id, depth=5, nav_depth=5)
+        # course = modulestore().get_course(course_id, depth=5, nav_depth=5)
         # headers = ('user_id', 'content_piece_id', 'viewed', 'p')
         rows = []
-        structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
+        sms = []
+        # structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
         blocks = get_block_structure_manager(CourseKey.from_string(str(course_id))).get_collected()
+
         for b in blocks:
             if 'type@html' in str(b):
-                rows.append([type(b), b])
+                sms.append([b, StudentModule.objects.filter(module_state_key__exact=b)])
+        rows = [[s[1].student.id, s[1].state, own_metadata(s[0]).get('display_name', '')] for s in sms]
 
         #
         # problem_set = []
