@@ -203,7 +203,7 @@ class PsychometricsReport(object):
             )
 
             for s in student_modules:
-                rows.append(s.state)
+                rows.append(json.dumps([s.module_type, s.state, s.done, d.module_state_key]))
 
 
         rows.insert(0, headers)
