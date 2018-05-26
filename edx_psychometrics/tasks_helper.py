@@ -145,25 +145,25 @@ class PsychometricsReport(object):
         #     except Exception as e:
         #         rows.append([str(e)])
 
-        for key, value in structure.items():
-            if value["block_type"] == 'problem':
-                try:
-                    rows.append([
-                        key,
-                        value,
-                        # get_student_module_as_dict()UsageKey.from_string(item[0])
-                        # str(modulestore().get_item(UsageKey.from_string(key))),
-                        str(modulestore().get_item(UsageKey.from_string(key)))
+        # for key, value in structure.items():
+        #     if value["block_type"] == 'problem':
+        #         try:
+        #             log.debug()
+        #             rows.append([
+        #                 key,
+        #                 value,
+        #                 str(modulestore().get_item(UsageKey.from_string(key)))
+        #
+        #
+        #             ])
+        #         except Exception as e:
+        #             rows.append([str(e)])
 
-                    ])
-                except Exception as e:
-                    rows.append([str(e)])
-
-        # for block in blocks:
-        #     try:
-        #         rows.append([blocks])
-        #     except Exception as e:
-        #         rows.append([str(e)])
+        for block in blocks:
+            try:
+                rows.append([block])
+            except Exception as e:
+                rows.append([str(e)])
         # for name, field in block.fields.items():
         #     try:
         #         rows.append((name, field.read_from(block)))
