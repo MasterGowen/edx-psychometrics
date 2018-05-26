@@ -199,7 +199,7 @@ class PsychometricsReport(object):
             student_modules = StudentModule.objects.filter(
                 student=student,
                 course_id=course_id,
-                module_type='html'
+                # module_type='html'
             )
 
             for s in student_modules:
