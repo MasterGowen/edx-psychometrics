@@ -141,12 +141,14 @@ class PsychometricsReport(object):
         for key, value in structure.items():
             if value["block_type"] == 'problem':
                 try:
+                    log.debug()
                     rows.append([
                         key,
                         value,
                         # get_student_module_as_dict()UsageKey.from_string(item[0])
                         # str(modulestore().get_item(UsageKey.from_string(key))),
                         str(modulestore().get_item(UsageKey.from_string(key)))
+
 
                     ])
                 except Exception as e:
