@@ -205,16 +205,16 @@ class PsychometricsReport(object):
             )
 
             for s in student_modules:
-                rows.append(json.dumps([s.module_type, s.state, s.done, str(s.module_state_key)]))
+                rows.append(json.dumps([str(s.module_type), str(s.state), str(s.done), str(s.module_state_key)]))
             for b in blocks:
                 try:
-                    rows.append(str(b))
+                    rows.append([str(b)])
                 except:
                     pass
             for s in structure:
 
                 try:
-                    rows.append(s)
+                    rows.append([s])
                 except:
                     pass
 
