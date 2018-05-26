@@ -201,22 +201,23 @@ class PsychometricsReport(object):
 
         problem_set = []
         problem_info = {}
-        c_subsection = 0
-        for subsection in course.get_children()[section].get_children():
-            c_subsection += 1
-            c_unit = 0
-            for unit in subsection.get_children():
-                c_unit += 1
-                c_problem = 0
-                for child in unit.get_children():
-                    if child.location.block_type == 'problem':
-                        c_problem += 1
-                        problem_set.append(child.location)
-                        problem_info[child.location] = {
-                            'id': text_type(child.location),
-                            'x_value': "P{0}.{1}.{2}".format(c_subsection, c_unit, c_problem),
-                            'display_name': own_metadata(child).get('display_name', ''),
-                        }
+        for section in course.get_children():
+            c_subsection = 0
+            for subsection in course.get_children()[section].get_children():
+                c_subsection += 1
+                c_unit = 0
+                for unit in subsection.get_children():
+                    c_unit += 1
+                    c_problem = 0
+                    for child in unit.get_children():
+                        if child.location.block_type == 'problem':
+                            c_problem += 1
+                            problem_set.append(child.location)
+                            problem_info[child.location] = {
+                                'id': text_type(child.location),
+                                'x_value': "P{0}.{1}.{2}".format(c_subsection, c_unit, c_problem),
+                                'display_name': own_metadata(child).get('display_name', ''),
+                            }
 
         # for student, course_grade, error in CourseGradeFactory().iter(enrolled_students, course):
         #     student_modules = StudentModule.objects.filter(
@@ -227,22 +228,22 @@ class PsychometricsReport(object):
 
         rows = problem_set
 
-            # for s in student_modules:
-            #     try:
-            #         history_entries = list(user_state_client.get_history(student.username, s.module_state_key))
-            #         for e in history_entries:
-            #             try:
-            #                 rows.append([
-            #                     s.student.id,
-            #                     e.module_type,
-            #                     e.id,
-            #
-            #                     e.updated.astimezone(pytz.timezone(settings.TIME_ZONE))
-            #                 ])
-            #             except:
-            #                 pass
-            #     except:
-            #         pass
+        # for s in student_modules:
+        #     try:
+        #         history_entries = list(user_state_client.get_history(student.username, s.module_state_key))
+        #         for e in history_entries:
+        #             try:
+        #                 rows.append([
+        #                     s.student.id,
+        #                     e.module_type,
+        #                     e.id,
+        #
+        #                     e.updated.astimezone(pytz.timezone(settings.TIME_ZONE))
+        #                 ])
+        #             except:
+        #                 pass
+        #     except:
+        #         pass
 
         # for b in blocks:
         #     try:
