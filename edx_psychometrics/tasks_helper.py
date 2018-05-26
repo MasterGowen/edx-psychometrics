@@ -205,18 +205,21 @@ class PsychometricsReport(object):
             )
 
             for s in student_modules:
-                history_entries = list(user_state_client.get_history(student.username, s.module_state_key))
-                for e in history_entries:
-                    try:
-                        rows.append([
-                            s.student.id,
-                            e.module_type,
-                            e.id,
+                try:
+                    history_entries = list(user_state_client.get_history(student.username, s.module_state_key))
+                    for e in history_entries:
+                        try:
+                            rows.append([
+                                s.student.id,
+                                e.module_type,
+                                e.id,
 
-                            e.updated.astimezone(pytz.timezone(settings.TIME_ZONE))
-                        ])
-                    except:
-                        pass
+                                e.updated.astimezone(pytz.timezone(settings.TIME_ZONE))
+                            ])
+                        except:
+                            pass
+                except:
+                    pass
 
         # for b in blocks:
         #     try:
