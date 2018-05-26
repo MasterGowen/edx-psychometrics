@@ -217,6 +217,7 @@ class PsychometricsReport(object):
                                 'id': text_type(child.location),
                                 'x_value': "P{0}.{1}.{2}".format(c_subsection, c_unit, c_problem),
                                 'display_name': own_metadata(child).get('display_name', ''),
+                                'inputs': str(child.get_children()),
                             }
 
         # for student, course_grade, error in CourseGradeFactory().iter(enrolled_students, course):
