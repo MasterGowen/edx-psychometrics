@@ -216,7 +216,7 @@ class PsychometricsReport(object):
                         problem_info[child.location] = {
                             'id': text_type(child.location),
                             'x_value': "P{0}.{1}.{2}".format(c_subsection, c_unit, c_problem),
-                            'display_name': str((own_metadata(child))  # .get('display_name', ''),
+                            'display_name': str((own_metadata(child))),  # .get('display_name', ''),
                             # 'inputs': str(child.get_state_for_lcp()),
                             "type": type(child)
                         }
