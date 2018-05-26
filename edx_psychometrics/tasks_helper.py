@@ -210,16 +210,16 @@ class PsychometricsReport(object):
                     c_unit += 1
                     c_problem = 0
                     for child in unit.get_children():
-                        if child.location.block_type == 'problem':
-                            c_problem += 1
-                            problem_set.append(child.location)
-                            problem_info[child.location] = {
-                                'id': text_type(child.location),
-                                'x_value': "P{0}.{1}.{2}".format(c_subsection, c_unit, c_problem),
-                                'display_name': own_metadata(child).get('display_name', ''),
-                                # 'inputs': str(child.get_state_for_lcp()),
-                                "type": type(child)
-                            }
+                        # if child.location.block_type == 'problem':
+                        c_problem += 1
+                        problem_set.append(child.location)
+                        problem_info[child.location] = {
+                            'id': text_type(child.location),
+                            'x_value': "P{0}.{1}.{2}".format(c_subsection, c_unit, c_problem),
+                            'display_name': own_metadata(child).get('display_name', ''),
+                            # 'inputs': str(child.get_state_for_lcp()),
+                            "type": type(child)
+                        }
 
         # for student, course_grade, error in CourseGradeFactory().iter(enrolled_students, course):
         #     student_modules = StudentModule.objects.filter(
