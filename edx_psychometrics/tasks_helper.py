@@ -203,7 +203,7 @@ class PsychometricsReport(object):
         problem_info = {}
         for section in course.get_children():
             c_subsection = 0
-            for subsection in course.get_children()[section].get_children():
+            for subsection in section.get_children():
                 c_subsection += 1
                 c_unit = 0
                 for unit in subsection.get_children():
