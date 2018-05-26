@@ -148,7 +148,7 @@ class PsychometricsReport(object):
         for key, value in structure.items():
             if value["block_type"] == 'problem':
                 descriptor = modulestore().get_item(UsageKey.from_string(key))
-                parent_metadata = descriptor.xblock_kvs.inherited_settings.copy()
+                parent_metadata = descriptor.xblock_kvs._fields.copy()
                 try:
                     # log.debug()
                     rows.append([
