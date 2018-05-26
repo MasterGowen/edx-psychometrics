@@ -190,9 +190,9 @@ class PsychometricsReport(object):
 
     @classmethod
     def _get_csv3_data(cls, course_id, enrolled_students, start_date, csv_name):
-        # user_state_client = DjangoXBlockUserStateClient()
+        user_state_client = DjangoXBlockUserStateClient()
         course = get_course_by_id(course_id)
-        headers = ('user_id', 'content_piece_id', 'viewed', 'p')
+        # headers = ('user_id', 'content_piece_id', 'viewed', 'p')
         rows = []
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
         blocks = get_block_structure_manager(CourseKey.from_string(str(course_id))).get_collected()
@@ -204,22 +204,23 @@ class PsychometricsReport(object):
                 # module_type='html'
             )
 
-            for s in student_modules:
-                rows.append(json.dumps([str(s.module_type), str(s.state), str(s.done), str(s.module_state_key)]))
-            for b in blocks:
-                try:
-                    rows.append([str(b)])
-                except:
-                    pass
-            for s in structure:
+            history_entries = list(user_state_client.get_history(student.username, student_modules))
+            for e in history_entries:
+                rows.append(json.dumps([student.id, str(e.module_type), str(e.state), str(e.done), str(e.module_state_key)]))
+        # for b in blocks:
+        #     try:
+        #         rows.append([str(b)])
+        #     except:
+        #         pass
+        # for s in structure:
+        #
+        #     try:
+        #         rows.append([s])
+        #     except:
+        #         pass
 
-                try:
-                    rows.append([s])
-                except:
-                    pass
 
-
-        rows.insert(0, headers)
+        # rows.insert(0, headers)
         upload_csv_to_report_store(rows, csv_name, course_id, start_date)
 
     @classmethod
