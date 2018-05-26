@@ -194,6 +194,8 @@ class PsychometricsReport(object):
         course = get_course_by_id(course_id)
         headers = ('user_id', 'content_piece_id', 'viewed', 'p')
         rows = []
+        structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
+        blocks = get_block_structure_manager(CourseKey.from_string(str(course_id))).get_collected()
 
         for student, course_grade, error in CourseGradeFactory().iter(enrolled_students, course):
             student_modules = StudentModule.objects.filter(
@@ -204,6 +206,17 @@ class PsychometricsReport(object):
 
             for s in student_modules:
                 rows.append(json.dumps([s.module_type, s.state, s.done, str(s.module_state_key)]))
+            for b in blocks:
+                try:
+                    rows.append(str(b))
+                except:
+                    pass
+            for s in structure:
+
+                try:
+                    rows.append(s)
+                except:
+                    pass
 
 
         rows.insert(0, headers)
