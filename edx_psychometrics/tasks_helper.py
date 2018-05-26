@@ -22,6 +22,8 @@ from xmodule.modulestore.django import modulestore
 from openedx.core.djangoapps.content.block_structure.manager import BlockStructureManager
 from openedx.core.djangoapps.content.block_structure.api import get_block_structure_manager
 
+from xmodule.modulestore.inheritance import own_metadata
+
 from openedx.core.djangoapps.content.course_structures.models import CourseStructure
 
 from courseware.user_state_client import DjangoXBlockUserStateClient
@@ -191,35 +193,56 @@ class PsychometricsReport(object):
     @classmethod
     def _get_csv3_data(cls, course_id, enrolled_students, start_date, csv_name):
         user_state_client = DjangoXBlockUserStateClient()
-        course = get_course_by_id(course_id)
+        course = modulestore().get_course(course_id, depth=4)
         # headers = ('user_id', 'content_piece_id', 'viewed', 'p')
         rows = []
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
         blocks = get_block_structure_manager(CourseKey.from_string(str(course_id))).get_collected()
 
-        for student, course_grade, error in CourseGradeFactory().iter(enrolled_students, course):
-            student_modules = StudentModule.objects.filter(
-                student=student,
-                course_id=course_id,
-                # module_type='html'
-            )
+        problem_set = []
+        problem_info = {}
+        c_subsection = 0
+        for subsection in course.get_children()[section].get_children():
+            c_subsection += 1
+            c_unit = 0
+            for unit in subsection.get_children():
+                c_unit += 1
+                c_problem = 0
+                for child in unit.get_children():
+                    if child.location.block_type == 'problem':
+                        c_problem += 1
+                        problem_set.append(child.location)
+                        problem_info[child.location] = {
+                            'id': text_type(child.location),
+                            'x_value': "P{0}.{1}.{2}".format(c_subsection, c_unit, c_problem),
+                            'display_name': own_metadata(child).get('display_name', ''),
+                        }
 
-            for s in student_modules:
-                try:
-                    history_entries = list(user_state_client.get_history(student.username, s.module_state_key))
-                    for e in history_entries:
-                        try:
-                            rows.append([
-                                s.student.id,
-                                e.module_type,
-                                e.id,
+        # for student, course_grade, error in CourseGradeFactory().iter(enrolled_students, course):
+        #     student_modules = StudentModule.objects.filter(
+        #         student=student,
+        #         course_id=course_id,
+        #         # module_type='html'
+        #     )
 
-                                e.updated.astimezone(pytz.timezone(settings.TIME_ZONE))
-                            ])
-                        except:
-                            pass
-                except:
-                    pass
+        rows = problem_set
+
+            # for s in student_modules:
+            #     try:
+            #         history_entries = list(user_state_client.get_history(student.username, s.module_state_key))
+            #         for e in history_entries:
+            #             try:
+            #                 rows.append([
+            #                     s.student.id,
+            #                     e.module_type,
+            #                     e.id,
+            #
+            #                     e.updated.astimezone(pytz.timezone(settings.TIME_ZONE))
+            #                 ])
+            #             except:
+            #                 pass
+            #     except:
+            #         pass
 
         # for b in blocks:
         #     try:
