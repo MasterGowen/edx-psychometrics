@@ -204,7 +204,9 @@ class PsychometricsReport(object):
 
         for b in blocks:
             if 'type@html' in str(b):
-                sms.append([b, StudentModule.objects.filter(module_state_key__exact=b)])
+                smodules = StudentModule.objects.filter(module_state_key__exact=b)
+                for s in smodules:
+                    sms.append([b, s])
         rows = [[s[1].student.id, s[1].state, own_metadata(s[0]).get('display_name', '')] for s in sms]
 
         #
