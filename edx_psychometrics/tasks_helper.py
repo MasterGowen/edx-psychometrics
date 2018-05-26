@@ -193,7 +193,7 @@ class PsychometricsReport(object):
     @classmethod
     def _get_csv3_data(cls, course_id, enrolled_students, start_date, csv_name):
         user_state_client = DjangoXBlockUserStateClient()
-        course = modulestore().get_course(course_id, depth=5)
+        course = modulestore().get_course(course_id, depth=5, nav_depth=5)
         # headers = ('user_id', 'content_piece_id', 'viewed', 'p')
         rows = []
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
