@@ -205,7 +205,7 @@ class PsychometricsReport(object):
             )
 
             for s in student_modules:
-                history_entries = list(user_state_client.get_history(student.username, student_modules))
+                history_entries = list(user_state_client.get_history(student.username, s))
                 for e in history_entries:
                     rows.append(json.dumps([student.id, str(e.module_type), str(e.state), str(e.done), str(e.module_state_key)]))
         # for b in blocks:
