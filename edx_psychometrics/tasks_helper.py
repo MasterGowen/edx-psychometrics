@@ -78,6 +78,11 @@ class PsychometricsReport(object):
         cls._get_csv2_data(course_id, enrolled_students, start_date, "psychometrics_report_csv2")
         task_progress.update_task_state(extra_meta=current_step)
 
+        # CSV3
+        current_step = {'step': 'Calculating CSV3'}
+        cls._get_csv3_data(course_id, enrolled_students, start_date, "psychometrics_report_csv3")
+        task_progress.update_task_state(extra_meta=current_step)
+
         # Perform the upload
         # csv_name = u'psychometrics_report'
         # upload_csv_to_report_store(rows, csv_name, course_id, start_date)
@@ -157,30 +162,51 @@ class PsychometricsReport(object):
         #         rows.append([blocks])
         #     except Exception as e:
         #         rows.append([str(e)])
-            # for name, field in block.fields.items():
-            #     try:
-            #         rows.append((name, field.read_from(block)))
-            #     except:
-            #         pass
+        # for name, field in block.fields.items():
+        #     try:
+        #         rows.append((name, field.read_from(block)))
+        #     except:
+        #         pass
 
-            # for key, value in structure.items():
-            #     if value["block_type"] == 'problem':
-            #
-            #
-            #         rows.append([
-            #             key,
-            #             value,
-            #             # get_student_module_as_dict()
-            #
-            #         ])
+        # for key, value in structure.items():
+        #     if value["block_type"] == 'problem':
+        #
+        #
+        #         rows.append([
+        #             key,
+        #             value,
+        #             # get_student_module_as_dict()
+        #
+        #         ])
 
-            # for s in student_modules:
-            #     rows.append([
-            #         s,
-            #         1,
-            #     ])
+        # for s in student_modules:
+        #     rows.append([
+        #         s,
+        #         1,
+        #     ])
 
         # rows.insert(0, headers)
+        upload_csv_to_report_store(rows, csv_name, course_id, start_date)
+
+    @classmethod
+    def _get_csv3_data(cls, course_id, enrolled_students, start_date, csv_name):
+        # user_state_client = DjangoXBlockUserStateClient()
+        course = get_course_by_id(course_id)
+        headers = ('user_id', 'content_piece_id', 'viewed', 'p')
+        rows = []
+
+        for student, course_grade, error in CourseGradeFactory().iter(enrolled_students, course):
+            student_modules = StudentModule.objects.filter(
+                student=student,
+                course_id=course_id,
+                module_type='html'
+            )
+
+            for s in student_modules:
+                rows.append(s.state)
+
+
+        rows.insert(0, headers)
         upload_csv_to_report_store(rows, csv_name, course_id, start_date)
 
     @classmethod
