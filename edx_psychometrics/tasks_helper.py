@@ -203,7 +203,7 @@ class PsychometricsReport(object):
         blocks = get_block_structure_manager(CourseKey.from_string(str(course_id))).get_collected()
 
         for b in blocks:
-            if 'type@html' in str(b):
+            if 'html' in str(b) or 'sequential' in str(b) or 'chapter' in str(b):
                 smodules = StudentModule.objects.filter(module_state_key__exact=b)
                 for s in smodules:
                     sms.append([b, s])
@@ -240,8 +240,8 @@ class PsychometricsReport(object):
         #     )
         # for i in problem_info.keys():
         #     rows.append([problem_info[i][e] for e in problem_info[i].keys()])
-        for b in blocks:
-            rows.append(str(b))
+        # for b in blocks:
+        #     rows.append(str(b))
 
         # for s in student_modules:
         #     try:
