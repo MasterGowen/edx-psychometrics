@@ -317,41 +317,46 @@ class PsychometricsReport(object):
 
     @classmethod
     def _get_csv5_data(cls, course_id, start_date, csv_name):
-        # openassessment_blocks = modulestore().get_items(CourseKey.from_string(str('course-v1:edX+DemoX+Demo_Course')),qualifiers={'category': 'openassessment'})
 
-        all_submission_information = sub_api.get_all_course_submission_information(course_id, 'openassessment')
+        openassessment_blocks = modulestore().get_items(CourseKey.from_string(course_id),qualifiers={'category': 'openassessment'})
 
         datarows = []
-        for student_item, submission, score in all_submission_information:
-            row = []
-            assessments = cls._use_read_replica(
-                Assessment.objects.prefetch_related('parts').
-                    prefetch_related('rubric').
-                    filter(
-                    submission_uuid=submission['uuid']
-                )
-            )
-            assessments_cell = cls._build_assessments_cell(assessments)
-            assessments_parts_cell = cls._build_assessments_parts_cell(assessments)
-            feedback_options_cell = cls._build_feedback_options_cell(assessments)
 
-            row = [
-                submission['uuid'],
-                submission['student_item'],
-                student_item['student_id'],
-                submission['submitted_at'],
-                submission['answer'],
-                assessments_cell,
-                assessments_parts_cell,
-                score.get('created_at', ''),
-                score.get('points_earned', ''),
-                score.get('points_possible', ''),
-                feedback_options_cell,
-                user_by_anonymous_id(student_item['student_id'])
-            ]
-            datarows.append(row)
+        for openassessment_block in openassessment_blocks:
+            x_block_id = openassessment_block.get_xblock_id()
+            all_submission_information = sub_api.get_all_submissions(course_id, x_block_id, 'openassessment')
+            for student_item, submission, score in all_submission_information:
+                row = []
+                assessments = cls._use_read_replica(
+                    Assessment.objects.prefetch_related('parts').
+                        prefetch_related('rubric').
+                        filter(
+                        submission_uuid=submission['uuid']
+                    )
+                )
+                assessments_cell = cls._build_assessments_cell(assessments)
+                assessments_parts_cell = cls._build_assessments_parts_cell(assessments)
+                feedback_options_cell = cls._build_feedback_options_cell(assessments)
+
+                row = [
+                    x_block_id,
+                    submission['uuid'],
+                    submission['student_item'],
+                    student_item['student_id'],
+                    submission['submitted_at'],
+                    submission['answer'],
+                    assessments_cell,
+                    assessments_parts_cell,
+                    score.get('created_at', ''),
+                    score.get('points_earned', ''),
+                    score.get('points_possible', ''),
+                    feedback_options_cell,
+                    user_by_anonymous_id(student_item['student_id'])
+                ]
+                datarows.append(row)
 
         header = [
+            'task_id',
             'Submission ID',
             'Item ID',
             'Anonymized Student ID',
