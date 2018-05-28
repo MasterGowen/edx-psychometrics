@@ -156,7 +156,6 @@ class PsychometricsReport(object):
                         value,
                         str(dir(parent_metadata))
 
-
                     ])
                 except Exception as e:
                     rows.append([str(e)])
@@ -197,16 +196,26 @@ class PsychometricsReport(object):
         user_state_client = DjangoXBlockUserStateClient()
         # course = modulestore().get_course(course_id, depth=5, nav_depth=5)
         # headers = ('user_id', 'content_piece_id', 'viewed', 'p')
+
         rows = []
         sms = []
-        # structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
+        structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
         blocks = get_block_structure_manager(CourseKey.from_string(str(course_id))).get_collected()
-        for block in blocks:
-            try:
-                # rows.append([modulestore().get_block_original_usage(CourseKey.from_string(str(course_id)))])
-                rows.append([block])
-            except Exception as e:
-                rows.append([str(e)])
+
+        for key, value in structure.items():
+            if value["block_type"] == 'vertical':
+                descriptor = modulestore().get_item(UsageKey.from_string(key))
+                parent_metadata = descriptor.xblock_kvs._fields.copy()
+                try:
+                    # log.debug()
+                    rows.append([
+                        key,
+                        value,
+                        str(dir(parent_metadata))
+
+                    ])
+                except Exception as e:
+                    rows.append([str(e)])
 
         for b in blocks:
             if 'html' in str(b) or 'sequential' in str(b) or 'chapter' in str(b):
