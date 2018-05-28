@@ -359,7 +359,7 @@ class PsychometricsReport(object):
                     "problem id",
                     user_by_anonymous_id(assessment.scorer_id),
                     scorer_points,
-                    score.get('points_earned', ''),
+                    # score.get('points_earned', ''),
                     score.get('points_possible', ''),
                     assessment.score_type
                 ]
