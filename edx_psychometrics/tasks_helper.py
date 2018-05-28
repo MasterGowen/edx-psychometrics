@@ -206,9 +206,10 @@ class PsychometricsReport(object):
 
         for key, value in structure.items():
             if value["block_type"] == 'vertical':
-
                 try:
+                    log.warning(str(parent))
                     parent = json.loads(value)['parent']
+                    log.warning(str(value))
                     rows.append(str(parent))
                     if parent not in json.loads(value).keys():
                         parent = [key]
@@ -216,7 +217,7 @@ class PsychometricsReport(object):
                         parent.append(key)
                 except Exception as e:
                     rows.append([str(e)])
-        rows += [json.dumps(vertical_map)]
+        rows += [str(vertical_map)]
         for b in blocks:
             if 'html' in str(b) or 'sequential' in str(b) or 'chapter' in str(b):
                 smodules = StudentModule.objects.filter(module_state_key__exact=b)
