@@ -221,13 +221,13 @@ class PsychometricsReport(object):
             if value["block_type"] == 'vertical':
                 try:
                     parent = value['parent']
-                    rows.append([str(parent), value["usage_key"]])
+                    # rows.append([str(parent), value["usage_key"]])
                     if parent not in value.keys():
-                        vertical_map = [value["usage_key"]]
+                        vertical_map[parent] = [value["usage_key"]]
                     else:
-                        vertical_map.append(value["usage_key"])
+                        vertical_map[parent].append(value["usage_key"])
                 except Exception as e:
-                    rows.append([str(e)])
+                    pass
         rows += [str(vertical_map)]
         for b in blocks:
             if 'html' in str(b) or 'sequential' in str(b) or 'chapter' in str(b):
