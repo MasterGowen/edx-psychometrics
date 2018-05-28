@@ -207,8 +207,10 @@ class PsychometricsReport(object):
         for key, value in structure.items():
             if value["block_type"] == 'vertical':
                 try:
-                    log.warning(str(parent))
+                    rows.append([value])
+
                     parent = json.loads(value)['parent']
+                    log.warning(str(parent))
                     log.warning(str(value))
                     rows.append(str(parent))
                     if parent not in json.loads(value).keys():
