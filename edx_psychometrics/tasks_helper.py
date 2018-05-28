@@ -209,7 +209,7 @@ class PsychometricsReport(object):
 
                 try:
                     parent = json.loads(value)['parent']
-                    rows.append(parent)
+                    rows.append(str(parent))
                     if parent not in json.loads(value).keys():
                         parent = [key]
                     else:
