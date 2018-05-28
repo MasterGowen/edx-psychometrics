@@ -15,7 +15,7 @@ from lms.djangoapps.instructor_analytics.csvs import format_dictlist
 
 from lms.djangoapps.grades.context import grading_context, grading_context_for_course
 from lms.djangoapps.course_blocks.utils import get_student_module_as_dict
-from student.models import CourseEnrollment
+from student.models import CourseEnrollment, user_by_anonymous_id
 from courseware.courses import get_course_by_id
 from opaque_keys.edx.keys import CourseKey, UsageKey
 from xmodule.modulestore.django import modulestore
@@ -25,11 +25,16 @@ from openedx.core.djangoapps.content.block_structure.api import get_block_struct
 from xmodule.modulestore.inheritance import own_metadata
 
 from openedx.core.djangoapps.content.course_structures.models import CourseStructure
-
 from courseware.user_state_client import DjangoXBlockUserStateClient
 from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
 
 from courseware.models import StudentModule
+
+# ORA
+from openassessment.assessment.models import Assessment
+from submissions import api as sub_api
+# from student.models import user_by_anonymous_id
+
 from django.conf import settings
 from lms.djangoapps.instructor_task.tasks_helper.runner import TaskProgress
 from lms.djangoapps.instructor_task.tasks_helper.utils import upload_csv_to_report_store
@@ -72,17 +77,25 @@ class PsychometricsReport(object):
 
         # CSV1
         current_step = {'step': 'Calculating CSV1'}
-        cls._get_csv1_data(course_id, enrolled_students, start_date, "psychometrics_report_csv1")
-        task_progress.update_task_state(extra_meta=current_step)
+        # cls._get_csv1_data(course_id, enrolled_students, start_date, "psychometrics_report_csv1")
+        # task_progress.update_task_state(extra_meta=current_step)
 
         # CSV2
         current_step = {'step': 'Calculating CSV2'}
-        cls._get_csv2_data(course_id, enrolled_students, start_date, "psychometrics_report_csv2")
-        task_progress.update_task_state(extra_meta=current_step)
+        # cls._get_csv2_data(course_id, enrolled_students, start_date, "psychometrics_report_csv2")
+        # task_progress.update_task_state(extra_meta=current_step)
 
         # CSV3
         current_step = {'step': 'Calculating CSV3'}
-        cls._get_csv3_data(course_id, enrolled_students, start_date, "psychometrics_report_csv3")
+        # cls._get_csv3_data(course_id, enrolled_students, start_date, "psychometrics_report_csv3")
+        # task_progress.update_task_state(extra_meta=current_step)
+
+        # CSV4
+
+
+        # CSV5
+        current_step = {'step': 'Calculating CSV5'}
+        cls._get_csv5_data(course_id, start_date, "psychometrics_report_csv5")
         task_progress.update_task_state(extra_meta=current_step)
 
         # Perform the upload
@@ -288,6 +301,132 @@ class PsychometricsReport(object):
 
         # rows.insert(0, headers)
         upload_csv_to_report_store(rows, csv_name, course_id, start_date)
+
+    @classmethod
+    def _get_csv5_data(cls, course_id, start_date, csv_name):
+        # openassessment_blocks = modulestore().get_items(CourseKey.from_string(str('course-v1:edX+DemoX+Demo_Course')),qualifiers={'category': 'openassessment'})
+
+        all_submission_information = sub_api.get_all_course_submission_information(course_id, 'openassessment')
+
+        datarows = []
+        for student_item, submission, score in all_submission_information:
+            row = []
+            assessments = cls._use_read_replica(
+                Assessment.objects.prefetch_related('parts').
+                    prefetch_related('rubric').
+                    filter(
+                    submission_uuid=submission['uuid']
+                )
+            )
+            assessments_cell = cls._build_assessments_cell(assessments)
+            assessments_parts_cell = cls._build_assessments_parts_cell(assessments)
+            feedback_options_cell = cls._build_feedback_options_cell(assessments)
+
+            row = [
+                submission['uuid'],
+                submission['student_item'],
+                student_item['student_id'],
+                submission['submitted_at'],
+                submission['answer'],
+                assessments_cell,
+                assessments_parts_cell,
+                score.get('created_at', ''),
+                score.get('points_earned', ''),
+                score.get('points_possible', ''),
+                feedback_options_cell,
+                user_by_anonymous_id(student_item['student_id'])
+            ]
+            datarows.append(row)
+
+        header = [
+            'Submission ID',
+            'Item ID',
+            'Anonymized Student ID',
+            'Date/Time Response Submitted',
+            'Response',
+            'Assessment Details',
+            'Assessment Scores',
+            'Date/Time Final Score Given',
+            'Final Score Points Earned',
+            'Final Score Points Possible',
+            'Feedback Statements Selected',
+            'username'
+        ]
+        rows = [header] + [row for row in datarows]
+
+        upload_csv_to_report_store(rows, csv_name, course_id, start_date)
+
+    @classmethod
+    def _use_read_replica(self, queryset):
+        """
+        Use the read replica if it's available.
+        Args:
+            queryset (QuerySet)
+        Returns:
+            QuerySet
+        """
+        return (
+            queryset.using("read_replica")
+            if "read_replica" in settings.DATABASES
+            else queryset
+        )
+
+    @classmethod
+    def _build_assessments_cell(cls, assessments):
+        """
+        Args:
+            assessments (QuerySet) - assessments that we would like to collate into one column.
+        Returns:
+            string that should be included in the 'assessments' column for this set of assessments' row
+        """
+        returned_string = u""
+        for assessment in assessments:
+            returned_string += u"Assessment #{}\n".format(assessment.id)
+            returned_string += u"-- scored_at: {}\n".format(assessment.scored_at)
+            returned_string += u"-- type: {}\n".format(assessment.score_type)
+            returned_string += u"-- scorer_id: {}\n".format(assessment.scorer_id)
+            if assessment.feedback != u"":
+                returned_string += u"-- overall_feedback: {}\n".format(assessment.feedback)
+        return returned_string
+
+    @classmethod
+    def _build_assessments_parts_cell(cls, assessments):
+        """
+        Args:
+            assessments (QuerySet) - assessments containing the parts that we would like to collate into one column.
+        Returns:
+            string that should be included in the relevant 'assessments_parts' column for this set of assessments' row
+        """
+        returned_string = u""
+        for assessment in assessments:
+            returned_string += u"Assessment #{}\n".format(assessment.id)
+            for part in assessment.parts.order_by('criterion__order_num'):
+                returned_string += u"-- {}".format(part.criterion.label)
+                if part.option is not None and part.option.label is not None:
+                    option_label = part.option.label
+                    returned_string += u": {option_label} ({option_points})\n".format(
+                        option_label=option_label, option_points=part.option.points
+                    )
+                if part.feedback != u"":
+                    returned_string += u"-- feedback: {}\n".format(part.feedback)
+        return returned_string
+
+    @classmethod
+    def _build_feedback_options_cell(cls, assessments):
+        """
+        Args:
+            assessments (QuerySet) - assessment that we would like to use to fetch and read the feedback options.
+        Returns:
+            string that should be included in the relevant 'feedback_options' column for this set of assessments' row
+        """
+
+        returned_string = u""
+        for assessment in assessments:
+            for feedback in assessment.assessment_feedback.all():
+                for option in feedback.options.all():
+                    returned_string += option.text + u"\n"
+
+        return returned_string
 
     @classmethod
     def _graded_scorable_blocks_to_header(cls, course):
