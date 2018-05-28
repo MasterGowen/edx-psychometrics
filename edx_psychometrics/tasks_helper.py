@@ -240,7 +240,7 @@ class PsychometricsReport(object):
                 return 0
 
         for student in enrolled_students:
-            for vert in [v for v in vlist for vlist in vertical_map.values()]:
+            for vert in [v for vlist in vertical_map.values() for v in vlist]:
                 rows.append([
                     student.id,
                     vert,
