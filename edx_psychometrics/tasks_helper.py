@@ -231,9 +231,10 @@ class PsychometricsReport(object):
                                                 )
             for _sm in _sms:
                 sequential = str(_sm.module_state_key)
+                rows.append([vertical_map[sequential].index(_vert), _sm.state["position"], json.dumps(vertical_map)])
                 try:
                     if _vert in vertical_map[sequential]:
-                        rows.append([vertical_map[sequential].index(_vert), _sm.state["position"]])
+
                         if vertical_map[sequential].index(_vert) <= _sm.state["position"]:
                             return 1
                 except Exception as e:
