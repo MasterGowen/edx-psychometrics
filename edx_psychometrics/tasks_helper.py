@@ -326,12 +326,12 @@ class PsychometricsReport(object):
 
         openassessment_blocks = modulestore().get_items(CourseKey.from_string(str(course_id)),
                                                         qualifiers={'category': 'openassessment'})
-        # openassessment_blocks = modulestore().get_items(CourseKey.from_string(str(course_id)), qualifiers={'category': 'openassessment'})
+        openassessment_blocks = modulestore().get_items(CourseKey.from_string(str(course_id)), qualifiers={'category': 'openassessment'})
 
         datarows = []
 
         # for openassessment_block in openassessment_blocks:
-        # x_block_id = openassessment_block.get_xblock_id()
+        x_block_id = openassessment_blocks[0].get_xblock_id()
         all_submission_information = sub_api.get_all_course_submission_information(course_id, 'openassessment')
         for student_item, submission, score in all_submission_information:
             row = []
@@ -339,32 +339,24 @@ class PsychometricsReport(object):
                 Assessment.objects.prefetch_related('parts').
                     prefetch_related('rubric').
                     filter(
-                    submission_uuid=submission['uuid']
+                    submission_uuid=submission['uuid'],
+                    item__item_id=x_block_id,
                 )
             )
-            # assessments_cell = cls._build_assessments_cell(assessments)
-
             for assessment in assessments:
-                # returned_string += u"Assessment #{}\n".format(assessment.id)
-                # returned_string += u"-- type: {}\n".format()
-                # returned_string += u"-- scorer_id: {}\n".format()
                 scorer_points = 0
                 for part in assessment.parts.order_by('criterion__order_num'):
                     if part.option is not None:
                         scorer_points += part.option.points
-                # returned_string += u"-- sum score: {}\n".format(scorer_points)
-
                 row = [
                     user_by_anonymous_id(student_item['student_id']),
-                    "problem id",
+                    x_block_id,
                     user_by_anonymous_id(assessment.scorer_id),
                     scorer_points,
-                    # score.get('points_earned', ''),
                     score.get('points_possible', ''),
                     assessment.score_type
                 ]
                 datarows.append(row)
-
         header = [
             'user_id',
             'item_id',
@@ -379,13 +371,6 @@ class PsychometricsReport(object):
 
     @classmethod
     def _use_read_replica(self, queryset):
-        """
-        Use the read replica if it's available.
-        Args:
-            queryset (QuerySet)
-        Returns:
-            QuerySet
-        """
         return (
             queryset.using("read_replica")
             if "read_replica" in settings.DATABASES
