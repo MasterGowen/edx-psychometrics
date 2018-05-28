@@ -206,10 +206,10 @@ class PsychometricsReport(object):
 
         for key, value in structure.items():
             if value["block_type"] == 'vertical':
-                descriptor = modulestore().get_item(UsageKey.from_string(key))
 
                 try:
                     parent = json.loads(value)['parent']
+                    rows.append(parent)
                     if parent not in json.loads(value).keys():
                         parent = [key]
                     else:
