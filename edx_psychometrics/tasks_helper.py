@@ -228,24 +228,27 @@ class PsychometricsReport(object):
 
         verticals = vertical_map.values()
 
-        def _viewed(_sm, _vert):
-            sequential = str(_sm.module_state_key)
-            if _vert in vertical_map[sequential]:
-                if vertical_map[sequential].index(vert) <= sm.state["position"]:
-                    return 1
-            else:
+        def _viewed(_vert):
+            _sm = StudentModule.objects.filter(module_type='sequential',
+                                               course_id=CourseKey.from_string(str(course_id)),
+                                               student=student
+                                               )
+            try:
+                sequential = str(_sm.module_state_key)
+                if _vert in vertical_map[sequential]:
+                    if vertical_map[sequential].index(vert) <= _sm.state["position"]:
+                        return 1
+                else:
+                    return 0
+            except:
                 return 0
 
         for student in enrolled_students:
             for vert in verticals:
-                sm = StudentModule.objects.filter(module_type='sequential',
-                                                  course_id=CourseKey.from_string(str(course_id)),
-                                                  student=student
-                                                  )
                 rows.append([
                     student.id,
                     vert,
-                    _viewed(sm, vert)
+                    _viewed(vert)
                 ])
         rows += [[s[1].student.id, s[1].state, str(s[1].module_state_key)] for s in sms]
 
@@ -318,7 +321,8 @@ class PsychometricsReport(object):
     @classmethod
     def _get_csv5_data(cls, course_id, start_date, csv_name):
 
-        openassessment_blocks = modulestore().get_items(CourseKey.from_string(course_id),qualifiers={'category': 'openassessment'})
+        openassessment_blocks = modulestore().get_items(CourseKey.from_string(course_id),
+                                                        qualifiers={'category': 'openassessment'})
 
         datarows = []
 
