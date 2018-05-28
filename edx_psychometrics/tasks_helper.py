@@ -201,6 +201,12 @@ class PsychometricsReport(object):
         sms = []
         # structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
         blocks = get_block_structure_manager(CourseKey.from_string(str(course_id))).get_collected()
+        for block in blocks:
+            try:
+                # rows.append([modulestore().get_block_original_usage(CourseKey.from_string(str(course_id)))])
+                rows.append([block])
+            except Exception as e:
+                rows.append([str(e)])
 
         for b in blocks:
             if 'html' in str(b) or 'sequential' in str(b) or 'chapter' in str(b):
