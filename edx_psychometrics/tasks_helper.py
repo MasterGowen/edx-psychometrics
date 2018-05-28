@@ -342,38 +342,36 @@ class PsychometricsReport(object):
                     submission_uuid=submission['uuid']
                 )
             )
-            assessments_cell = cls._build_assessments_cell(assessments)
-            # assessments_parts_cell = cls._build_assessments_parts_cell(assessments)
+            # assessments_cell = cls._build_assessments_cell(assessments)
 
-            row = [
-                # x_block_id,
-                # submission['uuid'],
-                # submission['student_item'],
-                user_by_anonymous_id(student_item['student_id']),
-                # submission['submitted_at'],
-                # submission['answer'],
-                assessments_cell,
-                # assessments_parts_cell,
-                # score.get('created_at', ''),
-                score.get('points_earned', ''),
-                score.get('points_possible', ''),
-                # user_by_anonymous_id(student_item['student_id'])
-            ]
-            datarows.append(row)
+            for assessment in assessments:
+                # returned_string += u"Assessment #{}\n".format(assessment.id)
+                # returned_string += u"-- type: {}\n".format()
+                # returned_string += u"-- scorer_id: {}\n".format()
+                scorer_points = 0
+                for part in assessment.parts.order_by('criterion__order_num'):
+                    if part.option is not None:
+                        scorer_points += part.option.points
+                # returned_string += u"-- sum score: {}\n".format(scorer_points)
+
+                row = [
+                    user_by_anonymous_id(student_item['student_id']),
+                    "problem id",
+                    user_by_anonymous_id(assessment.scorer_id),
+                    scorer_points,
+                    score.get('points_earned', ''),
+                    score.get('points_possible', ''),
+                    assessment.score_type
+                ]
+                datarows.append(row)
 
         header = [
-            # 'task_id',
-            # 'Submission ID',
-            # 'Item ID',
-            'student username',
-            # 'Date/Time Response Submitted',
-            # 'Response',
-            'Assessment Details',
-            # 'Assessment Scores',
-            # 'Date/Time Final Score Given',
-            'Final Score Points Earned',
-            'Final Score Points Possible',
-            # 'username'
+            'user_id',
+            'item_id',
+            'scorer_id',
+            'score',
+            'max_score',
+            'score_type'
         ]
         rows = [header] + [row for row in datarows]
 
@@ -394,43 +392,6 @@ class PsychometricsReport(object):
             else queryset
         )
 
-    @classmethod
-    def _build_assessments_cell(cls, assessments):
-        """
-        Args:
-            assessments (QuerySet) - assessments that we would like to collate into one column.
-        Returns:
-            string that should be included in the 'assessments' column for this set of assessments' row
-        """
-        returned_string = u""
-        for assessment in assessments:
-            returned_string += u"Assessment #{}\n".format(assessment.id)
-            returned_string += u"-- type: {}\n".format(assessment.score_type)
-            returned_string += u"-- scorer_id: {}\n".format(user_by_anonymous_id(assessment.scorer_id))
-            scorer_points = 0
-            for part in assessment.parts.order_by('criterion__order_num'):
-                if part.option is not None:
-                    scorer_points += part.option.points
-            returned_string += u"-- sum score: {}\n".format(scorer_points)
-
-        return returned_string
-
-    @classmethod
-    def _build_feedback_options_cell(cls, assessments):
-        """
-        Args:
-            assessments (QuerySet) - assessment that we would like to use to fetch and read the feedback options.
-        Returns:
-            string that should be included in the relevant 'feedback_options' column for this set of assessments' row
-        """
-
-        returned_string = u""
-        for assessment in assessments:
-            for feedback in assessment.assessment_feedback.all():
-                for option in feedback.options.all():
-                    returned_string += option.text + u"\n"
-
-        return returned_string
 
     @classmethod
     def _graded_scorable_blocks_to_header(cls, course):
