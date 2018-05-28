@@ -30,8 +30,7 @@ from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
 
 from courseware.models import StudentModule
 
-
-#ORA
+# ORA
 from openassessment.assessment.models import Assessment
 from submissions import api as sub_api
 # from student.models import user_by_anonymous_id
@@ -91,7 +90,7 @@ class PsychometricsReport(object):
         cls._get_csv3_data(course_id, enrolled_students, start_date, "psychometrics_report_csv3")
         task_progress.update_task_state(extra_meta=current_step)
 
-        #CSV4
+        # CSV4
 
 
         # CSV5
@@ -304,8 +303,9 @@ class PsychometricsReport(object):
         upload_csv_to_report_store(rows, csv_name, course_id, start_date)
 
     @classmethod
-    def _get_csv5_data(cls, course_id, enrolled_students, start_date, csv_name):
-        openassessment_blocks = modulestore().get_items(CourseKey.from_string(str('course-v1:edX+DemoX+Demo_Course')),qualifiers={'category': 'openassessment'})
+    def _get_csv5_data(cls, course_id, start_date, csv_name):
+        openassessment_blocks = modulestore().get_items(CourseKey.from_string(str('course-v1:edX+DemoX+Demo_Course')),
+                                                        qualifiers={'category': 'openassessment'})
 
         all_submission_information = sub_api.get_all_course_submission_information(course_id, 'openassessment')
 
@@ -356,6 +356,21 @@ class PsychometricsReport(object):
         rows = [header] + [row for row in datarows]
 
         upload_csv_to_report_store(rows, csv_name, course_id, start_date)
+
+    @classmethod
+    def _use_read_replica(self, queryset):
+        """
+        Use the read replica if it's available.
+        Args:
+            queryset (QuerySet)
+        Returns:
+            QuerySet
+        """
+        return (
+            queryset.using("read_replica")
+            if "read_replica" in settings.DATABASES
+            else queryset
+        )
 
     @classmethod
     def _build_assessments_cell(cls, assessments):
