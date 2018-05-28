@@ -33,7 +33,9 @@ from courseware.models import StudentModule
 # ORA
 from openassessment.assessment.models import Assessment
 from submissions import api as sub_api
+from .utils import get_course_item_submissions
 # from student.models import user_by_anonymous_id
+
 
 from django.conf import settings
 from lms.djangoapps.instructor_task.tasks_helper.runner import TaskProgress
@@ -332,7 +334,7 @@ class PsychometricsReport(object):
 
         # for openassessment_block in openassessment_blocks:
         x_block_id = openassessment_blocks[0].get_xblock_id()
-        all_submission_information = sub_api.get_all_course_submission_information(course_id, 'openassessment')
+        all_submission_information = get_course_item_submissions(course_id, x_block_id, 'openassessment')
         for student_item, submission, score in all_submission_information:
             row = []
             assessments = cls._use_read_replica(
@@ -340,7 +342,7 @@ class PsychometricsReport(object):
                     prefetch_related('rubric').
                     filter(
                     submission_uuid=submission['uuid'],
-                    item__item_id=x_block_id,
+                    # item__item_id=x_block_id,
                 )
             )
             for assessment in assessments:
