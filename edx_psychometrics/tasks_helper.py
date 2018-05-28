@@ -334,7 +334,7 @@ class PsychometricsReport(object):
                 score.get('points_earned', ''),
                 score.get('points_possible', ''),
                 feedback_options_cell,
-                user_by_anonymous_id(student_item[0]['student_id'])
+                user_by_anonymous_id(student_item['student_id'])
             ]
             datarows.append(row)
 
