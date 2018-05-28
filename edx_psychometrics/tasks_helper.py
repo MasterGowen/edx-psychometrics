@@ -213,7 +213,7 @@ class PsychometricsReport(object):
                 smodules = StudentModule.objects.filter(module_state_key__exact=b)
                 for s in smodules:
                     sms.append([b, s])
-        rows = [[s[1].student.id, s[1].state] for s in sms]
+        rows += [[s[1].student.id, s[1].state] for s in sms]
 
         #
         # problem_set = []
