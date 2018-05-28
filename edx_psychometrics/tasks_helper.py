@@ -322,8 +322,6 @@ class PsychometricsReport(object):
             assessments_parts_cell = cls._build_assessments_parts_cell(assessments)
             feedback_options_cell = cls._build_feedback_options_cell(assessments)
 
-            log.debug(student_item['student_id']+" !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-
             row = [
                 submission['uuid'],
                 submission['student_item'],
@@ -336,7 +334,7 @@ class PsychometricsReport(object):
                 score.get('points_earned', ''),
                 score.get('points_possible', ''),
                 feedback_options_cell,
-                # user_by_anonymous_id(student_item['student_id']).username
+                user_by_anonymous_id(student_item[0]['student_id'])
             ]
             datarows.append(row)
 
@@ -352,7 +350,7 @@ class PsychometricsReport(object):
             'Final Score Points Earned',
             'Final Score Points Possible',
             'Feedback Statements Selected',
-            # 'username'
+            'username'
         ]
         rows = [header] + [row for row in datarows]
 
