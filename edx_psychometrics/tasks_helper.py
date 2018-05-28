@@ -208,7 +208,6 @@ class PsychometricsReport(object):
         headers = ('user_id', 'content_piece_id', 'viewed', 'p')
 
         rows = []
-        sms = []
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
 
         vertical_map = {}
@@ -224,9 +223,6 @@ class PsychometricsReport(object):
                         vertical_map[parent].append(value["usage_key"])
                 except Exception as e:
                     pass
-        rows += [str(vertical_map)]
-
-        verticals = vertical_map.values()
 
         def _viewed(_vert):
             _sm = StudentModule.objects.filter(module_type='sequential',
@@ -244,13 +240,13 @@ class PsychometricsReport(object):
                 return 0
 
         for student in enrolled_students:
-            for vert in verticals:
+            for vert in vertical_map.values():
                 rows.append([
                     student.id,
                     vert,
                     _viewed(vert)
                 ])
-        rows += [[s[1].student.id, s[1].state, str(s[1].module_state_key)] for s in sms]
+        # rows += [[s[1].student.id, s[1].state, str(s[1].module_state_key)] for s in sms]
 
         #
         # problem_set = []
