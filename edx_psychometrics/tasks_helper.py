@@ -229,21 +229,19 @@ class PsychometricsReport(object):
                                                course_id=CourseKey.from_string(str(course_id)),
                                                student=student
                                                )
-            try:
-                sequential = str(_sm.module_state_key)
-                if _vert in vertical_map[sequential]:
-                    if vertical_map[sequential].index(vert) <= _sm.state["position"]:
-                        return 1
-                else:
-                    return 0
-            except:
+
+            sequential = str(_sm.module_state_key)
+            if _vert in vertical_map[sequential]:
+                if vertical_map[sequential].index(vert) <= _sm.state["position"]:
+                    return 1
+            else:
                 return 0
 
         for student in enrolled_students:
             for vert in [v for vlist in vertical_map.values() for v in vlist]:
                 rows.append([
                     student.id,
-                    vert,
+                    vert.split("@")[-1],
                     _viewed(vert)
                 ])
         # rows += [[s[1].student.id, s[1].state, str(s[1].module_state_key)] for s in sms]
