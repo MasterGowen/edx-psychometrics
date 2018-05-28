@@ -405,38 +405,32 @@ class PsychometricsReport(object):
         returned_string = u""
         for assessment in assessments:
             returned_string += u"Assessment #{}\n".format(assessment.id)
-            returned_string += u"-- scored_at: {}\n".format(assessment.scored_at)
             returned_string += u"-- type: {}\n".format(assessment.score_type)
-            returned_string += u"-- scorer_id: {}\n".format(assessment.scorer_id)
+            returned_string += u"-- scorer_id: {}\n".format(user_by_anonymous_id(assessment.scorer_id))
+            scorer_points = 0
             for part in assessment.parts.order_by('criterion__order_num'):
-                returned_string += u"-- {}".format(part.criterion.label)
-                if part.option is not None and part.option.label is not None:
-                    option_label = part.option.label
-                    returned_string += u": {option_label} ({option_points})\n".format(
-                        option_label=option_label, option_points=part.option.points
-                    )
+                if part.option is not None:
+                    scorer_points += part.option.points
+            returned_string += u"-- sum score: {}\n".format(scorer_points)
+
         return returned_string
 
-    # @classmethod
-    # def _build_assessments_parts_cell(cls, assessments):
-    #     """
-    #     Args:
-    #         assessments (QuerySet) - assessments containing the parts that we would like to collate into one column.
-    #     Returns:
-    #         string that should be included in the relevant 'assessments_parts' column for this set of assessments' row
-    #     """
-    #     returned_string = u""
-    #     for assessment in assessments:
-    #         returned_string += u"Assessment #{}\n".format(assessment.id)
-    #         for part in assessment.parts.order_by('criterion__order_num'):
-    #             returned_string += u"-- {}".format(part.criterion.label)
-    #             if part.option is not None and part.option.label is not None:
-    #                 option_label = part.option.label
-    #                 returned_string += u": {option_label} ({option_points})\n".format(
-    #                     option_label=option_label, option_points=part.option.points
-    #                 )
-    #     return returned_string
+    @classmethod
+    def _build_feedback_options_cell(cls, assessments):
+        """
+        Args:
+            assessments (QuerySet) - assessment that we would like to use to fetch and read the feedback options.
+        Returns:
+            string that should be included in the relevant 'feedback_options' column for this set of assessments' row
+        """
 
+        returned_string = u""
+        for assessment in assessments:
+            for feedback in assessment.assessment_feedback.all():
+                for option in feedback.options.all():
+                    returned_string += option.text + u"\n"
+
+        return returned_string
 
     @classmethod
     def _graded_scorable_blocks_to_header(cls, course):
