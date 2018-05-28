@@ -208,7 +208,7 @@ class PsychometricsReport(object):
             if value["block_type"] == 'vertical':
                 try:
                     parent = value['parent']
-                    rows.append([str(parent), value])
+                    rows.append([str(parent), value["usage_key"]])
                     if parent not in value.keys():
                         parent = [key]
                     else:
