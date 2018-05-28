@@ -222,7 +222,7 @@ class PsychometricsReport(object):
                 try:
                     parent = value['parent']
                     # rows.append([str(parent), value["usage_key"]])
-                    if parent not in value.keys():
+                    if parent not in vertical_map.keys():
                         vertical_map[parent] = [value["usage_key"]]
                     else:
                         vertical_map[parent].append(value["usage_key"])
@@ -234,7 +234,7 @@ class PsychometricsReport(object):
                 smodules = StudentModule.objects.filter(module_state_key__exact=b)
                 for s in smodules:
                     sms.append([b, s])
-        rows += [[s[1].student.id, s[1].state] for s in sms]
+        rows += [[s[1].student.id, s[1].state, str(s[1].module_state_key)] for s in sms]
 
         #
         # problem_set = []
