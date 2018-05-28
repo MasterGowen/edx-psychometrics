@@ -202,21 +202,21 @@ class PsychometricsReport(object):
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
         blocks = get_block_structure_manager(CourseKey.from_string(str(course_id))).get_collected()
 
+        vertical_map = {}
+
         for key, value in structure.items():
             if value["block_type"] == 'vertical':
                 descriptor = modulestore().get_item(UsageKey.from_string(key))
-                parent_metadata = descriptor.xblock_kvs._fields.copy()
-                try:
-                    # log.debug()
-                    rows.append([
-                        key,
-                        value,
-                        str(dir(parent_metadata))
 
-                    ])
+                try:
+                    parent = json.loads(value)['parent']
+                    if parent not in json.loads(value).keys():
+                        parent = [key]
+                    else:
+                        parent.append(key)
                 except Exception as e:
                     rows.append([str(e)])
-
+        rows += [json.dumps(vertical_map)]
         for b in blocks:
             if 'html' in str(b) or 'sequential' in str(b) or 'chapter' in str(b):
                 smodules = StudentModule.objects.filter(module_state_key__exact=b)
