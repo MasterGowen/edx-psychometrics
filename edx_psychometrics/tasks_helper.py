@@ -304,8 +304,7 @@ class PsychometricsReport(object):
 
     @classmethod
     def _get_csv5_data(cls, course_id, start_date, csv_name):
-        openassessment_blocks = modulestore().get_items(CourseKey.from_string(str('course-v1:edX+DemoX+Demo_Course')),
-                                                        qualifiers={'category': 'openassessment'})
+        # openassessment_blocks = modulestore().get_items(CourseKey.from_string(str('course-v1:edX+DemoX+Demo_Course')),qualifiers={'category': 'openassessment'})
 
         all_submission_information = sub_api.get_all_course_submission_information(course_id, 'openassessment')
 
