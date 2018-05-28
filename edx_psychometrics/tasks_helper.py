@@ -92,7 +92,6 @@ class PsychometricsReport(object):
 
         # CSV4
 
-
         # CSV5
         current_step = {'step': 'Calculating CSV5'}
         cls._get_csv5_data(course_id, start_date, "psychometrics_report_csv5")
@@ -206,14 +205,10 @@ class PsychometricsReport(object):
 
     @classmethod
     def _get_csv3_data(cls, course_id, enrolled_students, start_date, csv_name):
-        user_state_client = DjangoXBlockUserStateClient()
-        # course = modulestore().get_course(course_id, depth=5, nav_depth=5)
-        # headers = ('user_id', 'content_piece_id', 'viewed', 'p')
+        headers = ('user_id', 'content_piece_id', 'viewed', 'p')
 
         rows = []
-        sms = []
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
-        blocks = get_block_structure_manager(CourseKey.from_string(str(course_id))).get_collected()
 
         vertical_map = {}
 
@@ -228,13 +223,30 @@ class PsychometricsReport(object):
                         vertical_map[parent].append(value["usage_key"])
                 except Exception as e:
                     pass
-        rows += [str(vertical_map)]
-        for b in blocks:
-            if 'html' in str(b) or 'sequential' in str(b) or 'chapter' in str(b):
-                smodules = StudentModule.objects.filter(module_state_key__exact=b)
-                for s in smodules:
-                    sms.append([b, s])
-        rows += [[s[1].student.id, s[1].state, str(s[1].module_state_key)] for s in sms]
+
+        def _viewed(_vert):
+            _sm = StudentModule.objects.filter(module_type='sequential',
+                                               course_id=CourseKey.from_string(str(course_id)),
+                                               student=student
+                                               )
+            try:
+                sequential = str(_sm.module_state_key)
+                if _vert in vertical_map[sequential]:
+                    if vertical_map[sequential].index(vert) <= _sm.state["position"]:
+                        return 1
+                else:
+                    return 0
+            except:
+                return 0
+
+        for student in enrolled_students:
+            for vert in vertical_map.values():
+                rows.append([
+                    student.id,
+                    vert,
+                    _viewed(vert)
+                ])
+        # rows += [[s[1].student.id, s[1].state, str(s[1].module_state_key)] for s in sms]
 
         #
         # problem_set = []
@@ -299,13 +311,13 @@ class PsychometricsReport(object):
         #     except:
         #         pass
 
-        # rows.insert(0, headers)
+        rows.insert(0, headers)
         upload_csv_to_report_store(rows, csv_name, course_id, start_date)
 
     @classmethod
     def _get_csv5_data(cls, course_id, start_date, csv_name):
 
-        openassessment_blocks = modulestore().get_items(CourseKey.from_string(str(course_id)),
+        openassessment_blocks = modulestore().get_items(CourseKey.from_string(course_id),
                                                         qualifiers={'category': 'openassessment'})
 
         datarows = []
