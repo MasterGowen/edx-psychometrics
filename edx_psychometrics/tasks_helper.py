@@ -77,18 +77,18 @@ class PsychometricsReport(object):
 
         # CSV1
         current_step = {'step': 'Calculating CSV1'}
-        cls._get_csv1_data(course_id, enrolled_students, start_date, "psychometrics_report_csv1")
-        task_progress.update_task_state(extra_meta=current_step)
+        # cls._get_csv1_data(course_id, enrolled_students, start_date, "psychometrics_report_csv1")
+        # task_progress.update_task_state(extra_meta=current_step)
 
         # CSV2
         current_step = {'step': 'Calculating CSV2'}
-        cls._get_csv2_data(course_id, enrolled_students, start_date, "psychometrics_report_csv2")
-        task_progress.update_task_state(extra_meta=current_step)
+        # cls._get_csv2_data(course_id, enrolled_students, start_date, "psychometrics_report_csv2")
+        # task_progress.update_task_state(extra_meta=current_step)
 
         # CSV3
         current_step = {'step': 'Calculating CSV3'}
-        cls._get_csv3_data(course_id, enrolled_students, start_date, "psychometrics_report_csv3")
-        task_progress.update_task_state(extra_meta=current_step)
+        # cls._get_csv3_data(course_id, enrolled_students, start_date, "psychometrics_report_csv3")
+        # task_progress.update_task_state(extra_meta=current_step)
 
         # CSV4
 
@@ -322,6 +322,8 @@ class PsychometricsReport(object):
             assessments_parts_cell = cls._build_assessments_parts_cell(assessments)
             feedback_options_cell = cls._build_feedback_options_cell(assessments)
 
+            log.debug(student_item['student_id']+" !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
             row = [
                 submission['uuid'],
                 submission['student_item'],
@@ -334,7 +336,7 @@ class PsychometricsReport(object):
                 score.get('points_earned', ''),
                 score.get('points_possible', ''),
                 feedback_options_cell,
-                user_by_anonymous_id(student_item['student_id']).username
+                # user_by_anonymous_id(student_item['student_id']).username
             ]
             datarows.append(row)
 
@@ -350,7 +352,7 @@ class PsychometricsReport(object):
             'Final Score Points Earned',
             'Final Score Points Possible',
             'Feedback Statements Selected',
-            'username'
+            # 'username'
         ]
         rows = [header] + [row for row in datarows]
 
