@@ -33,7 +33,7 @@ from courseware.models import StudentModule
 # ORA
 from openassessment.assessment.models import Assessment
 from submissions import api as sub_api
-from .utils import get_course_item_submissions
+from utils import get_course_item_submissions
 # from student.models import user_by_anonymous_id
 
 
