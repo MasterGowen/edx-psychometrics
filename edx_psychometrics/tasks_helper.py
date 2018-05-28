@@ -223,9 +223,9 @@ class PsychometricsReport(object):
                     parent = value['parent']
                     rows.append([str(parent), value["usage_key"]])
                     if parent not in value.keys():
-                        parent = [key]
+                        vertical_map = [value["usage_key"]]
                     else:
-                        parent.append(key)
+                        vertical_map.append(value["usage_key"])
                 except Exception as e:
                     rows.append([str(e)])
         rows += [str(vertical_map)]
