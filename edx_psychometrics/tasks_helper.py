@@ -323,34 +323,34 @@ class PsychometricsReport(object):
             feedback_options_cell = cls._build_feedback_options_cell(assessments)
 
             row = [
-                submission['uuid'],
-                submission['student_item'],
-                student_item['student_id'],
-                submission['submitted_at'],
-                submission['answer'],
-                assessments_cell,
-                assessments_parts_cell,
-                score.get('created_at', ''),
-                score.get('points_earned', ''),
-                score.get('points_possible', ''),
-                feedback_options_cell,
+                submission['uuid'] + "|",
+                submission['student_item'] + "|",
+                student_item['student_id'] + "|",
+                submission['submitted_at'] + "|",
+                submission['answer'] + "|",
+                assessments_cell + "|",
+                assessments_parts_cell + "|",
+                score.get('created_at', '') + "|",
+                score.get('points_earned', '') + "|",
+                score.get('points_possible', '') + "|",
+                feedback_options_cell + "|",
                 user_by_anonymous_id(student_item['student_id'])
             ]
             datarows.append(row)
 
         header = [
-            'Submission ID',
-            'Item ID',
-            'Anonymized Student ID',
-            'Date/Time Response Submitted',
-            'Response',
-            'Assessment Details',
-            'Assessment Scores',
-            'Date/Time Final Score Given',
-            'Final Score Points Earned',
-            'Final Score Points Possible',
-            'Feedback Statements Selected',
-            'username'
+            'Submission ID' + "|",
+            'Item ID' + "|",
+            'Anonymized Student ID' + "|",
+            'Date/Time Response Submitted' + "|",
+            'Response' + "|",
+            'Assessment Details' + "|",
+            'Assessment Scores' + "|",
+            'Date/Time Final Score Given' + "|",
+            'Final Score Points Earned' + "|",
+            'Final Score Points Possible' + "|",
+            'Feedback Statements Selected' + "|",
+            'username + "|"'
         ]
         rows = [header] + [row for row in datarows]
 
