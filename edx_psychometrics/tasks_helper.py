@@ -225,17 +225,17 @@ class PsychometricsReport(object):
                     pass
 
         def _viewed(_vert):
-            _sm = StudentModule.objects.filter(module_type='sequential',
-                                               course_id=CourseKey.from_string(str(course_id)),
-                                               student=student
-                                               )
-
-            sequential = str(_sm.module_state_key)
-            if _vert in vertical_map[sequential]:
-                if vertical_map[sequential].index(vert) <= _sm.state["position"]:
-                    return 1
-            else:
-                return 0
+            _sms = StudentModule.objects.filter(module_type='sequential',
+                                                course_id=CourseKey.from_string(str(course_id)),
+                                                student=student
+                                                )
+            for _sm in _sms:
+                sequential = str(_sm.module_state_key)
+                if _vert in vertical_map[sequential]:
+                    if vertical_map[sequential].index(vert) <= _sm.state["position"]:
+                        return 1
+                else:
+                    return 0
 
         for student in enrolled_students:
             for vert in [v for vlist in vertical_map.values() for v in vlist]:
