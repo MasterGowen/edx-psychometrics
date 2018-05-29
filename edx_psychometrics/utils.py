@@ -45,7 +45,8 @@ def upload_json_to_report_store(rows, csv_name, course_id, timestamp, config_nam
     tracker_emit(csv_name)
 
 def store_json_file(self, course_id, filename, rows):
-    with open('data.txt', 'w') as outfile:
+    file = self.path_to(course_id, filename)
+    with open(file, 'w') as outfile:
         json.dump(rows, outfile)
         self.store(course_id, filename, outfile)
 
