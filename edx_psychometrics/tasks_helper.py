@@ -163,7 +163,7 @@ class PsychometricsReport(object):
                             current_block['usage_key'].split("@")[-1],
                             current_block['block_type'],
                             current_block['display_name'],
-                            key,
+                            key.split("@")[-1],
                             module_order,
                             value['display_name']
                         ]
