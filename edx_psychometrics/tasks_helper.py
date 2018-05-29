@@ -18,6 +18,7 @@ from lms.djangoapps.course_blocks.utils import get_student_module_as_dict
 from student.models import CourseEnrollment, user_by_anonymous_id
 from courseware.courses import get_course_by_id
 from opaque_keys.edx.keys import CourseKey, UsageKey
+from opaque_keys.edx.locator import BlockUsageLocator
 from xmodule.modulestore.django import modulestore
 from openedx.core.djangoapps.content.block_structure.manager import BlockStructureManager
 from openedx.core.djangoapps.content.block_structure.api import get_block_structure_manager
@@ -211,11 +212,9 @@ class PsychometricsReport(object):
 
     @classmethod
     def _get_csv3_data(cls, course_id, enrolled_students, start_date, csv_name):
-        from xmodule import seq_module, vertical_block
         headers = ('user_id', 'content_piece_id', 'viewed', 'p')
 
         rows = []
-        # structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
 
         course = get_course_by_id(course_id)
         chapters = [chapter for chapter in course.get_children() if not chapter.hide_from_toc]
@@ -226,109 +225,28 @@ class PsychometricsReport(object):
             } for s in c.get_children() if not s.hide_from_toc]
         } for c in chapters]
 
-        rows.append([json.dumps(vertical_map)])
+        def _viewed(c_pos, sequential, vertical, student):
+            _sm = StudentModule.objects.filter(module_type='sequential',
+                                               course_id=CourseKey.from_string(str(course_id)),
+                                               student=student,
+                                               module_state_key=BlockUsageLocator.from_string(sequential)
+                                               ).first()
+            position = json.loads(_sm.state)["position"]
 
-        # for key, value in structure.items():
-        #     if value["block_type"] == 'vertical':
-        #         try:
-        #             parent = value['parent']
-        #             if parent not in vertical_map.keys():
-        #                 vertical_map[str(parent)] = [value["usage_key"]]
-        #             else:
-        #                 vertical_map[str(parent)].append(value["usage_key"])
-        #         except Exception as e:
-        #             log.warning(e)
+            if vertical_map[c_pos][sequential].index(vertical) <= position
+                return 1
+            else:
+                return 0
 
-        def _viewed(_vert, student):
-            _sms = StudentModule.objects.filter(module_type='sequential',
-                                                course_id=CourseKey.from_string(str(course_id)),
-                                                student=student
-                                                )
-            for _sm in _sms:
-                sequential = str(_sm.module_state_key)
-                rows.append([_sm.module_state_key.get_children()])
-
-                if _vert in vertical_map.get(sequential, [None]):
-                    if vertical_map[sequential].index(_vert) <= (json.loads(_sm.state)["position"] - 1):
-                        return 1
-                    else:
-                        return 0
-                else:
-                    return 0
-            return 0
-
-        # for student in enrolled_students:
-        #     for vert in [v for vlist in vertical_map.values() for v in vlist]:
-        #         rows.append([
-        #             student.id,
-        #             vert.split("@")[-1],
-        #             _viewed(vert, student)
-        #         ])
-        # rows += [[s[1].student.id, s[1].state, str(s[1].module_state_key)] for s in sms]
-
-        #
-        # problem_set = []
-        # problem_info = {}
-        # for section in course.get_children():
-        #     c_subsection = 0
-        #     for subsection in section.get_children():
-        #         c_subsection += 1
-        #         c_unit = 0
-        #         for unit in subsection.get_children():
-        #             c_unit += 1
-        #             c_problem = 0
-        #             for child in unit.get_children():
-        #                 # if child.location.block_type == 'problem':
-        #                 c_problem += 1
-        #                 problem_set.append(child.location)
-        #                 problem_info[child.location] = {
-        #                     'id': text_type(child.location),
-        #                     'x_value': "P{0}.{1}.{2}".format(c_subsection, c_unit, c_problem),
-        #                     'display_name': str((own_metadata(child))),  # .get('display_name', ''),
-        #                     # 'inputs': str(child.get_state_for_lcp()),
-        #                     "type": type(child)
-        #                 }
-
-        # for student, course_grade, error in CourseGradeFactory().iter(enrolled_students, course):
-        #     student_modules = StudentModule.objects.filter(
-        #         student=student,
-        #         course_id=course_id,
-        #         # module_type='html'
-        #     )
-        # for i in problem_info.keys():
-        #     rows.append([problem_info[i][e] for e in problem_info[i].keys()])
-        # for b in blocks:
-        #     rows.append(str(b))
-
-        # for s in student_modules:
-        #     try:
-        #         history_entries = list(user_state_client.get_history(student.username, s.module_state_key))
-        #         for e in history_entries:
-        #             try:
-        #                 rows.append([
-        #                     s.student.id,
-        #                     e.module_type,
-        #                     e.id,
-        #
-        #                     e.updated.astimezone(pytz.timezone(settings.TIME_ZONE))
-        #                 ])
-        #             except:
-        #                 pass
-        #     except:
-        #         pass
-
-        # for b in blocks:
-        #     try:
-        #         rows.append([str(b)])
-        #     except:
-        #         pass
-        # for s in structure:
-        #
-        #     try:
-        #         rows.append([s])
-        #     except:
-        #         pass
-
+        for student in enrolled_students:
+            for c_pos, chapter in enumerate(vertical_map):
+                for subsection, verticals in chapter.items():
+                    for vertical in verticals:
+                        rows.append([
+                            student.id,
+                            vertical.split("@")[-1],
+                            _viewed(c_pos, subsection, vertical, student)
+                        ])
         rows.insert(0, headers)
         upload_csv_to_report_store(rows, csv_name, course_id, start_date)
 
