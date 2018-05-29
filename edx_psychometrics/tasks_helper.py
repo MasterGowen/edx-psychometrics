@@ -222,14 +222,13 @@ class PsychometricsReport(object):
             'chapter_name': c.display_name_with_default_escaped,
             'sections': [{
                 'clickable_tab_count': len(s.get_children()) if (type(s) == seq_module.SequenceDescriptor) else 0,
-                s.location: [{
+                str(s.location): [{
                     'children_count': len(t.get_children()) if (type(t) == vertical_block.VerticalBlock) else 0,
                     'class': dir(t)} for t in s.get_children()
                 ]
             } for s in c.get_children() if not s.hide_from_toc]
         } for c in chapters]
         rows.append([json.dumps(vertical_map)])
-
 
         # for key, value in structure.items():
         #     if value["block_type"] == 'vertical':
@@ -338,7 +337,8 @@ class PsychometricsReport(object):
     @classmethod
     def _get_csv4_data(cls, course_id, start_date, csv_name):
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
-        headers = ('content_piece_id', 'content_piece_type', 'content_piece_name', 'module_id', 'module_order', 'module_name')
+        headers = (
+        'content_piece_id', 'content_piece_type', 'content_piece_name', 'module_id', 'module_order', 'module_name')
         datarows = []
         module_order = 0
         for key, value in structure.items():
@@ -362,7 +362,8 @@ class PsychometricsReport(object):
     @classmethod
     def _get_csv5_data(cls, course_id, start_date, csv_name):
 
-        openassessment_blocks = modulestore().get_items(CourseKey.from_string(str(course_id)), qualifiers={'category': 'openassessment'})
+        openassessment_blocks = modulestore().get_items(CourseKey.from_string(str(course_id)),
+                                                        qualifiers={'category': 'openassessment'})
         datarows = []
         for openassessment_block in openassessment_blocks:
             x_block_id = openassessment_block.get_xblock_id()
@@ -401,7 +402,6 @@ class PsychometricsReport(object):
         rows = [header] + [row for row in datarows]
 
         upload_csv_to_report_store(rows, csv_name, course_id, start_date)
-
 
     @classmethod
     def _graded_scorable_blocks_to_header(cls, course):
