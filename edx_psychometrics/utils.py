@@ -3,6 +3,27 @@ from submissions.serializers import (
 )
 from submissions.models import Submission, StudentItem, Score, ScoreSummary, ScoreAnnotation, score_set, score_reset
 from django.conf import settings
+from eventtracking import tracker
+from lms.djangoapps.instructor_task.models import ReportStore
+
+from lms.djangoapps.instructor_task.tasks_helper.utils import tracker_emit
+
+from django.core.files.storage import get_valid_filename
+
+
+def upload_json_to_report_store(rows, csv_name, course_id, timestamp, config_name='GRADES_DOWNLOAD'):
+    report_store = ReportStore.from_config(config_name)
+    report_store.store_rows(
+        course_id,
+        u"{course_prefix}_{csv_name}_{timestamp_str}.json".format(
+            course_prefix=get_valid_filename(unicode("_").join([course_id.org, course_id.course, course_id.run])),
+            csv_name=csv_name,
+            timestamp_str=timestamp.strftime("%Y-%m-%d-%H%M")
+        ),
+        rows
+    )
+    tracker_emit(csv_name)
+
 
 def get_course_item_submissions(course_id, item_id, item_type, read_replica=True):
     """ For the given course, get all student items of the given item type, all the submissions for those itemes,
