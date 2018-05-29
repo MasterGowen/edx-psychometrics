@@ -342,7 +342,7 @@ class PsychometricsReport(object):
 
         datarows = []
         module_order = 0
-        for key, value in structure.values():
+        for key, value in structure.items():
             if value.block_type == 'vertical':
                 for block in value.children:
                     current_block = structure[block]
