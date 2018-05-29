@@ -35,7 +35,8 @@ from courseware.models import StudentModule
 # ORA
 from openassessment.assessment.models import Assessment
 from submissions import api as sub_api
-from edx_psychometrics.utils import get_course_item_submissions, _use_read_replica, upload_csv_to_report_store_by_semicolon, upload_json_to_report_store
+from edx_psychometrics.utils import get_course_item_submissions, _use_read_replica, \
+    upload_csv_to_report_store_by_semicolon
 # from student.models import user_by_anonymous_id
 
 
@@ -105,11 +106,10 @@ class PsychometricsReport(object):
         task_progress.update_task_state(extra_meta=current_step)
 
         # zf = zipfile.ZipFile('zipfile_write_compression.zip', mode='w')
-
-        # Course description
-        current_step = {'step': 'Calculating description json'}
-        cls._get_json_data(course_id, start_date, "course")
-        task_progress.update_task_state(extra_meta=current_step)
+        # upload_json_to_report_store("kek?", "ya jeson", course_id, start_date)
+        # Perform the upload
+        # csv_name = u'psychometrics_report'
+        # upload_csv_to_report_store(rows, csv_name, course_id, start_date)
 
         return task_progress.update_task_state(extra_meta=current_step)
 
@@ -177,12 +177,12 @@ class PsychometricsReport(object):
 
         course = get_course_by_id(course_id)
         chapters = [chapter for chapter in course.get_children() if not chapter.hide_from_toc]
-        vertical_map = [{
-            str(c.location): [{
-                str(s.location): [str(t.location) for t in s.get_children()
-                                  ]
-            } for s in c.get_children() if not s.hide_from_toc]
-        } for c in chapters]
+        vertical_map = [
+            {str(c.location): [  # chapter
+                {str(s.location): [str(t.location) for t in s.get_children()  # sequention:
+                                   ]
+                 } for s in c.get_children() if not s.hide_from_toc]
+            } for c in chapters]
 
         def _viewed(c_pos, sequential, vertical, student):
             _sm = StudentModule.objects.filter(module_type='sequential',
@@ -201,14 +201,17 @@ class PsychometricsReport(object):
                 return 0
 
         for student in enrolled_students:
-            for c_pos, chapter in enumerate(vertical_map):
-                for subsection, verticals in chapter.items():
-                    for vertical in verticals:
-                        rows.append([
-                            student.id,
-                            vertical,
-                            _viewed(c_pos, subsection, vertical, student)
-                        ])
+            for c_pos, _chapter in enumerate(vertical_map):
+                for subsection, sequences in _chapter.items():
+                    rows.append([json.dumps([type(sequences), [type(s) for s in sequences]])])
+                    # for sequence in sequences:
+                    #     rows.append(sequence)
+                        # for vertical in sequence:
+                    # rows.append([
+                    #     student.id,
+                    #     vertical,
+                    #     _viewed(c_pos, subsection, vertical, student)
+                    # ])
         rows.insert(0, headers)
         upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, start_date)
 
@@ -280,16 +283,6 @@ class PsychometricsReport(object):
         rows = [header] + [row for row in datarows]
 
         upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, start_date)
-
-    @classmethod
-    def _get_json_data(cls, course_id, start_date, csv_name):
-        course = CourseKey.from_string(str(course_id))
-        course_data = {
-            "short_name": '+'.join([course.org, course.course, course.run]),
-            "long_name": get_course_by_id(CourseKey.from_string(str(course_id))).display_name
-        }
-
-        upload_json_to_report_store([json.dumps(course_data)], "course", course_id, start_date)
 
     @classmethod
     def _graded_scorable_blocks_to_header(cls, course):
