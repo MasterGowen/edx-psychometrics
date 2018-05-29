@@ -232,6 +232,7 @@ class PsychometricsReport(object):
                                                 )
             for _sm in _sms:
                 sequential = str(_sm.module_state_key)
+                rows.append(sequential)
                 if _vert in vertical_map.get(sequential, [None]):
                     if vertical_map[sequential].index(_vert) <= json.loads(_sm.state)["position"]:
                         return 1
@@ -246,11 +247,7 @@ class PsychometricsReport(object):
                 rows.append([
                     student.id,
                     vert.split("@")[-1],
-                    _viewed(vert),
-                    str(StudentModule.objects.filter(module_type='sequential',
-                                                 course_id=CourseKey.from_string(str(course_id)),
-                                                 student=student
-                                                 ))
+                    _viewed(vert)
                 ])
         # rows += [[s[1].student.id, s[1].state, str(s[1].module_state_key)] for s in sms]
 
