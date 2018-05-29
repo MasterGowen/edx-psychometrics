@@ -34,7 +34,7 @@ from courseware.models import StudentModule
 # ORA
 from openassessment.assessment.models import Assessment
 from submissions import api as sub_api
-from edx_psychometrics.utils import get_course_item_submissions, _use_read_replica, upload_csv_to_report_store_semicolor
+from edx_psychometrics.utils import get_course_item_submissions, _use_read_replica, upload_csv_to_report_store_by_semicolon
 # from student.models import user_by_anonymous_id
 
 
@@ -139,7 +139,7 @@ class PsychometricsReport(object):
                                 ])
 
         rows.insert(0, headers)
-        upload_csv_to_report_store_semicolor(rows, csv_name, course_id, start_date)
+        upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, start_date)
 
     @classmethod
     def _get_csv2_data(cls, course_id, enrolled_students, start_date, csv_name):
@@ -209,7 +209,7 @@ class PsychometricsReport(object):
         #     ])
 
         # rows.insert(0, headers)
-        upload_csv_to_report_store_semicolor(rows, csv_name, course_id, start_date)
+        upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, start_date)
 
     @classmethod
     def _get_csv3_data(cls, course_id, enrolled_students, start_date, csv_name):
@@ -357,7 +357,7 @@ class PsychometricsReport(object):
                 module_order = module_order + 1
 
         datarows.insert(0, headers)
-        upload_csv_to_report_store_semicolor(datarows, csv_name, course_id, start_date)
+        upload_csv_to_report_store_by_semicolon(datarows, csv_name, course_id, start_date)
 
     @classmethod
     def _get_csv5_data(cls, course_id, start_date, csv_name):
@@ -401,7 +401,7 @@ class PsychometricsReport(object):
         ]
         rows = [header] + [row for row in datarows]
 
-        upload_csv_to_report_store_semicolor(rows, csv_name, course_id, start_date)
+        upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, start_date)
 
     @classmethod
     def _graded_scorable_blocks_to_header(cls, course):

@@ -15,7 +15,7 @@ from django.core.files.base import ContentFile
 import codecs
 import csv
 
-def upload_csv_to_report_store_semicolor(rows, csv_name, course_id, timestamp, config_name='GRADES_DOWNLOAD'):
+def upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, timestamp, config_name='GRADES_DOWNLOAD'):
     report_store = ReportStore.from_config(config_name)
     store_rows_semicolor(
         report_store,
