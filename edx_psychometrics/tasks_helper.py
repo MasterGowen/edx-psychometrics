@@ -86,8 +86,8 @@ class PsychometricsReport(object):
 
         # CSV2
         current_step = {'step': 'Calculating CSV2'}
-        # cls._get_csv2_data(course_id, enrolled_students, start_date, "psychometrics_report_csv2")
-        # task_progress.update_task_state(extra_meta=current_step)
+        cls._get_csv2_data(course_id, enrolled_students, start_date, "psychometrics_report_csv2")
+        task_progress.update_task_state(extra_meta=current_step)
 
         # CSV3
         current_step = {'step': 'Calculating CSV3'}
@@ -144,73 +144,29 @@ class PsychometricsReport(object):
 
     @classmethod
     def _get_csv2_data(cls, course_id, enrolled_students, start_date, csv_name):
-        course = get_course_by_id(course_id)
-        headers = ('user_id', 'item_id', 'correct', 'time')
-        rows = []
-
-        for student, course_grade, error in CourseGradeFactory().iter(enrolled_students, course):
-            student_modules = StudentModule.objects.filter(
-                student=student,
-                course_id=course_id,
-                module_type='problem'
-            )
-
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
-        blocks = get_block_structure_manager(CourseKey.from_string(str(course_id))).get_collected()
-        # for block in blocks:
-        #     rows.append([type(block)]) # ,modulestore().get_item(block)
-        # for block in blocks:
-        #     try:
-        #         # rows.append([modulestore().get_block_original_usage(CourseKey.from_string(str(course_id)))])
-        #         rows.append([block])
-        #     except Exception as e:
-        #         rows.append([str(e)])
-
+        headers = ('item_id', 'item_type', 'item_name', 'module_id', 'module_order', 'module_name')
+        datarows = []
+        module_order = 0
         for key, value in structure.items():
-            if value["block_type"] == 'problem':
-                descriptor = modulestore().get_item(UsageKey.from_string(key))
-                parent_metadata = descriptor.xblock_kvs._fields.copy()
-                try:
-                    # log.debug()
-                    rows.append([
-                        key,
-                        value,
-                        str(dir(parent_metadata))
+            if value['block_type'] == 'vertical':
+                for block in value['children']:
+                    if block['block_type'] == 'problem':
+                        current_block = structure[block]
+                        row = [
+                            current_block['usage_key'],
+                            current_block['block_type'],
+                            current_block['display_name'],
+                            key,
+                            module_order,
+                            value['display_name']
+                        ]
+                        datarows.append(row)
+                module_order = module_order + 1
 
-                    ])
-                except Exception as e:
-                    rows.append([str(e)])
+        datarows.insert(0, headers)
 
-        for block in blocks:
-            try:
-                rows.append([block])
-            except Exception as e:
-                rows.append([str(e)])
-        # for name, field in block.fields.items():
-        #     try:
-        #         rows.append((name, field.read_from(block)))
-        #     except:
-        #         pass
-
-        # for key, value in structure.items():
-        #     if value["block_type"] == 'problem':
-        #
-        #
-        #         rows.append([
-        #             key,
-        #             value,
-        #             # get_student_module_as_dict()
-        #
-        #         ])
-
-        # for s in student_modules:
-        #     rows.append([
-        #         s,
-        #         1,
-        #     ])
-
-        # rows.insert(0, headers)
-        upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, start_date)
+        upload_csv_to_report_store_by_semicolon(datarows, csv_name, course_id, start_date)
 
     @classmethod
     def _get_csv3_data(cls, course_id, enrolled_students, start_date, csv_name):
