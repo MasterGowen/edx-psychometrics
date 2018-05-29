@@ -246,7 +246,11 @@ class PsychometricsReport(object):
                 rows.append([
                     student.id,
                     vert.split("@")[-1],
-                    _viewed(vert)
+                    _viewed(vert),
+                    str(StudentModule.objects.filter(module_type='sequential',
+                                                 course_id=CourseKey.from_string(str(course_id)),
+                                                 student=student
+                                                 ))
                 ])
         # rows += [[s[1].student.id, s[1].state, str(s[1].module_state_key)] for s in sms]
 
