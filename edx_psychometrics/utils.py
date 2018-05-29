@@ -56,7 +56,7 @@ def store_rows_by_semicolon(self, course_id, filename, rows):
     output_buffer = ContentFile('')
     output_buffer.write(codecs.BOM_UTF8)
     csvwriter = csv.writer(output_buffer, delimiter=';')
-    csvwriter.writerows(self._get_utf8_encoded_rows(self, rows))
+    csvwriter.writerows(self._get_utf8_encoded_rows(rows))
     output_buffer.seek(0)
     self.store(course_id, filename, output_buffer)
 
