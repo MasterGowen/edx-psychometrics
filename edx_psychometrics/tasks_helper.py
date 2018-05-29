@@ -215,7 +215,6 @@ class PsychometricsReport(object):
         vertical_map = {}
 
         for key, value in structure.items():
-            rows.append([key, value])
             if value["block_type"] == 'vertical':
                 try:
                     parent = value['parent']
@@ -235,8 +234,7 @@ class PsychometricsReport(object):
                 sequential = str(_sm.module_state_key)
 
                 if _vert in vertical_map.get(sequential, [None]):
-                    rows.append(_vert)
-                    if vertical_map[sequential].index(_vert) <= json.loads(_sm.state)["position"]:
+                    if vertical_map[sequential].index(_vert) <= (json.loads(_sm.state)["position"] - 1):
                         return 1
                     else:
                         return 0
