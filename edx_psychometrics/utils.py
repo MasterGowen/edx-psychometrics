@@ -31,7 +31,7 @@ def upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, timestamp
 
 def upload_json_to_report_store(rows, csv_name, course_id, timestamp, config_name='GRADES_DOWNLOAD'):
     report_store = ReportStore.from_config(config_name)
-    store_rows_semicolor(
+    report_store.store_rows(
         report_store,
         course_id,
         u"{course_prefix}_{csv_name}_{timestamp_str}.json".format(
