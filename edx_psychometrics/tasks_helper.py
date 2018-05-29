@@ -151,7 +151,7 @@ class PsychometricsReport(object):
         for key, value in structure.items():
             if value['block_type'] == 'vertical':
                 for block in value['children']:
-                    if block['block_type'] == 'problem':
+                    if structure[block]['block_type'] == 'problem':
                         current_block = structure[block]
                         row = [
                             current_block['usage_key'],
