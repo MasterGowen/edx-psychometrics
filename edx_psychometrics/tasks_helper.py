@@ -154,7 +154,7 @@ class PsychometricsReport(object):
                     if structure[block]['block_type'] == 'problem':
                         current_block = structure[block]
                         row = [
-                            current_block['usage_key'],
+                            current_block['usage_key'].split("@")[-1],
                             current_block['block_type'],
                             current_block['display_name'],
                             key,
