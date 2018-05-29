@@ -1,4 +1,6 @@
 import json
+import StringIO
+
 from submissions.serializers import (
     SubmissionSerializer, StudentItemSerializer, ScoreSerializer, UnannotatedScoreSerializer
 )
@@ -46,9 +48,12 @@ def upload_json_to_report_store(rows, csv_name, course_id, timestamp, config_nam
 
 def store_json_file(self, course_id, filename, rows):
     file = self.path_to(course_id, filename)
-    with open(file, 'w') as outfile:
-        json.dump(rows, outfile)
-        self.store(course_id, filename, outfile)
+    outfile = StringIO.StringIO()
+    outfile.write(json.dumps(rows))
+    self.store(course_id, filename, outfile)
+
+    # with open(file, 'w') as outfile:
+    #     json.dump(rows, outfile)
 
 def store_rows_by_semicolon(self, course_id, filename, rows):
     output_buffer = ContentFile('')
