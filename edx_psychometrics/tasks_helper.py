@@ -10,6 +10,7 @@ import pytz
 from pytz import UTC
 from six import text_type
 import json
+import zipfile
 
 from lms.djangoapps.instructor_analytics.csvs import format_dictlist
 
@@ -33,7 +34,7 @@ from courseware.models import StudentModule
 # ORA
 from openassessment.assessment.models import Assessment
 from submissions import api as sub_api
-from edx_psychometrics.utils import get_course_item_submissions, _use_read_replica, upload_json_to_report_store
+from edx_psychometrics.utils import get_course_item_submissions, _use_read_replica, upload_csv_to_report_store_semicolor
 # from student.models import user_by_anonymous_id
 
 
@@ -102,6 +103,7 @@ class PsychometricsReport(object):
         cls._get_csv5_data(course_id, start_date, "psychometrics_report_csv5")
         task_progress.update_task_state(extra_meta=current_step)
 
+        zf = zipfile.ZipFile('zipfile_write_compression.zip', mode='w')
         upload_json_to_report_store("kek?", "ya jeson", course_id, start_date)
         # Perform the upload
         # csv_name = u'psychometrics_report'
@@ -402,7 +404,7 @@ class PsychometricsReport(object):
         ]
         rows = [header] + [row for row in datarows]
 
-        upload_csv_to_report_store(rows, csv_name, course_id, start_date)
+        upload_csv_to_report_store_semicolor(rows, csv_name, course_id, start_date)
 
     @classmethod
     def _graded_scorable_blocks_to_header(cls, course):
