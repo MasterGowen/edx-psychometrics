@@ -293,7 +293,7 @@ class PsychometricsReport(object):
         course = CourseKey.from_string(str(course_id))
         course_data = {
             "short_name": "+".join([course.org, course.course, course.run]),
-            "long_name": get_course_by_id(CourseKey.from_string(str(course_id)))
+            "long_name": get_course_by_id(CourseKey.from_string(str(course_id))).display_name
         }
 
         upload_json_to_report_store([json.dumps(course_data)], 'course', course_id, start_date)
