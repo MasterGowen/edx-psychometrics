@@ -343,13 +343,14 @@ class PsychometricsReport(object):
         datarows = []
         module_order = 0
         for key, value in structure.items():
-            if value.block_type == 'vertical':
-                for block in value.children:
+            if value['block_type'] == 'vertical':
+                for block in value['children']:
                     current_block = structure[block]
-                    row = [current_block.usage_key, current_block.block_type, current_block.display_name, module_order,
-                           value.display_name]
+                    # print(current_block['block_type'])
+                    row = [current_block['usage_key'], current_block['block_type'], current_block['display_name'], module_order,
+                           value['display_name']]
                     datarows.append(row)
-            module_order = module_order + 1
+                module_order = module_order + 1
 
         upload_csv_to_report_store(datarows, csv_name, course_id, start_date)
 
