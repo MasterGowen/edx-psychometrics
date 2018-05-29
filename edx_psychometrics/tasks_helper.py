@@ -33,7 +33,7 @@ from courseware.models import StudentModule
 # ORA
 from openassessment.assessment.models import Assessment
 from submissions import api as sub_api
-from edx_psychometrics.utils import get_course_item_submissions
+from edx_psychometrics.utils import get_course_item_submissions, _use_read_replica
 # from student.models import user_by_anonymous_id
 
 
@@ -322,21 +322,17 @@ class PsychometricsReport(object):
 
         openassessment_blocks = modulestore().get_items(CourseKey.from_string(str(course_id)),
                                                         qualifiers={'category': 'openassessment'})
-
         datarows = []
-
         for openassessment_block in openassessment_blocks:
             x_block_id = openassessment_block.get_xblock_id()
             all_submission_information = get_course_item_submissions(course_id, x_block_id, 'openassessment')
             for student_item, submission, score in all_submission_information:
-                row = []
                 max_score = score.get('points_possible')
-                assessments = cls._use_read_replica(
+                assessments = _use_read_replica(
                     Assessment.objects.prefetch_related('parts').
                         prefetch_related('rubric').
                         filter(
                         submission_uuid=submission['uuid'],
-                        # item__item_id=x_block_id,9c527f2985e17c1674d80d4ffaa009c7
                     )
                 )
                 for assessment in assessments:
@@ -345,7 +341,6 @@ class PsychometricsReport(object):
                         if part.option is not None:
                             scorer_points += part.option.points
                     row = [
-                        # user_by_anonymous_id(student_item['student_id']),
                         str(user_by_anonymous_id(str(student_item['student_id'])).id),
                         x_block_id.split("@")[-1],
                         str(user_by_anonymous_id(str(assessment.scorer_id)).id),
@@ -366,13 +361,6 @@ class PsychometricsReport(object):
 
         upload_csv_to_report_store(rows, csv_name, course_id, start_date)
 
-    @classmethod
-    def _use_read_replica(self, queryset):
-        return (
-            queryset.using("read_replica")
-            if "read_replica" in settings.DATABASES
-            else queryset
-        )
 
     @classmethod
     def _graded_scorable_blocks_to_header(cls, course):
