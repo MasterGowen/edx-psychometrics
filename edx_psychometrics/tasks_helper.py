@@ -225,7 +225,7 @@ class PsychometricsReport(object):
                 'clickable_tab_count': len(s.get_children()) if (type(s) == seq_module.SequenceDescriptor) else 0,
                 str(s.location): [{
                     'children_count': len(t.get_children()) if (type(t) == vertical_block.VerticalBlock) else 0,
-                    'class': dir(t)} for t in s.get_children()
+                    'class': t.location} for t in s.get_children()
                 ]
             } for s in c.get_children() if not s.hide_from_toc]
         } for c in chapters]
