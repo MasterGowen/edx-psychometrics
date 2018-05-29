@@ -35,7 +35,8 @@ from courseware.models import StudentModule
 # ORA
 from openassessment.assessment.models import Assessment
 from submissions import api as sub_api
-from edx_psychometrics.utils import get_course_item_submissions, _use_read_replica, upload_csv_to_report_store_by_semicolon
+from edx_psychometrics.utils import get_course_item_submissions, _use_read_replica, \
+    upload_csv_to_report_store_by_semicolon
 # from student.models import user_by_anonymous_id
 
 
@@ -220,12 +221,12 @@ class PsychometricsReport(object):
 
         course = get_course_by_id(course_id)
         chapters = [chapter for chapter in course.get_children() if not chapter.hide_from_toc]
-        vertical_map = [{
-            str(c.location): [{
-                str(s.location): [str(t.location) for t in s.get_children()
-                                  ]
-            } for s in c.get_children() if not s.hide_from_toc]
-        } for c in chapters]
+        vertical_map = [
+            {str(c.location): [  # chapter
+                {str(s.location): [str(t.location) for t in s.get_children()  # sequention:
+                                      ]
+                } for s in c.get_children() if not s.hide_from_toc]
+            } for c in chapters]
 
         def _viewed(c_pos, sequential, vertical, student):
             _sm = StudentModule.objects.filter(module_type='sequential',
@@ -244,8 +245,8 @@ class PsychometricsReport(object):
                 return 0
 
         for student in enrolled_students:
-            for c_pos, chapter in enumerate(vertical_map):
-                for subsection, verticals in chapter.items():
+            for c_pos, _chapter in enumerate(vertical_map):
+                for subsection, verticals in _chapter.items():
                     for vertical in verticals:
                         rows.append([
                             student.id,
