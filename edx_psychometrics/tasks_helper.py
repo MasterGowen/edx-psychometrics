@@ -36,7 +36,7 @@ from courseware.models import StudentModule
 from openassessment.assessment.models import Assessment
 from submissions import api as sub_api
 from edx_psychometrics.utils import get_course_item_submissions, _use_read_replica, \
-    upload_csv_to_report_store_by_semicolon
+    upload_csv_to_report_store_by_semicolon, upload_json_to_report_store
 # from student.models import user_by_anonymous_id
 
 
@@ -103,6 +103,11 @@ class PsychometricsReport(object):
         # CSV5
         current_step = {'step': 'Calculating CSV5'}
         cls._get_csv5_data(course_id, start_date, "psychometrics_report_csv5")
+        task_progress.update_task_state(extra_meta=current_step)
+
+        # Course description json
+        current_step = {'step': 'Calculating description json'}
+        cls._get_course_json_data(course_id, start_date, "course")
         task_progress.update_task_state(extra_meta=current_step)
 
         # zf = zipfile.ZipFile('zipfile_write_compression.zip', mode='w')
@@ -281,6 +286,10 @@ class PsychometricsReport(object):
         rows = [header] + [row for row in datarows]
 
         upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, start_date)
+
+    @classmethod
+    def _get_course_json_data(cls, course_id, start_date, csv_name):
+        pass
 
     @classmethod
     def _graded_scorable_blocks_to_header(cls, course):
