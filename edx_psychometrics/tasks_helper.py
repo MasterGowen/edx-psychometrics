@@ -110,12 +110,6 @@ class PsychometricsReport(object):
         cls._get_course_json_data(course_id, start_date, "course")
         task_progress.update_task_state(extra_meta=current_step)
 
-        # zf = zipfile.ZipFile('zipfile_write_compression.zip', mode='w')
-        # upload_json_to_report_store("kek?", "ya jeson", course_id, start_date)
-        # Perform the upload
-        # csv_name = u'psychometrics_report'
-        # upload_csv_to_report_store(rows, csv_name, course_id, start_date)
-
         return task_progress.update_task_state(extra_meta=current_step)
 
     @classmethod
@@ -296,7 +290,7 @@ class PsychometricsReport(object):
             "long_name": get_course_by_id(CourseKey.from_string(str(course_id))).display_name
         }
 
-        upload_json_to_report_store([[course_data]], 'course', course_id, start_date)
+        upload_json_to_report_store(course_data, 'course', course_id, start_date)
 
     @classmethod
     def _graded_scorable_blocks_to_header(cls, course):
