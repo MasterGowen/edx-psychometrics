@@ -189,10 +189,13 @@ class PsychometricsReport(object):
                                                student=student,
                                                module_state_key=BlockUsageLocator.from_string(sequential)
                                                ).first()
-            position = json.loads(_sm.state)["position"]
+            if _sm:
+                position = json.loads(_sm.state)["position"]
 
-            if vertical_map[c_pos][sequential].index(vertical) <= position:
-                return 1
+                if vertical_map[c_pos][sequential].index(vertical) <= position:
+                    return 1
+                else:
+                    return 0
             else:
                 return 0
 
@@ -202,7 +205,7 @@ class PsychometricsReport(object):
                     for vertical in verticals:
                         rows.append([
                             student.id,
-                            vertical.split("@")[-1],
+                            vertical,
                             _viewed(c_pos, subsection, vertical, student)
                         ])
         rows.insert(0, headers)
