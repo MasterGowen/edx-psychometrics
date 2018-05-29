@@ -235,7 +235,7 @@ class PsychometricsReport(object):
                                                ).first()
             position = json.loads(_sm.state)["position"]
 
-            if vertical_map[c_pos][sequential].index(vertical) <= position
+            if vertical_map[c_pos][sequential].index(vertical) <= position:
                 return 1
             else:
                 return 0
@@ -250,7 +250,7 @@ class PsychometricsReport(object):
                             _viewed(c_pos, subsection, vertical, student)
                         ])
         rows.insert(0, headers)
-        upload_csv_to_report_store(rows, csv_name, course_id, start_date)
+        upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, start_date)
 
     @classmethod
     def _get_csv4_data(cls, course_id, start_date, csv_name):
