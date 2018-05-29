@@ -180,8 +180,8 @@ class PsychometricsReport(object):
         vertical_map = [
             {str(c.location): [  # chapter
                 {str(s.location): [str(t.location) for t in s.get_children()  # sequention:
-                                      ]
-                } for s in c.get_children() if not s.hide_from_toc]
+                                   ]
+                 } for s in c.get_children() if not s.hide_from_toc]
             } for c in chapters]
 
         def _viewed(c_pos, sequential, vertical, student):
@@ -205,12 +205,12 @@ class PsychometricsReport(object):
                 for subsection, sequences in _chapter.items():
                     for sequence in sequences:
                         rows.append(sequence)
-                        for vertical in verticals:
-                            # rows.append([
-                            #     student.id,
-                            #     vertical,
-                            #     _viewed(c_pos, subsection, vertical, student)
-                            # ])
+                        # for vertical in verticals:
+                    # rows.append([
+                    #     student.id,
+                    #     vertical,
+                    #     _viewed(c_pos, subsection, vertical, student)
+                    # ])
         rows.insert(0, headers)
         upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, start_date)
 
