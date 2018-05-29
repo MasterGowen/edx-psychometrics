@@ -93,6 +93,9 @@ class PsychometricsReport(object):
         task_progress.update_task_state(extra_meta=current_step)
 
         # CSV4
+        current_step = {'step': 'Calculating CSV4'}
+        cls._get_csv4_data(course_id, enrolled_students, start_date, "psychometrics_report_csv4")
+        task_progress.update_task_state(extra_meta=current_step)
 
         # CSV5
         current_step = {'step': 'Calculating CSV5'}
@@ -334,10 +337,19 @@ class PsychometricsReport(object):
         upload_csv_to_report_store(rows, csv_name, course_id, start_date)
 
     @classmethod
+    def _get_csv4_data(cls, course_id, start_date, csv_name):
+        structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
+        rows = []
+        for key, value in structure.items():
+            row = [key, value]
+            rows.append(row)
+
+        upload_csv_to_report_store(rows, csv_name, course_id, start_date)
+
+    @classmethod
     def _get_csv5_data(cls, course_id, start_date, csv_name):
 
-        openassessment_blocks = modulestore().get_items(CourseKey.from_string(str(course_id)),
-                                                        qualifiers={'category': 'openassessment'})
+        openassessment_blocks = modulestore().get_items(CourseKey.from_string(str(course_id)), qualifiers={'category': 'openassessment'})
         datarows = []
         for openassessment_block in openassessment_blocks:
             x_block_id = openassessment_block.get_xblock_id()
