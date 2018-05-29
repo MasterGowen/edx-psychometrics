@@ -296,7 +296,7 @@ class PsychometricsReport(object):
             "long_name": get_course_by_id(CourseKey.from_string(str(course_id))).display_name
         }
 
-        upload_json_to_report_store([json.dumps(course_data)], 'course', course_id, start_date)
+        upload_json_to_report_store([str(json.dumps(course_data))], 'course', course_id, start_date)
 
     @classmethod
     def _graded_scorable_blocks_to_header(cls, course):
