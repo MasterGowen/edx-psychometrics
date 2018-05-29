@@ -338,14 +338,20 @@ class PsychometricsReport(object):
 
     @classmethod
     def _get_csv4_data(cls, course_id, enrolled_students, start_date, csv_name):
-        structure = CourseStructure.objects.get(course_id=course_id, block_type='vertical').ordered_blocks
-        rows = []
-        structures = ['course', 'chapter','sequential', 'vertical']
-        for key, value in structure.items():
-            row = [key, value]
-            rows.append(row)
+        structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
 
-        upload_csv_to_report_store(rows, csv_name, course_id, start_date)
+        datarows = []
+        module_order = 0
+        for key, value in structure.values():
+            if value.block_type == 'vertical':
+                for block in value.children:
+                    current_block = structure[block]
+                    row = [current_block.usage_key, current_block.block_type, current_block.display_name, module_order,
+                           value.display_name]
+                    datarows.append(row)
+            module_order = module_order + 1
+
+        upload_csv_to_report_store(datarows, csv_name, course_id, start_date)
 
     @classmethod
     def _get_csv5_data(cls, course_id, start_date, csv_name):
