@@ -202,13 +202,14 @@ class PsychometricsReport(object):
 
         for student in enrolled_students:
             for c_pos, _chapter in enumerate(vertical_map):
-                for subsection, verticals in _chapter.items():
-                    for vertical in verticals:
-                        rows.append([
-                            student.id,
-                            vertical,
-                            _viewed(c_pos, subsection, vertical, student)
-                        ])
+                for subsection, sequences in _chapter.items():
+                    for sequence, verticals in sequences.items():
+                        for vertical in verticals:
+                            rows.append([
+                                student.id,
+                                vertical,
+                                _viewed(c_pos, subsection, vertical, student)
+                            ])
         rows.insert(0, headers)
         upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, start_date)
 
