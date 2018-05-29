@@ -33,7 +33,9 @@ from courseware.models import StudentModule
 # ORA
 from openassessment.assessment.models import Assessment
 from submissions import api as sub_api
+from edx_psychometrics.utils import get_course_item_submissions
 # from student.models import user_by_anonymous_id
+
 
 from django.conf import settings
 from lms.djangoapps.instructor_task.tasks_helper.runner import TaskProgress
@@ -325,56 +327,44 @@ class PsychometricsReport(object):
 
         openassessment_blocks = modulestore().get_items(CourseKey.from_string(str(course_id)),
                                                         qualifiers={'category': 'openassessment'})
+        openassessment_blocks = modulestore().get_items(CourseKey.from_string(str(course_id)), qualifiers={'category': 'openassessment'})
 
         datarows = []
 
-        for openassessment_block in openassessment_blocks:
-            x_block_id = openassessment_block.get_xblock_id()
-            all_submission_information = sub_api.get_all_submissions(course_id, x_block_id, 'openassessment')
-            for student_item, submission, score in all_submission_information:
-                row = []
-                assessments = cls._use_read_replica(
-                    Assessment.objects.prefetch_related('parts').
-                        prefetch_related('rubric').
-                        filter(
-                        submission_uuid=submission['uuid']
-                    )
+        # for openassessment_block in openassessment_blocks:
+        x_block_id = openassessment_blocks[0].get_xblock_id()
+        all_submission_information = get_course_item_submissions(course_id, x_block_id, 'openassessment')
+        for student_item, submission, score in all_submission_information:
+            row = []
+            assessments = cls._use_read_replica(
+                Assessment.objects.prefetch_related('parts').
+                    prefetch_related('rubric').
+                    filter(
+                    submission_uuid=submission['uuid'],
+                    # item__item_id=x_block_id,
                 )
-                assessments_cell = cls._build_assessments_cell(assessments)
-                assessments_parts_cell = cls._build_assessments_parts_cell(assessments)
-                feedback_options_cell = cls._build_feedback_options_cell(assessments)
-
+            )
+            for assessment in assessments:
+                scorer_points = 0
+                for part in assessment.parts.order_by('criterion__order_num'):
+                    if part.option is not None:
+                        scorer_points += part.option.points
                 row = [
+                    user_by_anonymous_id(student_item['student_id']),
                     x_block_id,
-                    submission['uuid'],
-                    submission['student_item'],
-                    student_item['student_id'],
-                    submission['submitted_at'],
-                    submission['answer'],
-                    assessments_cell,
-                    assessments_parts_cell,
-                    score.get('created_at', ''),
-                    score.get('points_earned', ''),
+                    user_by_anonymous_id(assessment.scorer_id),
+                    scorer_points,
                     score.get('points_possible', ''),
-                    feedback_options_cell,
-                    user_by_anonymous_id(student_item['student_id'])
+                    assessment.score_type
                 ]
                 datarows.append(row)
-
         header = [
-            'task_id',
-            'Submission ID',
-            'Item ID',
-            'Anonymized Student ID',
-            'Date/Time Response Submitted',
-            'Response',
-            'Assessment Details',
-            'Assessment Scores',
-            'Date/Time Final Score Given',
-            'Final Score Points Earned',
-            'Final Score Points Possible',
-            'Feedback Statements Selected',
-            'username'
+            'user_id',
+            'item_id',
+            'scorer_id',
+            'score',
+            'max_score',
+            'score_type'
         ]
         rows = [header] + [row for row in datarows]
 
@@ -382,75 +372,12 @@ class PsychometricsReport(object):
 
     @classmethod
     def _use_read_replica(self, queryset):
-        """
-        Use the read replica if it's available.
-        Args:
-            queryset (QuerySet)
-        Returns:
-            QuerySet
-        """
         return (
             queryset.using("read_replica")
             if "read_replica" in settings.DATABASES
             else queryset
         )
 
-    @classmethod
-    def _build_assessments_cell(cls, assessments):
-        """
-        Args:
-            assessments (QuerySet) - assessments that we would like to collate into one column.
-        Returns:
-            string that should be included in the 'assessments' column for this set of assessments' row
-        """
-        returned_string = u""
-        for assessment in assessments:
-            returned_string += u"Assessment #{}\n".format(assessment.id)
-            returned_string += u"-- scored_at: {}\n".format(assessment.scored_at)
-            returned_string += u"-- type: {}\n".format(assessment.score_type)
-            returned_string += u"-- scorer_id: {}\n".format(assessment.scorer_id)
-            if assessment.feedback != u"":
-                returned_string += u"-- overall_feedback: {}\n".format(assessment.feedback)
-        return returned_string
-
-    @classmethod
-    def _build_assessments_parts_cell(cls, assessments):
-        """
-        Args:
-            assessments (QuerySet) - assessments containing the parts that we would like to collate into one column.
-        Returns:
-            string that should be included in the relevant 'assessments_parts' column for this set of assessments' row
-        """
-        returned_string = u""
-        for assessment in assessments:
-            returned_string += u"Assessment #{}\n".format(assessment.id)
-            for part in assessment.parts.order_by('criterion__order_num'):
-                returned_string += u"-- {}".format(part.criterion.label)
-                if part.option is not None and part.option.label is not None:
-                    option_label = part.option.label
-                    returned_string += u": {option_label} ({option_points})\n".format(
-                        option_label=option_label, option_points=part.option.points
-                    )
-                if part.feedback != u"":
-                    returned_string += u"-- feedback: {}\n".format(part.feedback)
-        return returned_string
-
-    @classmethod
-    def _build_feedback_options_cell(cls, assessments):
-        """
-        Args:
-            assessments (QuerySet) - assessment that we would like to use to fetch and read the feedback options.
-        Returns:
-            string that should be included in the relevant 'feedback_options' column for this set of assessments' row
-        """
-
-        returned_string = u""
-        for assessment in assessments:
-            for feedback in assessment.assessment_feedback.all():
-                for option in feedback.options.all():
-                    returned_string += option.text + u"\n"
-
-        return returned_string
 
     @classmethod
     def _graded_scorable_blocks_to_header(cls, course):
