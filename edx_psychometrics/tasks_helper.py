@@ -239,7 +239,7 @@ class PsychometricsReport(object):
                         if vertical_map[sequential].index(_vert) <= json.loads(_sm.state)["position"]:
                             return 1
                 except Exception as e:
-                    pass
+                    return 0
 
                 else:
                     return 0
