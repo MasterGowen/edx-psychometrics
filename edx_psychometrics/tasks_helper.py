@@ -232,8 +232,9 @@ class PsychometricsReport(object):
                                                 )
             for _sm in _sms:
                 sequential = str(_sm.module_state_key)
-                rows.append(sequential)
+
                 if _vert in vertical_map.get(sequential, [None]):
+                    rows.append(_vert)
                     if vertical_map[sequential].index(_vert) <= json.loads(_sm.state)["position"]:
                         return 1
                     else:
