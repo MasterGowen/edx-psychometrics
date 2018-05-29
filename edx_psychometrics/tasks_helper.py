@@ -226,8 +226,6 @@ class PsychometricsReport(object):
                 except Exception as e:
                     log.warning(e)
 
-        rows.append([json.dumps(vertical_map)])
-
         def _viewed(_vert, student):
             _sms = StudentModule.objects.filter(module_type='sequential',
                                                 course_id=CourseKey.from_string(str(course_id)),
