@@ -339,19 +339,25 @@ class PsychometricsReport(object):
     @classmethod
     def _get_csv4_data(cls, course_id, enrolled_students, start_date, csv_name):
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
-
+        headers = ('content_piece_id', 'content_piece_type', 'content_piece_name', 'module_id', 'module_order', 'module_name')
         datarows = []
         module_order = 0
         for key, value in structure.items():
             if value['block_type'] == 'vertical':
                 for block in value['children']:
                     current_block = structure[block]
-                    # print(current_block['block_type'])
-                    row = [current_block['usage_key'], current_block['block_type'], current_block['display_name'], module_order,
-                           value['display_name']]
+                    row = [
+                        current_block['usage_key'].split("@")[-1],
+                        current_block['block_type'],
+                        current_block['display_name'],
+                        key.split("@")[-1],
+                        module_order,
+                        value['display_name']
+                    ]
                     datarows.append(row)
                 module_order = module_order + 1
 
+        datarows.insert(0, headers)
         upload_csv_to_report_store(datarows, csv_name, course_id, start_date)
 
     @classmethod
