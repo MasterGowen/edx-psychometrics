@@ -234,7 +234,7 @@ class PsychometricsReport(object):
             for _sm in _sms:
                 sequential = str(_sm.module_state_key)
 
-                rows.append([sequential, json.loads(_sm.state["position"]),  _vert, json.dumps(vertical_map)])
+                rows.append([sequential, _sm.state,  _vert, json.dumps(vertical_map)])
 
                 try:
                     if _vert in vertical_map[sequential]:
