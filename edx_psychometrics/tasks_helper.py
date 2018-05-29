@@ -246,7 +246,7 @@ class PsychometricsReport(object):
                     for vertical in verticals:
                         rows.append([
                             student.id,
-                            vertical.split("@")[-1],
+                            vertical,
                             _viewed(c_pos, subsection, vertical, student)
                         ])
         rows.insert(0, headers)
