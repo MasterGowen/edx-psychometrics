@@ -207,23 +207,38 @@ class PsychometricsReport(object):
 
     @classmethod
     def _get_csv3_data(cls, course_id, enrolled_students, start_date, csv_name):
+        from xmodule import seq_module, vertical_block
         headers = ('user_id', 'content_piece_id', 'viewed', 'p')
 
         rows = []
-        structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
+        # structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
 
-        vertical_map = {}
+        course = get_course_by_id(course_id)
+        chapters = [chapter for chapter in course.get_children() if not chapter.hide_from_toc]
+        vertical_map = [{
+            'chapter_name': c.display_name_with_default_escaped,
+            'sections': [{
+                'section_name': s.display_name_with_default_escaped,
+                'clickable_tab_count': len(s.get_children()) if (type(s) == seq_module.SequenceDescriptor) else 0,
+                'tabs': [{
+                    'children_count': len(t.get_children()) if (type(t) == vertical_block.VerticalBlock) else 0,
+                    'class': t.__class__.__name__} for t in s.get_children()
+                ]
+            } for s in c.get_children() if not s.hide_from_toc]
+        } for c in chapters]
+        rows.append([json.dumps(vertical_map)])
 
-        for key, value in structure.items():
-            if value["block_type"] == 'vertical':
-                try:
-                    parent = value['parent']
-                    if parent not in vertical_map.keys():
-                        vertical_map[str(parent)] = [value["usage_key"]]
-                    else:
-                        vertical_map[str(parent)].append(value["usage_key"])
-                except Exception as e:
-                    log.warning(e)
+
+        # for key, value in structure.items():
+        #     if value["block_type"] == 'vertical':
+        #         try:
+        #             parent = value['parent']
+        #             if parent not in vertical_map.keys():
+        #                 vertical_map[str(parent)] = [value["usage_key"]]
+        #             else:
+        #                 vertical_map[str(parent)].append(value["usage_key"])
+        #         except Exception as e:
+        #             log.warning(e)
 
         def _viewed(_vert, student):
             _sms = StudentModule.objects.filter(module_type='sequential',
