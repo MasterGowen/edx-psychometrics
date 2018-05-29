@@ -222,7 +222,7 @@ class PsychometricsReport(object):
             'chapter_name': c.display_name_with_default_escaped,
             'sections': [{
                 'clickable_tab_count': len(s.get_children()) if (type(s) == seq_module.SequenceDescriptor) else 0,
-                s.url_name_for_block: [{
+                s.location: [{
                     'children_count': len(t.get_children()) if (type(t) == vertical_block.VerticalBlock) else 0,
                     'class': dir(t)} for t in s.get_children()
                 ]
