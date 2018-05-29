@@ -203,8 +203,9 @@ class PsychometricsReport(object):
         for student in enrolled_students:
             for c_pos, _chapter in enumerate(vertical_map):
                 for subsection, sequences in _chapter.items():
-                    for sequence in sequences:
-                        rows.append(sequence)
+                    rows.append([json.dumps([subsection, sequences])])
+                    # for sequence in sequences:
+                    #     rows.append(sequence)
                         # for vertical in verticals:
                     # rows.append([
                     #     student.id,
