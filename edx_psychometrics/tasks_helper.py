@@ -261,13 +261,13 @@ class PsychometricsReport(object):
                     return 0
             return 0
 
-        for student in enrolled_students:
-            for vert in [v for vlist in vertical_map.values() for v in vlist]:
-                rows.append([
-                    student.id,
-                    vert.split("@")[-1],
-                    _viewed(vert, student)
-                ])
+        # for student in enrolled_students:
+        #     for vert in [v for vlist in vertical_map.values() for v in vlist]:
+        #         rows.append([
+        #             student.id,
+        #             vert.split("@")[-1],
+        #             _viewed(vert, student)
+        #         ])
         # rows += [[s[1].student.id, s[1].state, str(s[1].module_state_key)] for s in sms]
 
         #
