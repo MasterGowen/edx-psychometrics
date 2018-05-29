@@ -8,14 +8,19 @@ from lms.djangoapps.instructor_task.models import ReportStore
 
 from lms.djangoapps.instructor_task.tasks_helper.utils import tracker_emit
 
+from lms.djangoapps.instructor_task.models import DjangoStorageReportStore
+
 from django.core.files.storage import get_valid_filename
+from django.core.files.base import ContentFile
+import codecs
+import csv
 
-
-def upload_json_to_report_store(rows, csv_name, course_id, timestamp, config_name='GRADES_DOWNLOAD'):
+def upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, timestamp, config_name='GRADES_DOWNLOAD'):
     report_store = ReportStore.from_config(config_name)
-    report_store.store_rows(
+    store_rows_semicolor(
+        report_store,
         course_id,
-        u"{course_prefix}_{csv_name}_{timestamp_str}.json".format(
+        u"{course_prefix}_{csv_name}_{timestamp_str}.csv".format(
             course_prefix=get_valid_filename(unicode("_").join([course_id.org, course_id.course, course_id.run])),
             csv_name=csv_name,
             timestamp_str=timestamp.strftime("%Y-%m-%d-%H%M")
@@ -23,6 +28,16 @@ def upload_json_to_report_store(rows, csv_name, course_id, timestamp, config_nam
         rows
     )
     tracker_emit(csv_name)
+
+def store_rows_semicolor(self, course_id, filename, rows):
+        output_buffer = ContentFile('')
+        # Adding unicode signature (BOM) for MS Excel 2013 compatibility
+        output_buffer.write(codecs.BOM_UTF8)
+        csvwriter = csv.writer(output_buffer, delimiter=';')
+        csvwriter.writerows(DjangoStorageReportStore._get_utf8_encoded_rows(self, rows))
+        output_buffer.seek(0)
+        self.store(course_id, filename, output_buffer)
+
 
 
 def get_course_item_submissions(course_id, item_id, item_type, read_replica=True):
