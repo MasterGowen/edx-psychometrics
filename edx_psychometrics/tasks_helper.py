@@ -239,6 +239,7 @@ class PsychometricsReport(object):
                         return 0
                 else:
                     return 0
+            return 0
 
         for student in enrolled_students:
             for vert in [v for vlist in vertical_map.values() for v in vlist]:
