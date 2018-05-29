@@ -224,9 +224,9 @@ class PsychometricsReport(object):
                     else:
                         vertical_map[str(parent)].append(value["usage_key"])
                 except Exception as e:
-                    pass
+                    log.warning(e)
 
-        def _viewed(_vert):
+        def _viewed(_vert, student):
             _sms = StudentModule.objects.filter(module_type='sequential',
                                                 course_id=CourseKey.from_string(str(course_id)),
                                                 student=student
@@ -249,7 +249,7 @@ class PsychometricsReport(object):
                 rows.append([
                     student.id,
                     vert.split("@")[-1],
-                    _viewed(vert)
+                    _viewed(vert, student)
                 ])
         # rows += [[s[1].student.id, s[1].state, str(s[1].module_state_key)] for s in sms]
 
