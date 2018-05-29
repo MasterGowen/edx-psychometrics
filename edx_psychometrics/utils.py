@@ -36,7 +36,7 @@ def store_rows_semicolor(self, course_id, filename, rows):
         csvwriter = csv.writer(output_buffer, delimiter=';')
         csvwriter.writerows(DjangoStorageReportStore._get_utf8_encoded_rows(self, rows))
         output_buffer.seek(0)
-        self.store(self, course_id, filename, output_buffer)
+        self.store(course_id, filename, output_buffer)
 
 
 
