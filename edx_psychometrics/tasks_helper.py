@@ -81,8 +81,8 @@ class PsychometricsReport(object):
 
         # CSV1
         current_step = {'step': 'Calculating CSV1'}
-        # cls._get_csv1_data(course_id, enrolled_students, start_date, "psychometrics_report_csv1")
-        # task_progress.update_task_state(extra_meta=current_step)
+        cls._get_csv1_data(course_id, enrolled_students, start_date, "psychometrics_report_csv1")
+        task_progress.update_task_state(extra_meta=current_step)
 
         # CSV2
         current_step = {'step': 'Calculating CSV2'}
