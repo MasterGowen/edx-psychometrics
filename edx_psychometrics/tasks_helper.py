@@ -332,12 +332,13 @@ class PsychometricsReport(object):
             all_submission_information = get_course_item_submissions(course_id, x_block_id, 'openassessment')
             for student_item, submission, score in all_submission_information:
                 row = []
+                max_score = score.get('points_possible')
                 assessments = cls._use_read_replica(
                     Assessment.objects.prefetch_related('parts').
                         prefetch_related('rubric').
                         filter(
                         submission_uuid=submission['uuid'],
-                        # item__item_id=x_block_id,
+                        # item__item_id=x_block_id,9c527f2985e17c1674d80d4ffaa009c7
                     )
                 )
                 for assessment in assessments:
@@ -346,11 +347,12 @@ class PsychometricsReport(object):
                         if part.option is not None:
                             scorer_points += part.option.points
                     row = [
-                        user_by_anonymous_id(student_item['student_id']),
-                        x_block_id,
-                        user_by_anonymous_id(assessment.scorer_id),
+                        # user_by_anonymous_id(student_item['student_id']),
+                        str(user_by_anonymous_id(str(student_item['student_id'])).id),
+                        x_block_id.split("@")[-1],
+                        str(user_by_anonymous_id(str(assessment.scorer_id)).id),
                         scorer_points,
-                        score.get('points_possible', ''),
+                        max_score,
                         assessment.score_type
                     ]
                     datarows.append(row)
