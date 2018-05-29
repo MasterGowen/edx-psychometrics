@@ -35,7 +35,7 @@ from courseware.models import StudentModule
 # ORA
 from openassessment.assessment.models import Assessment
 from submissions import api as sub_api
-from edx_psychometrics.utils import get_course_item_submissions, _use_read_replica, upload_csv_to_report_store_by_semicolon
+from edx_psychometrics.utils import get_course_item_submissions, _use_read_replica, upload_csv_to_report_store_by_semicolon, upload_json_to_report_store
 # from student.models import user_by_anonymous_id
 
 
@@ -105,10 +105,11 @@ class PsychometricsReport(object):
         task_progress.update_task_state(extra_meta=current_step)
 
         # zf = zipfile.ZipFile('zipfile_write_compression.zip', mode='w')
-        # upload_json_to_report_store("kek?", "ya jeson", course_id, start_date)
-        # Perform the upload
-        # csv_name = u'psychometrics_report'
-        # upload_csv_to_report_store(rows, csv_name, course_id, start_date)
+
+        # Course description
+        current_step = {'step': 'Calculating description json'}
+        cls._get_json_data(course_id, start_date, "course")
+        task_progress.update_task_state(extra_meta=current_step)
 
         return task_progress.update_task_state(extra_meta=current_step)
 
@@ -279,6 +280,16 @@ class PsychometricsReport(object):
         rows = [header] + [row for row in datarows]
 
         upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, start_date)
+
+    @classmethod
+    def _get_json_data(cls, course_id, start_date, csv_name):
+        course = CourseKey.from_string(str(course_id))
+        course_data = {
+            "short_name": '+'.join([course.org, course.course, course.run]),
+            "long_name": get_course_by_id(CourseKey.from_string(str(course_id))).display_name
+        }
+
+        upload_json_to_report_store([json.dumps(course_data)], "course", course_id, start_date)
 
     @classmethod
     def _graded_scorable_blocks_to_header(cls, course):
