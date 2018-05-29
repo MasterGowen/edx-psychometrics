@@ -1,77 +1,46 @@
 import logging
 import re
-from collections import OrderedDict
-from datetime import datetime
-from itertools import chain, izip, izip_longest
-from time import time
-
-from lazy import lazy
+import json
 import pytz
 from pytz import UTC
-from six import text_type
-import json
-import zipfile
+from collections import OrderedDict
+from datetime import datetime
+from itertools import chain
+from time import time
 
-from lms.djangoapps.instructor_analytics.csvs import format_dictlist
+from lms.djangoapps.instructor_task.tasks_helper.runner import TaskProgress
+from lms.djangoapps.grades.context import grading_context_for_course
+from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
 
-from lms.djangoapps.grades.context import grading_context, grading_context_for_course
-from lms.djangoapps.course_blocks.utils import get_student_module_as_dict
 from student.models import CourseEnrollment, user_by_anonymous_id
+from courseware.models import StudentModule
 from courseware.courses import get_course_by_id
+from courseware.user_state_client import DjangoXBlockUserStateClient
+
 from opaque_keys.edx.keys import CourseKey, UsageKey
 from opaque_keys.edx.locator import BlockUsageLocator
 from xmodule.modulestore.django import modulestore
-from openedx.core.djangoapps.content.block_structure.manager import BlockStructureManager
-from openedx.core.djangoapps.content.block_structure.api import get_block_structure_manager
-
-from xmodule.modulestore.inheritance import own_metadata
 
 from openedx.core.djangoapps.content.course_structures.models import CourseStructure
-from courseware.user_state_client import DjangoXBlockUserStateClient
-from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
-
-from courseware.models import StudentModule
 
 # ORA
 from openassessment.assessment.models import Assessment
-from submissions import api as sub_api
+
 from edx_psychometrics.utils import get_course_item_submissions, _use_read_replica, \
     upload_csv_to_report_store_by_semicolon, upload_json_to_report_store
-# from student.models import user_by_anonymous_id
-
 
 from django.conf import settings
-from lms.djangoapps.instructor_task.tasks_helper.runner import TaskProgress
-from lms.djangoapps.instructor_task.tasks_helper.utils import upload_csv_to_report_store
 
 log = logging.getLogger(__name__)
-
-ENROLLED_IN_COURSE = 'enrolled'
-
-NOT_ENROLLED_IN_COURSE = 'unenrolled'
-
-
-def _user_enrollment_status(user, course_id):
-    """
-    Returns the enrollment activation status in the given course
-    for the given user.
-    """
-    enrollment_is_active = CourseEnrollment.enrollment_mode_for_user(user, course_id)[1]
-    if enrollment_is_active:
-        return ENROLLED_IN_COURSE
-    return NOT_ENROLLED_IN_COURSE
-
-
-def _flatten(iterable):
-    return list(chain.from_iterable(iterable))
 
 
 class PsychometricsReport(object):
     @classmethod
     def generate(cls, _xmodule_instance_args, _entry_id, course_id, task_input, action_name):
         """
-        For a given `course_id`, generate a CSV file containing
-        all student answers to a given problem, and store using a `ReportStore`.
+        For a given `course_id`, generate a 5 CSV file containing
+        information about the learning process
+        .
         """
         start_time = time()
         start_date = datetime.now(UTC)
@@ -80,32 +49,32 @@ class PsychometricsReport(object):
 
         enrolled_students = CourseEnrollment.objects.users_enrolled_in(course_id, include_inactive=True)
 
-        # CSV1
+        # Generating Generating CSV1
         current_step = {'step': 'Calculating CSV1'}
         cls._get_csv1_data(course_id, enrolled_students, start_date, "psychometrics_report_csv1")
         task_progress.update_task_state(extra_meta=current_step)
 
-        # CSV2
+        # Generating CSV2
         current_step = {'step': 'Calculating CSV2'}
-        cls._get_csv2_data(course_id, enrolled_students, start_date, "psychometrics_report_csv2")
+        cls._get_csv2_data(course_id, start_date, "psychometrics_report_csv2")
         task_progress.update_task_state(extra_meta=current_step)
 
-        # CSV3
+        # Generating CSV3
         current_step = {'step': 'Calculating CSV3'}
         cls._get_csv3_data(course_id, enrolled_students, start_date, "psychometrics_report_csv3")
         task_progress.update_task_state(extra_meta=current_step)
 
-        # CSV4
+        # Generating CSV4
         current_step = {'step': 'Calculating CSV4'}
         cls._get_csv4_data(course_id, start_date, "psychometrics_report_csv4")
         task_progress.update_task_state(extra_meta=current_step)
 
-        # CSV5
+        # Generating CSV5
         current_step = {'step': 'Calculating CSV5'}
         cls._get_csv5_data(course_id, start_date, "psychometrics_report_csv5")
         task_progress.update_task_state(extra_meta=current_step)
 
-        # Course description json
+        # Generating course description json
         current_step = {'step': 'Calculating description json'}
         cls._get_course_json_data(course_id, start_date, "course")
         task_progress.update_task_state(extra_meta=current_step)
@@ -143,7 +112,7 @@ class PsychometricsReport(object):
         upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, start_date)
 
     @classmethod
-    def _get_csv2_data(cls, course_id, enrolled_students, start_date, csv_name):
+    def _get_csv2_data(cls, course_id, start_date, csv_name):
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
         headers = ('item_id', 'item_type', 'item_name', 'module_id', 'module_order', 'module_name')
         datarows = []
@@ -178,10 +147,10 @@ class PsychometricsReport(object):
         chapters = [chapter for chapter in course.get_children() if not chapter.hide_from_toc]
         vertical_map = [
             {str(c.location): [  # chapter
-                {str(s.location): [str(t.location) for t in s.get_children()  # sequention:
-                                   ]
-                 } for s in c.get_children() if not s.hide_from_toc]
-            } for c in chapters]
+                                 {str(s.location): [str(t.location) for t in s.get_children()  # sequention:
+                                                    ]
+                                  } for s in c.get_children() if not s.hide_from_toc]
+             } for c in chapters]
 
         def _viewed(c_pos, sequential, vertical, student):
             _sm = StudentModule.objects.filter(module_type='sequential',
