@@ -324,38 +324,36 @@ class PsychometricsReport(object):
 
         openassessment_blocks = modulestore().get_items(CourseKey.from_string(str(course_id)),
                                                         qualifiers={'category': 'openassessment'})
-        openassessment_blocks = modulestore().get_items(CourseKey.from_string(str(course_id)),
-                                                        qualifiers={'category': 'openassessment'})
 
         datarows = []
 
-        # for openassessment_block in openassessment_blocks:
-        x_block_id = openassessment_blocks[0].get_xblock_id()
-        all_submission_information = get_course_item_submissions(course_id, x_block_id, 'openassessment')
-        for student_item, submission, score in all_submission_information:
-            row = []
-            assessments = cls._use_read_replica(
-                Assessment.objects.prefetch_related('parts').
-                    prefetch_related('rubric').
-                    filter(
-                    submission_uuid=submission['uuid'],
-                    # item__item_id=x_block_id,
+        for openassessment_block in openassessment_blocks:
+            x_block_id = openassessment_block.get_xblock_id()
+            all_submission_information = get_course_item_submissions(course_id, x_block_id, 'openassessment')
+            for student_item, submission, score in all_submission_information:
+                row = []
+                assessments = cls._use_read_replica(
+                    Assessment.objects.prefetch_related('parts').
+                        prefetch_related('rubric').
+                        filter(
+                        submission_uuid=submission['uuid'],
+                        # item__item_id=x_block_id,
+                    )
                 )
-            )
-            for assessment in assessments:
-                scorer_points = 0
-                for part in assessment.parts.order_by('criterion__order_num'):
-                    if part.option is not None:
-                        scorer_points += part.option.points
-                row = [
-                    user_by_anonymous_id(student_item['student_id']),
-                    x_block_id,
-                    user_by_anonymous_id(assessment.scorer_id),
-                    scorer_points,
-                    score.get('points_possible', ''),
-                    assessment.score_type
-                ]
-                datarows.append(row)
+                for assessment in assessments:
+                    scorer_points = 0
+                    for part in assessment.parts.order_by('criterion__order_num'):
+                        if part.option is not None:
+                            scorer_points += part.option.points
+                    row = [
+                        user_by_anonymous_id(student_item['student_id']),
+                        x_block_id,
+                        user_by_anonymous_id(assessment.scorer_id),
+                        scorer_points,
+                        score.get('points_possible', ''),
+                        assessment.score_type
+                    ]
+                    datarows.append(row)
         header = [
             'user_id',
             'item_id',
