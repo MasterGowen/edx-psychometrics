@@ -222,15 +222,12 @@ class PsychometricsReport(object):
         course = get_course_by_id(course_id)
         chapters = [chapter for chapter in course.get_children() if not chapter.hide_from_toc]
         vertical_map = [{
-            'chapter_name': c.display_name_with_default_escaped,
-            'sections': [{
-                'clickable_tab_count': len(s.get_children()) if (type(s) == seq_module.SequenceDescriptor) else 0,
-                str(s.location): [{
-                    'children_count': len(t.get_children()) if (type(t) == vertical_block.VerticalBlock) else 0,
-                    'class': dir(t)} for t in s.get_children()
-                ]
+            str(c.location): [{
+                str(s.location): [str(t.location) for t in s.get_children()
+                                  ]
             } for s in c.get_children() if not s.hide_from_toc]
         } for c in chapters]
+
         rows.append([json.dumps(vertical_map)])
 
         # for key, value in structure.items():
@@ -341,7 +338,7 @@ class PsychometricsReport(object):
     def _get_csv4_data(cls, course_id, start_date, csv_name):
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
         headers = (
-        'content_piece_id', 'content_piece_type', 'content_piece_name', 'module_id', 'module_order', 'module_name')
+            'content_piece_id', 'content_piece_type', 'content_piece_name', 'module_id', 'module_order', 'module_name')
         datarows = []
         module_order = 0
         for key, value in structure.items():
