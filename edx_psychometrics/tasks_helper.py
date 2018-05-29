@@ -218,7 +218,6 @@ class PsychometricsReport(object):
             if value["block_type"] == 'vertical':
                 try:
                     parent = value['parent']
-                    # rows.append([str(parent), value["usage_key"]])
                     if parent not in vertical_map.keys():
                         vertical_map[str(parent)] = [value["usage_key"]]
                     else:
@@ -233,8 +232,6 @@ class PsychometricsReport(object):
                                                 )
             for _sm in _sms:
                 sequential = str(_sm.module_state_key)
-
-                rows.append([sequential, json.loads(_sm.state)["position"],  _vert, vertical_map[sequential].index(_vert)])
 
                 try:
                     if _vert in vertical_map[sequential]:
@@ -327,7 +324,8 @@ class PsychometricsReport(object):
 
         openassessment_blocks = modulestore().get_items(CourseKey.from_string(str(course_id)),
                                                         qualifiers={'category': 'openassessment'})
-        openassessment_blocks = modulestore().get_items(CourseKey.from_string(str(course_id)), qualifiers={'category': 'openassessment'})
+        openassessment_blocks = modulestore().get_items(CourseKey.from_string(str(course_id)),
+                                                        qualifiers={'category': 'openassessment'})
 
         datarows = []
 
@@ -377,7 +375,6 @@ class PsychometricsReport(object):
             if "read_replica" in settings.DATABASES
             else queryset
         )
-
 
     @classmethod
     def _graded_scorable_blocks_to_header(cls, course):
