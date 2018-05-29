@@ -29,6 +29,20 @@ def upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, timestamp
     )
     tracker_emit(csv_name)
 
+def upload_json_to_report_store(rows, csv_name, course_id, timestamp, config_name='GRADES_DOWNLOAD'):
+    report_store = ReportStore.from_config(config_name)
+    store_rows_semicolor(
+        report_store,
+        course_id,
+        u"{course_prefix}_{csv_name}_{timestamp_str}.json".format(
+            course_prefix=get_valid_filename(unicode("_").join([course_id.org, course_id.course, course_id.run])),
+            csv_name=csv_name,
+            timestamp_str=timestamp.strftime("%Y-%m-%d-%H%M")
+        ),
+        rows
+    )
+    tracker_emit(csv_name)
+
 def store_rows_semicolor(self, course_id, filename, rows):
         output_buffer = ContentFile('')
         # Adding unicode signature (BOM) for MS Excel 2013 compatibility
