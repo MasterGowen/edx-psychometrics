@@ -204,7 +204,7 @@ class PsychometricsReport(object):
             for c_pos, _chapter in enumerate(vertical_map):
                 for subsection, sequences in _chapter.items():
                     rows.append([json.dumps({str(type(sequences)): [str(type(s)) for s in sequences]})])
-                    # for sequence in sequences:
+                    rows.append([s.keys() for s in sequences])
                     #     rows.append(sequence)
                         # for vertical in sequence:
                     # rows.append([
