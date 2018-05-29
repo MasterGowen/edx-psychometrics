@@ -94,7 +94,7 @@ class PsychometricsReport(object):
 
         # CSV4
         current_step = {'step': 'Calculating CSV4'}
-        cls._get_csv4_data(course_id, enrolled_students, start_date, "psychometrics_report_csv4")
+        cls._get_csv4_data(course_id, start_date, "psychometrics_report_csv4")
         task_progress.update_task_state(extra_meta=current_step)
 
         # CSV5
@@ -221,11 +221,10 @@ class PsychometricsReport(object):
         vertical_map = [{
             'chapter_name': c.display_name_with_default_escaped,
             'sections': [{
-                'section_name': s.display_name_with_default_escaped,
                 'clickable_tab_count': len(s.get_children()) if (type(s) == seq_module.SequenceDescriptor) else 0,
-                'tabs': [{
+                s.url_name_for_block: [{
                     'children_count': len(t.get_children()) if (type(t) == vertical_block.VerticalBlock) else 0,
-                    'class': t.__class__.__name__} for t in s.get_children()
+                    'class': dir(t)} for t in s.get_children()
                 ]
             } for s in c.get_children() if not s.hide_from_toc]
         } for c in chapters]
@@ -337,7 +336,7 @@ class PsychometricsReport(object):
         upload_csv_to_report_store(rows, csv_name, course_id, start_date)
 
     @classmethod
-    def _get_csv4_data(cls, course_id, enrolled_students, start_date, csv_name):
+    def _get_csv4_data(cls, course_id, start_date, csv_name):
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
         headers = ('content_piece_id', 'content_piece_type', 'content_piece_name', 'module_id', 'module_order', 'module_name')
         datarows = []
