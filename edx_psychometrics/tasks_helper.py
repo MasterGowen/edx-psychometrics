@@ -215,6 +215,7 @@ class PsychometricsReport(object):
         vertical_map = {}
 
         for key, value in structure.items():
+            rows.append([key, value])
             if value["block_type"] == 'vertical':
                 try:
                     parent = value['parent']
