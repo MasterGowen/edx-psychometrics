@@ -219,7 +219,7 @@ class PsychometricsReport(object):
         course = get_course_by_id(course_id)
         chapters = [chapter for chapter in course.get_children() if not chapter.hide_from_toc]
         vertical_map = [{
-            'chapter_name': c.display_name_with_default_escaped,
+            'chapter_name': str(c.location),
             'sections': [{
                 'clickable_tab_count': len(s.get_children()) if (type(s) == seq_module.SequenceDescriptor) else 0,
                 str(s.location): [{
