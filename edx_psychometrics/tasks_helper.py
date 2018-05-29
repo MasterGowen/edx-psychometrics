@@ -215,7 +215,7 @@ class PsychometricsReport(object):
         vertical_map = {}
 
         for key, value in structure.items():
-            rows.append([key, value])
+            # rows.append([key, value])
             if value["block_type"] == 'vertical':
                 try:
                     parent = value['parent']
@@ -226,6 +226,8 @@ class PsychometricsReport(object):
                 except Exception as e:
                     log.warning(e)
 
+        rows.append([json.dumps(vertical_map)])
+
         def _viewed(_vert, student):
             _sms = StudentModule.objects.filter(module_type='sequential',
                                                 course_id=CourseKey.from_string(str(course_id)),
@@ -233,7 +235,6 @@ class PsychometricsReport(object):
                                                 )
             for _sm in _sms:
                 sequential = str(_sm.module_state_key)
-                rows.append([sequential])
 
                 if _vert in vertical_map.get(sequential, [None]):
                     rows.append(_vert)
