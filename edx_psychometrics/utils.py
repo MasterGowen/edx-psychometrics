@@ -8,7 +8,7 @@ from lms.djangoapps.instructor_task.models import ReportStore
 
 from lms.djangoapps.instructor_task.tasks_helper.utils import tracker_emit
 
-from lms.djangoapps.instructor_task.models DjangoStorageReportStore
+from lms.djangoapps.instructor_task.models import DjangoStorageReportStore
 
 from django.core.files.storage import get_valid_filename
 from django.core.files.base import ContentFile
