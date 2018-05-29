@@ -103,8 +103,8 @@ class PsychometricsReport(object):
         cls._get_csv5_data(course_id, start_date, "psychometrics_report_csv5")
         task_progress.update_task_state(extra_meta=current_step)
 
-        zf = zipfile.ZipFile('zipfile_write_compression.zip', mode='w')
-        upload_json_to_report_store("kek?", "ya jeson", course_id, start_date)
+        # zf = zipfile.ZipFile('zipfile_write_compression.zip', mode='w')
+        # upload_json_to_report_store("kek?", "ya jeson", course_id, start_date)
         # Perform the upload
         # csv_name = u'psychometrics_report'
         # upload_csv_to_report_store(rows, csv_name, course_id, start_date)

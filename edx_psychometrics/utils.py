@@ -20,7 +20,7 @@ def upload_csv_to_report_store_semicolor(rows, csv_name, course_id, timestamp, c
     store_rows_semicolor(
         report_store,
         course_id,
-        u"{course_prefix}_{csv_name}_{timestamp_str}.json".format(
+        u"{course_prefix}_{csv_name}_{timestamp_str}.csv".format(
             course_prefix=get_valid_filename(unicode("_").join([course_id.org, course_id.course, course_id.run])),
             csv_name=csv_name,
             timestamp_str=timestamp.strftime("%Y-%m-%d-%H%M")
