@@ -50,29 +50,29 @@ class PsychometricsReport(object):
         enrolled_students = CourseEnrollment.objects.users_enrolled_in(course_id, include_inactive=True)
 
         # Generating Generating CSV1
-        current_step = {'step': 'Calculating CSV1'}
-        cls._get_csv1_data(course_id, enrolled_students, start_date, "psychometrics_report_csv1")
-        task_progress.update_task_state(extra_meta=current_step)
+        # current_step = {'step': 'Calculating CSV1'}
+        # cls._get_csv1_data(course_id, enrolled_students, start_date, "psychometrics_report_csv1")
+        # task_progress.update_task_state(extra_meta=current_step)
 
         # Generating CSV2
-        current_step = {'step': 'Calculating CSV2'}
-        cls._get_csv2_data(course_id, start_date, "psychometrics_report_csv2")
-        task_progress.update_task_state(extra_meta=current_step)
+        # current_step = {'step': 'Calculating CSV2'}
+        # cls._get_csv2_data(course_id, start_date, "psychometrics_report_csv2")
+        # task_progress.update_task_state(extra_meta=current_step)
 
         # Generating CSV3
-        current_step = {'step': 'Calculating CSV3'}
-        cls._get_csv3_data(course_id, enrolled_students, start_date, "psychometrics_report_csv3")
-        task_progress.update_task_state(extra_meta=current_step)
+        # current_step = {'step': 'Calculating CSV3'}
+        # cls._get_csv3_data(course_id, enrolled_students, start_date, "psychometrics_report_csv3")
+        # task_progress.update_task_state(extra_meta=current_step)
 
         # Generating CSV4
-        current_step = {'step': 'Calculating CSV4'}
-        cls._get_csv4_data(course_id, start_date, "psychometrics_report_csv4")
-        task_progress.update_task_state(extra_meta=current_step)
+        # current_step = {'step': 'Calculating CSV4'}
+        # cls._get_csv4_data(course_id, start_date, "psychometrics_report_csv4")
+        # task_progress.update_task_state(extra_meta=current_step)
 
         # Generating CSV5
-        current_step = {'step': 'Calculating CSV5'}
-        cls._get_csv5_data(course_id, start_date, "psychometrics_report_csv5")
-        task_progress.update_task_state(extra_meta=current_step)
+        # current_step = {'step': 'Calculating CSV5'}
+        # cls._get_csv5_data(course_id, start_date, "psychometrics_report_csv5")
+        # task_progress.update_task_state(extra_meta=current_step)
 
         # Generating course description json
         current_step = {'step': 'Calculating description json'}
