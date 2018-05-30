@@ -30,7 +30,7 @@ class InMemoryZipFile(object):
 
     def read(self):
         self.inMemoryOutputFile.seek(0)
-        return self.inMemoryOutputFile.read()
+        return self.inMemoryOutputFile
 
 
 def upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, timestamp, config_name='GRADES_DOWNLOAD'):
