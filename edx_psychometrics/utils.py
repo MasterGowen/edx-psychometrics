@@ -72,7 +72,7 @@ def store_json_file(self, course_id, filename, rows):
     my_zip.write("file2.csv", "csv,data,here")
     my_zip.write(str(filename)+".json", json.dumps(rows))
 
-    self.store(course_id, "moya_zipka", my_zip.read())
+    self.store(course_id, "moya_zipka.zip", my_zip.read())
 
     self.store(course_id, filename, outfile)
 
