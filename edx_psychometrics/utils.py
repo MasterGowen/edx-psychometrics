@@ -68,11 +68,10 @@ def store_json_file(self, course_id, filename, rows):
     outfile.write(json.dumps(rows))
 
     my_zip = InMemoryZipFile()
-    my_zip.write("file1.txt", "some text contents")
-    my_zip.write("file2.csv", "csv,data,here")
-    my_zip.write(str(filename)+".json", json.dumps(rows))
 
-    self.store(course_id, "moya_zipka.zip", my_zip.read())
+    my_zip.write(str(filename), json.dumps(rows))
+
+    self.store(course_id, f"{filename}.zip", my_zip.read())
 
     self.store(course_id, filename, outfile)
 
