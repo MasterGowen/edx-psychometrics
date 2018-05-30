@@ -3,6 +3,9 @@ import StringIO
 import codecs
 import csv
 
+from io import BytesIO
+from zipfile import ZipFile
+
 from submissions.models import Submission
 from submissions.serializers import (
     SubmissionSerializer, StudentItemSerializer, ScoreSerializer
@@ -14,6 +17,20 @@ from lms.djangoapps.instructor_task.tasks_helper.utils import tracker_emit
 from django.conf import settings
 from django.core.files.storage import get_valid_filename
 from django.core.files.base import ContentFile
+
+
+class InMemoryZipFile(object):
+    def __init__(self):
+        self.inMemoryOutputFile = BytesIO()
+
+    def write(self, inzipfilename, data):
+        zip = ZipFile(self.inMemoryOutputFile, 'a')
+        zip.writestr(inzipfilename, data)
+        zip.close()
+
+    def read(self):
+        self.inMemoryOutputFile.seek(0)
+        return self.inMemoryOutputFile.read()
 
 
 def upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, timestamp, config_name='GRADES_DOWNLOAD'):
@@ -49,6 +66,14 @@ def upload_json_to_report_store(json_data, filename, course_id, timestamp, confi
 def store_json_file(self, course_id, filename, rows):
     outfile = StringIO.StringIO()
     outfile.write(json.dumps(rows))
+
+    my_zip = InMemoryZipFile()
+    my_zip.write("file1.txt", "some text contents")
+    my_zip.write("file2.csv", "csv,data,here")
+    my_zip.write(str(filename)+".json", json.dumps(rows))
+
+    self.store(course_id, "moya_zipka", my_zip.read())
+
     self.store(course_id, filename, outfile)
 
 
