@@ -32,7 +32,6 @@ class InMemoryZipFile(object):
         self.inMemoryOutputFile.seek(0)
         return self.inMemoryOutputFile
 
-
 def upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, timestamp, config_name='GRADES_DOWNLOAD'):
     report_store = ReportStore.from_config(config_name)
     store_rows_by_semicolon(
@@ -66,13 +65,9 @@ def upload_json_to_report_store(json_data, filename, course_id, timestamp, confi
 def store_json_file(self, course_id, filename, rows):
     outfile = StringIO.StringIO()
     outfile.write(json.dumps(rows))
-
     my_zip = InMemoryZipFile()
-
     my_zip.write(str(filename), json.dumps(rows))
-
-    self.store(course_id, u"{filename}.zip".format(filename="CSV-archive"), my_zip.read())
-
+    # self.store(course_id, u"{filename}.zip".format(filename="CSV-archive"), my_zip.read())
     self.store(course_id, filename, outfile)
 
 
