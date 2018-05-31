@@ -58,7 +58,7 @@ class PsychometricsReportStore(object):
 def write_to_csv_by_semicolon(rows):
     # tracker_emit(filename)
     output_buffer = ContentFile('')
-    output_buffer.write(codecs.BOM_UTF8)
+    # output_buffer.write(codecs.BOM_UTF8)
     csvwriter = csv.writer(output_buffer, delimiter=';')
     csvwriter.writerows(_get_utf8_encoded_rows(rows))
     output_buffer.seek(0)

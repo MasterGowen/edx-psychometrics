@@ -150,7 +150,7 @@ class PsychometricsReport(object):
 
     @classmethod
     def _get_csv3_data(cls, course_id, enrolled_students):
-        headers = ('user_id', 'content_piece_id', 'viewed', 'p')
+        headers = ('user_id', 'content_piece_id', 'viewed')
 
         rows = []
 
@@ -257,7 +257,7 @@ class PsychometricsReport(object):
         header = [
             'user_id',
             'item_id',
-            'scorer_id',
+            'reviewer_id',
             'score',
             'max_score',
             # 'score_type'
