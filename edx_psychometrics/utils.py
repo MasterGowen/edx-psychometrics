@@ -75,13 +75,14 @@ def store_rows_by_semicolon(self, course_id, filename, rows):
     csvwriter = csv.writer(output_buffer, delimiter=';')
     csvwriter.writerows(self._get_utf8_encoded_rows(rows))
 
-    my_zip = InMemoryZipFile()
+    output_buffer.seek(0)
 
+    my_zip = InMemoryZipFile()
     my_zip.write(str(filename), output_buffer.read())
 
     self.store(course_id, u"{filename}_test.zip".format(filename="CSV-archive"), my_zip.read())
 
-    output_buffer.seek(0)
+
 
     self.store(course_id, filename, output_buffer)
 
