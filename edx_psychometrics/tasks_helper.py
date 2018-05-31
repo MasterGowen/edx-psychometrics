@@ -27,7 +27,7 @@ from openedx.core.djangoapps.content.course_structures.models import CourseStruc
 from openassessment.assessment.models import Assessment
 
 from edx_psychometrics.utils import get_course_item_submissions, _use_read_replica, \
-    upload_csv_to_report_store_by_semicolon, upload_json_to_report_store, PsychometricsReportStore
+    upload_csv_to_report_store_by_semicolon, PsychometricsReportStore
 
 from django.conf import settings
 
