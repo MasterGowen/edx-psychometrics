@@ -38,10 +38,12 @@ class PsychometricsReportStore(object):
         self.archive = InMemoryZipFile()
 
     def append_csv(self, filename, output_buffer):
-        self.archive.write(str(filename), output_buffer.read())
+        csv_filename = u"{filename}.csv".format(filename=filename)
+        self.archive.write(csv_filename, output_buffer.read())
 
     def append_json(self, filename, data):
-        self.archive.write(str(filename), json.dumps(data))
+        json_filename = u"{filename}.json".format(filename=filename)
+        self.archive.write(json_filename, json.dumps(data))
 
     def save_archive(self, course_id, filename, timestamp, config_name='GRADES_DOWNLOAD'):
         report_store = ReportStore.from_config(config_name)
@@ -53,42 +55,15 @@ class PsychometricsReportStore(object):
         report_store.store(course_id, zip_file_name, self.archive.read())
 
 
-def upload_csv_to_report_store_by_semicolon(rows, filename):
-    tracker_emit(filename)
+def upload_csv_to_report_store_by_semicolon(rows):
+    # tracker_emit(filename)
     output_buffer = ContentFile('')
     output_buffer.write(codecs.BOM_UTF8)
     csvwriter = csv.writer(output_buffer, delimiter=';')
     csvwriter.writerows(_get_utf8_encoded_rows(rows))
     output_buffer.seek(0)
-    csv_filename = u"{filename}.csv".format(filename=filename)
-    return csv_filename, output_buffer
 
-
-# def upload_json_to_report_store(json_data, filename, course_id, timestamp, config_name='GRADES_DOWNLOAD'):
-#
-#     tracker_emit(filename)
-#     json_file = StringIO.StringIO()
-#     json_file.write(json.dumps(json_data))
-#
-#     csv_filename = u"{filename}.csv".format(filename=filename)
-#
-#     return u"{filename}.csv".format(filename), json_data
-
-
-# def store_json_file(self, course_id, filename, data):
-#     json_file = StringIO.StringIO()
-#     json_file.write(json.dumps(data))
-#     self.store(course_id, filename, json_file)
-
-
-# def store_rows_by_semicolon(self, course_id, filename, rows):
-#     output_buffer = ContentFile('')
-#     output_buffer.write(codecs.BOM_UTF8)
-#     csvwriter = csv.writer(output_buffer, delimiter=';')
-#     csvwriter.writerows(self._get_utf8_encoded_rows(rows))
-#     output_buffer.seek(0)
-
-#     self.store(course_id, filename, output_buffer)
+    return output_buffer
 
 
 def get_course_item_submissions(course_id, item_id, item_type, read_replica=True):
