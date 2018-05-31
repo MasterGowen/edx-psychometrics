@@ -36,7 +36,7 @@ log = logging.getLogger(__name__)
 
 class PsychometricsReport(object):
 
-    arch = PsychometricsReportStore()
+    archive = PsychometricsReportStore()
 
     @classmethod
     def generate(cls, _xmodule_instance_args, _entry_id, course_id, task_input, action_name):
@@ -54,39 +54,40 @@ class PsychometricsReport(object):
         # Generating Generating CSV1
         current_step = {'step': 'Calculating CSV1'}
         filename_csv1, file_csv1 = cls._get_csv1_data(course_id, enrolled_students, "psychometrics_report_csv1")
-        cls.arch.append(filename_csv1, file_csv1)
+        cls.archive.append_csv(filename_csv1, file_csv1)
         task_progress.update_task_state(extra_meta=current_step)
 
         # Generating CSV2
         current_step = {'step': 'Calculating CSV2'}
         filename_csv2, file_csv2 = cls._get_csv2_data(course_id, "psychometrics_report_csv2")
-        cls.arch.append(filename_csv2, file_csv2)
+        cls.archive.append_csv(filename_csv2, file_csv2)
         task_progress.update_task_state(extra_meta=current_step)
 
         # Generating CSV3
         current_step = {'step': 'Calculating CSV3'}
         filename_csv3, file_csv3 = cls._get_csv3_data(course_id, enrolled_students, "psychometrics_report_csv3")
-        cls.arch.append(filename_csv3, file_csv3)
+        cls.archive.append_csv(filename_csv3, file_csv3)
         task_progress.update_task_state(extra_meta=current_step)
 
         # Generating CSV4
         current_step = {'step': 'Calculating CSV4'}
         filename_csv4, file_csv4 = cls._get_csv4_data(course_id, "psychometrics_report_csv4")
-        cls.arch.append(filename_csv4, file_csv4)
+        cls.archive.append_csv(filename_csv4, file_csv4)
         task_progress.update_task_state(extra_meta=current_step)
 
         # Generating CSV5
         current_step = {'step': 'Calculating CSV5'}
         filename_csv5, file_csv5 = cls._get_csv5_data(course_id, "psychometrics_report_csv5")
-        cls.arch.append(filename_csv5, file_csv5)
+        cls.archive.append_csv(filename_csv5, file_csv5)
         task_progress.update_task_state(extra_meta=current_step)
 
-        cls.arch.save_archive(course_id, "archive", start_date)
+        # Generating course description json
+        current_step = {'step': 'Calculating description json'}
+        filename_json, data_json = cls._get_course_json_data(course_id, "course")
+        cls.archive.append_json(filename_json, data_json)
+        task_progress.update_task_state(extra_meta=current_step)
 
-        # # Generating course description json
-        # current_step = {'step': 'Calculating description json'}
-        # cls._get_course_json_data(course_id, start_date, "course")
-        # task_progress.update_task_state(extra_meta=current_step)
+        cls.archive.save_archive(course_id, "archive", start_date)
 
         return task_progress.update_task_state(extra_meta=current_step)
 
@@ -267,13 +268,13 @@ class PsychometricsReport(object):
         return filename, file
 
     @classmethod
-    def _get_course_json_data(cls, course_id, csv_name):
+    def _get_course_json_data(cls, course_id, filename):
         course = CourseKey.from_string(str(course_id))
         course_data = {
             "short_name": "+".join([course.org, course.course, course.run]),
             "long_name": get_course_by_id(CourseKey.from_string(str(course_id))).display_name
         }
-        return "course", course_data
+        return filename, course_data
         # upload_json_to_report_store(course_data, 'course', course_id, start_date)
 
     @classmethod

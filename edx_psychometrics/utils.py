@@ -32,12 +32,16 @@ class InMemoryZipFile(object):
         self.inMemoryOutputFile.seek(0)
         return self.inMemoryOutputFile
 
+
 class PsychometricsReportStore(object):
     def __init__(self):
         self.archive = InMemoryZipFile()
 
-    def append(self, filename, output_buffer):
+    def append_csv(self, filename, output_buffer):
         self.archive.write(str(filename), output_buffer.read())
+
+    def append_json(self, filename, data):
+        self.archive.write(str(filename), data)
 
     def save_archive(self, course_id, filename, timestamp, config_name='GRADES_DOWNLOAD'):
         report_store = ReportStore.from_config(config_name)
@@ -47,6 +51,7 @@ class PsychometricsReportStore(object):
             timestamp_str=timestamp.strftime("%Y-%m-%d-%H%M")
         )
         report_store.store(course_id, zip_file_name, self.archive.read())
+
 
 def upload_csv_to_report_store_by_semicolon(rows, filename):
     tracker_emit(filename)
