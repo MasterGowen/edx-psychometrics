@@ -70,8 +70,7 @@ def upload_csv_to_report_store_by_semicolon(rows, filename, course_id, timestamp
     csvwriter.writerows(report_store_1._get_utf8_encoded_rows(rows))
     output_buffer.seek(0)
 
-    name = u"{filename}.csv".format(filename)
-    return name, output_buffer
+    return u"{filename}.csv".format(filename=filename), output_buffer
 
 
 def upload_json_to_report_store(json_data, filename, course_id, timestamp, config_name='GRADES_DOWNLOAD'):
