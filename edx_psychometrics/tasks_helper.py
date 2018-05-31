@@ -115,7 +115,8 @@ class PsychometricsReport(object):
                                 ])
 
         rows.insert(0, headers)
-        upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, start_date)
+        filename, file = upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, start_date)
+        return filename, file
 
     @classmethod
     def _get_csv2_data(cls, course_id, start_date, csv_name):
