@@ -40,7 +40,6 @@ class PsychometricsReport(object):
         """
         For a given `course_id`, generate a 5 CSV file containing
         information about the learning process
-        .
         """
         start_time = time()
         start_date = datetime.now(UTC)
