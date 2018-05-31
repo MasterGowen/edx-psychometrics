@@ -41,7 +41,7 @@ class PsychometricsReportStore(object):
         self.archive.write(str(filename), output_buffer.read())
 
     def append_json(self, filename, data):
-        self.archive.write(str(filename), data)
+        self.archive.write(str(filename), json.dumps(data))
 
     def save_archive(self, course_id, filename, timestamp, config_name='GRADES_DOWNLOAD'):
         report_store = ReportStore.from_config(config_name)
