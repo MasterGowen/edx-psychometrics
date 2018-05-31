@@ -19,7 +19,7 @@ from django.core.files.storage import get_valid_filename
 from django.core.files.base import ContentFile
 
 
-class InMemoryZipFile(object):
+class PsychometricsZipFile(object):
     def __init__(self):
         self.inMemoryOutputFile = BytesIO()
 
@@ -35,7 +35,7 @@ class InMemoryZipFile(object):
 
 class PsychometricsReportStore(object):
     def __init__(self):
-        self.archive = InMemoryZipFile()
+        self.archive = PsychometricsZipFile()
 
     def append_csv(self, filename, output_buffer):
         csv_filename = u"{filename}.csv".format(filename=filename)
@@ -55,7 +55,7 @@ class PsychometricsReportStore(object):
         report_store.store(course_id, zip_file_name, self.archive.read())
 
 
-def upload_csv_to_report_store_by_semicolon(rows):
+def write_to_csv_by_semicolon(rows):
     # tracker_emit(filename)
     output_buffer = ContentFile('')
     output_buffer.write(codecs.BOM_UTF8)

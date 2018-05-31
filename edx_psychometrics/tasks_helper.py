@@ -27,7 +27,7 @@ from openedx.core.djangoapps.content.course_structures.models import CourseStruc
 from openassessment.assessment.models import Assessment
 
 from edx_psychometrics.utils import get_course_item_submissions, _use_read_replica, \
-    upload_csv_to_report_store_by_semicolon, PsychometricsReportStore
+    write_to_csv_by_semicolon, PsychometricsReportStore
 
 from django.conf import settings
 
@@ -54,31 +54,31 @@ class PsychometricsReport(object):
         # Generating Generating CSV1
         current_step = {'step': 'Calculating CSV1'}
         file_csv1 = cls._get_csv1_data(course_id, enrolled_students)
-        cls.archive.append_csv("psychometrics_report_csv1", file_csv1)
+        cls.archive.append_csv("csv1", file_csv1)
         task_progress.update_task_state(extra_meta=current_step)
 
         # Generating CSV2
         current_step = {'step': 'Calculating CSV2'}
         file_csv2 = cls._get_csv2_data(course_id, )
-        cls.archive.append_csv("psychometrics_report_csv2", file_csv2)
+        cls.archive.append_csv("csv2", file_csv2)
         task_progress.update_task_state(extra_meta=current_step)
 
         # Generating CSV3
         current_step = {'step': 'Calculating CSV3'}
         file_csv3 = cls._get_csv3_data(course_id, enrolled_students)
-        cls.archive.append_csv("psychometrics_report_csv3", file_csv3)
+        cls.archive.append_csv("csv3", file_csv3)
         task_progress.update_task_state(extra_meta=current_step)
 
         # Generating CSV4
         current_step = {'step': 'Calculating CSV4'}
         file_csv4 = cls._get_csv4_data(course_id)
-        cls.archive.append_csv("psychometrics_report_csv4", file_csv4)
+        cls.archive.append_csv("csv4", file_csv4)
         task_progress.update_task_state(extra_meta=current_step)
 
         # Generating CSV5
         current_step = {'step': 'Calculating CSV5'}
         file_csv5 = cls._get_csv5_data(course_id)
-        cls.archive.append_csv("psychometrics_report_csv5", file_csv5)
+        cls.archive.append_csv("csv5", file_csv5)
         task_progress.update_task_state(extra_meta=current_step)
 
         # Generating course description json
@@ -87,7 +87,7 @@ class PsychometricsReport(object):
         cls.archive.append_json("course", data_json)
         task_progress.update_task_state(extra_meta=current_step)
 
-        cls.archive.save_archive(course_id, "archive", start_date)
+        cls.archive.save_archive(course_id, "psychometrics_data", start_date)
 
         return task_progress.update_task_state(extra_meta=current_step)
 
@@ -119,7 +119,7 @@ class PsychometricsReport(object):
                                 ])
 
         rows.insert(0, headers)
-        file = upload_csv_to_report_store_by_semicolon(rows)
+        file = write_to_csv_by_semicolon(rows)
         return file
 
     @classmethod
@@ -145,7 +145,7 @@ class PsychometricsReport(object):
                 module_order = module_order + 1
 
         datarows.insert(0, headers)
-        file = upload_csv_to_report_store_by_semicolon(datarows)
+        file = write_to_csv_by_semicolon(datarows)
         return file
 
     @classmethod
@@ -193,7 +193,7 @@ class PsychometricsReport(object):
                                 ])
         rows.insert(0, headers)
 
-        file = upload_csv_to_report_store_by_semicolon(rows)
+        file = write_to_csv_by_semicolon(rows)
         return file
 
     @classmethod
@@ -219,7 +219,7 @@ class PsychometricsReport(object):
                 module_order = module_order + 1
 
         datarows.insert(0, headers)
-        file = upload_csv_to_report_store_by_semicolon(datarows)
+        file = write_to_csv_by_semicolon(datarows)
         return file
 
     @classmethod
@@ -264,7 +264,7 @@ class PsychometricsReport(object):
         ]
         datarows = [header] + [row for row in rows]
 
-        file = upload_csv_to_report_store_by_semicolon(datarows)
+        file = write_to_csv_by_semicolon(datarows)
         return file
 
     @classmethod
@@ -276,16 +276,16 @@ class PsychometricsReport(object):
         }
         return course_data
 
-    @classmethod
-    def _graded_scorable_blocks_to_header(cls, course):
-        """
-        Returns an OrderedDict that maps a scorable block's id to its
-        headers in the final report.
-        """
-        scorable_blocks_map = []
-        grading_context = grading_context_for_course(course)
-        for assignment_type_name, subsection_infos in grading_context['all_graded_subsections_by_type'].iteritems():
-            for subsection_index, subsection_info in enumerate(subsection_infos, start=1):
-                for scorable_block in subsection_info['scored_descendants']:
-                    scorable_blocks_map.append(scorable_block.location)
-        return scorable_blocks_map
+    # @classmethod
+    # def _graded_scorable_blocks_to_header(cls, course):
+    #     """
+    #     Returns an OrderedDict that maps a scorable block's id to its
+    #     headers in the final report.
+    #     """
+    #     scorable_blocks_map = []
+    #     grading_context = grading_context_for_course(course)
+    #     for assignment_type_name, subsection_infos in grading_context['all_graded_subsections_by_type'].iteritems():
+    #         for subsection_index, subsection_info in enumerate(subsection_infos, start=1):
+    #             for scorable_block in subsection_info['scored_descendants']:
+    #                 scorable_blocks_map.append(scorable_block.location)
+    #     return scorable_blocks_map
