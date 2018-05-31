@@ -66,7 +66,8 @@ def upload_csv_to_report_store_by_semicolon(rows, filename, course_id, timestamp
     output_buffer = ContentFile('')
     output_buffer.write(codecs.BOM_UTF8)
     csvwriter = csv.writer(output_buffer, delimiter=';')
-    csvwriter.writerows(ReportStore._get_utf8_encoded_rows(rows))
+    report_store_1 = ReportStore.from_config(config_name)
+    csvwriter.writerows(report_store_1._get_utf8_encoded_rows(rows))
     output_buffer.seek(0)
     return u"{filename}.csv".format(filename), output_buffer
 
