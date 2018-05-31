@@ -64,15 +64,8 @@ def upload_json_to_report_store(json_data, filename, course_id, timestamp, confi
 
 
 def store_json_file(self, course_id, filename, rows):
-    outfile = BytesIO()
+    outfile = StringIO.StringIO()
     outfile.write(json.dumps(rows))
-
-    my_zip = InMemoryZipFile()
-
-    my_zip.write(str(filename), outfile)
-
-    self.store(course_id, u"{filename}_lol.zip".format(filename="CSV-archive"), my_zip.read())
-
     self.store(course_id, filename, outfile)
 
 
@@ -81,7 +74,15 @@ def store_rows_by_semicolon(self, course_id, filename, rows):
     output_buffer.write(codecs.BOM_UTF8)
     csvwriter = csv.writer(output_buffer, delimiter=';')
     csvwriter.writerows(self._get_utf8_encoded_rows(rows))
+
+    my_zip = InMemoryZipFile()
+
+    my_zip.write(str(filename), output_buffer)
+
+    self.store(course_id, u"{filename}_test.zip".format(filename="CSV-archive"), my_zip.read())
+
     output_buffer.seek(0)
+
     self.store(course_id, filename, output_buffer)
 
 
