@@ -32,12 +32,6 @@ class InMemoryZipFile(object):
         self.inMemoryOutputFile.seek(0)
         return self.inMemoryOutputFile
 
-#
-#     # my_zip = InMemoryZipFile()
-#     # my_zip.write(str(filename), output_buffer.read())
-#     # self.store(course_id, u"{filename}_test.zip".format(filename="CSV-archive"), my_zip.read())
-#
-
 class PsychometricsReportStore(object):
     def __init__(self):
         self.archive = InMemoryZipFile()
@@ -45,52 +39,35 @@ class PsychometricsReportStore(object):
     def append(self, filename, output_buffer):
         self.archive.write(str(filename), output_buffer.read())
 
-    def save_archive(self, course_id, filename, config_name='GRADES_DOWNLOAD'):
+    def save_archive(self, course_id, filename, timestamp, config_name='GRADES_DOWNLOAD'):
         report_store = ReportStore.from_config(config_name)
-        report_store.store(course_id, u"{filename}_test.zip".format(filename="CSV-archive"), self.archive.read())
+        zip_file_name = u"{filename}_{course}_{timestamp_str}.zip".format(
+            filename=filename,
+            course=get_valid_filename(unicode("_").join([course_id.org, course_id.course, course_id.run])),
+            timestamp_str=timestamp.strftime("%Y-%m-%d-%H%M")
+        )
+        report_store.store(course_id, zip_file_name, self.archive.read())
 
-def upload_csv_to_report_store_by_semicolon(rows, filename, course_id, timestamp, config_name='GRADES_DOWNLOAD'):
-    # report_store = ReportStore.from_config(config_name)
-    # store_rows_by_semicolon(
-    #     report_store,
-    #     course_id,
-    #     u"{filename}.csv".format(
-    #         course_prefix=get_valid_filename(unicode("_").join([course_id.org, course_id.course, course_id.run])),
-    #         filename=filename,
-    #         timestamp_str=timestamp.strftime("%Y-%m-%d-%H%M")
-    #     ),
-    #     rows
-    # )
+def upload_csv_to_report_store_by_semicolon(rows, filename):
     tracker_emit(filename)
-
     output_buffer = ContentFile('')
     output_buffer.write(codecs.BOM_UTF8)
     csvwriter = csv.writer(output_buffer, delimiter=';')
-    report_store_1 = ReportStore.from_config(config_name)
-    csvwriter.writerows(report_store_1._get_utf8_encoded_rows(rows))
+    csvwriter.writerows(_get_utf8_encoded_rows(rows))
     output_buffer.seek(0)
+    csv_filename = u"{filename}.csv".format(filename=filename)
+    return csv_filename, output_buffer
 
-    return u"{filename}.csv".format(filename=filename), output_buffer
 
-
-def upload_json_to_report_store(json_data, filename, course_id, timestamp, config_name='GRADES_DOWNLOAD'):
-    # report_store = ReportStore.from_config(config_name)
-    # store_json_file(
-    #     report_store,
-    #     course_id,
-    #     u"{filename}.json".format(
-    #         course_prefix=get_valid_filename(unicode("_").join([course_id.org, course_id.course, course_id.run])),
-    #         filename=filename,
-    #         timestamp_str=timestamp.strftime("%Y-%m-%d-%H%M")
-    #     ),
-    #     json_data
-    # )
-    tracker_emit(filename)
-
-    json_file = StringIO.StringIO()
-    json_file.write(json.dumps(json_data))
-
-    return u"{filename}.csv".format(filename), json_data
+# def upload_json_to_report_store(json_data, filename, course_id, timestamp, config_name='GRADES_DOWNLOAD'):
+#
+#     tracker_emit(filename)
+#     json_file = StringIO.StringIO()
+#     json_file.write(json.dumps(json_data))
+#
+#     csv_filename = u"{filename}.csv".format(filename=filename)
+#
+#     return u"{filename}.csv".format(filename), json_data
 
 
 # def store_json_file(self, course_id, filename, data):
@@ -132,6 +109,11 @@ def get_course_item_submissions(course_id, item_id, item_type, read_replica=True
             SubmissionSerializer(submission).data,
             serialized_score
         )
+
+
+def _get_utf8_encoded_rows(rows):
+    for row in rows:
+        yield [unicode(item).encode('utf-8') for item in row]
 
 
 def _use_read_replica(queryset):

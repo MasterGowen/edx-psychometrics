@@ -53,33 +53,36 @@ class PsychometricsReport(object):
 
         # Generating Generating CSV1
         current_step = {'step': 'Calculating CSV1'}
-        filename, file = cls._get_csv1_data(course_id, enrolled_students, start_date, "psychometrics_report_csv1")
-
-        cls.arch.append(filename, file)
-        cls.arch.save_archive(course_id, "arch")
-
+        filename_csv1, file_csv1 = cls._get_csv1_data(course_id, enrolled_students, "psychometrics_report_csv1")
+        cls.arch.append(filename_csv1, file_csv1)
         task_progress.update_task_state(extra_meta=current_step)
 
         # Generating CSV2
-        # current_step = {'step': 'Calculating CSV2'}
-        # cls._get_csv2_data(course_id, start_date, "psychometrics_report_csv2")
-        # task_progress.update_task_state(extra_meta=current_step)
-        #
-        # # Generating CSV3
-        # current_step = {'step': 'Calculating CSV3'}
-        # cls._get_csv3_data(course_id, enrolled_students, start_date, "psychometrics_report_csv3")
-        # task_progress.update_task_state(extra_meta=current_step)
-        #
-        # # Generating CSV4
-        # current_step = {'step': 'Calculating CSV4'}
-        # cls._get_csv4_data(course_id, start_date, "psychometrics_report_csv4")
-        # task_progress.update_task_state(extra_meta=current_step)
-        #
-        # # Generating CSV5
-        # current_step = {'step': 'Calculating CSV5'}
-        # cls._get_csv5_data(course_id, start_date, "psychometrics_report_csv5")
-        # task_progress.update_task_state(extra_meta=current_step)
-        #
+        current_step = {'step': 'Calculating CSV2'}
+        filename_csv2, file_csv2 = cls._get_csv2_data(course_id, "psychometrics_report_csv2")
+        cls.arch.append(filename_csv2, file_csv2)
+        task_progress.update_task_state(extra_meta=current_step)
+
+        # Generating CSV3
+        current_step = {'step': 'Calculating CSV3'}
+        filename_csv3, file_csv3 = cls._get_csv3_data(course_id, enrolled_students, "psychometrics_report_csv3")
+        cls.arch.append(filename_csv3, file_csv3)
+        task_progress.update_task_state(extra_meta=current_step)
+
+        # Generating CSV4
+        current_step = {'step': 'Calculating CSV4'}
+        filename_csv4, file_csv4 = cls._get_csv4_data(course_id, "psychometrics_report_csv4")
+        cls.arch.append(filename_csv4, file_csv4)
+        task_progress.update_task_state(extra_meta=current_step)
+
+        # Generating CSV5
+        current_step = {'step': 'Calculating CSV5'}
+        filename_csv5, file_csv5 = cls._get_csv5_data(course_id, "psychometrics_report_csv5")
+        cls.arch.append(filename_csv5, file_csv5)
+        task_progress.update_task_state(extra_meta=current_step)
+
+        cls.arch.save_archive(course_id, "archive", start_date)
+
         # # Generating course description json
         # current_step = {'step': 'Calculating description json'}
         # cls._get_course_json_data(course_id, start_date, "course")
@@ -88,7 +91,7 @@ class PsychometricsReport(object):
         return task_progress.update_task_state(extra_meta=current_step)
 
     @classmethod
-    def _get_csv1_data(cls, course_id, enrolled_students, start_date, csv_name):
+    def _get_csv1_data(cls, course_id, enrolled_students, csv_name):
         user_state_client = DjangoXBlockUserStateClient()
         course = get_course_by_id(course_id)
         headers = ('user_id', 'item_id', 'correct', 'time')
@@ -115,11 +118,11 @@ class PsychometricsReport(object):
                                 ])
 
         rows.insert(0, headers)
-        filename, file = upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, start_date)
+        filename, file = upload_csv_to_report_store_by_semicolon(rows, csv_name)
         return filename, file
 
     @classmethod
-    def _get_csv2_data(cls, course_id, start_date, csv_name):
+    def _get_csv2_data(cls, course_id, csv_name):
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
         headers = ('item_id', 'item_type', 'item_name', 'module_id', 'module_order', 'module_name')
         datarows = []
@@ -141,11 +144,11 @@ class PsychometricsReport(object):
                 module_order = module_order + 1
 
         datarows.insert(0, headers)
-
-        upload_csv_to_report_store_by_semicolon(datarows, csv_name, course_id, start_date)
+        filename, file = upload_csv_to_report_store_by_semicolon(datarows, csv_name)
+        return filename, file
 
     @classmethod
-    def _get_csv3_data(cls, course_id, enrolled_students, start_date, csv_name):
+    def _get_csv3_data(cls, course_id, enrolled_students, csv_name):
         headers = ('user_id', 'content_piece_id', 'viewed', 'p')
 
         rows = []
@@ -188,10 +191,12 @@ class PsychometricsReport(object):
                                     _viewed(c_pos, subsection, vertical, student)
                                 ])
         rows.insert(0, headers)
-        upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, start_date)
+
+        filename, file = upload_csv_to_report_store_by_semicolon(rows, csv_name)
+        return filename, file
 
     @classmethod
-    def _get_csv4_data(cls, course_id, start_date, csv_name):
+    def _get_csv4_data(cls, course_id, csv_name):
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
         headers = (
             'content_piece_id', 'content_piece_type', 'content_piece_name', 'module_id', 'module_order', 'module_name')
@@ -213,14 +218,15 @@ class PsychometricsReport(object):
                 module_order = module_order + 1
 
         datarows.insert(0, headers)
-        upload_csv_to_report_store_by_semicolon(datarows, csv_name, course_id, start_date)
+        filename, file = upload_csv_to_report_store_by_semicolon(datarows, csv_name)
+        return filename, file
 
     @classmethod
-    def _get_csv5_data(cls, course_id, start_date, csv_name):
+    def _get_csv5_data(cls, course_id, csv_name):
 
         openassessment_blocks = modulestore().get_items(CourseKey.from_string(str(course_id)),
                                                         qualifiers={'category': 'openassessment'})
-        datarows = []
+        rows = []
         for openassessment_block in openassessment_blocks:
             x_block_id = openassessment_block.get_xblock_id()
             all_submission_information = get_course_item_submissions(course_id, x_block_id, 'openassessment')
@@ -244,30 +250,31 @@ class PsychometricsReport(object):
                         str(user_by_anonymous_id(str(assessment.scorer_id)).id),
                         scorer_points,
                         max_score,
-                        assessment.score_type
+                        # assessment.score_type
                     ]
-                    datarows.append(row)
+                    rows.append(row)
         header = [
             'user_id',
             'item_id',
             'scorer_id',
             'score',
             'max_score',
-            'score_type'
+            # 'score_type'
         ]
-        rows = [header] + [row for row in datarows]
+        datarows = [header] + [row for row in rows]
 
-        upload_csv_to_report_store_by_semicolon(rows, csv_name, course_id, start_date)
+        filename, file = upload_csv_to_report_store_by_semicolon(datarows, csv_name)
+        return filename, file
 
     @classmethod
-    def _get_course_json_data(cls, course_id, start_date, csv_name):
+    def _get_course_json_data(cls, course_id, csv_name):
         course = CourseKey.from_string(str(course_id))
         course_data = {
             "short_name": "+".join([course.org, course.course, course.run]),
             "long_name": get_course_by_id(CourseKey.from_string(str(course_id))).display_name
         }
-
-        upload_json_to_report_store(course_data, 'course', course_id, start_date)
+        return "course", course_data
+        # upload_json_to_report_store(course_data, 'course', course_id, start_date)
 
     @classmethod
     def _graded_scorable_blocks_to_header(cls, course):
