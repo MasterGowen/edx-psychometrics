@@ -64,7 +64,7 @@ def upload_json_to_report_store(json_data, filename, course_id, timestamp, confi
 
 
 def store_json_file(self, course_id, filename, rows):
-    outfile = StringIO.StringIO()
+    outfile = BytesIO()
     outfile.write(json.dumps(rows))
 
     my_zip = InMemoryZipFile()
