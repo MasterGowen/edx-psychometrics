@@ -27,7 +27,7 @@ from openedx.core.djangoapps.content.course_structures.models import CourseStruc
 from openassessment.assessment.models import Assessment
 
 from edx_psychometrics.utils import get_course_item_submissions, _use_read_replica, \
-    upload_csv_to_report_store_by_semicolon, upload_json_to_report_store
+    upload_csv_to_report_store_by_semicolon, upload_json_to_report_store, PsychometricsReportStore
 
 from django.conf import settings
 
@@ -35,6 +35,9 @@ log = logging.getLogger(__name__)
 
 
 class PsychometricsReport(object):
+
+    arch = PsychometricsReportStore()
+
     @classmethod
     def generate(cls, _xmodule_instance_args, _entry_id, course_id, task_input, action_name):
         """
@@ -50,33 +53,37 @@ class PsychometricsReport(object):
 
         # Generating Generating CSV1
         current_step = {'step': 'Calculating CSV1'}
-        cls._get_csv1_data(course_id, enrolled_students, start_date, "psychometrics_report_csv1")
+        filename, file = cls._get_csv1_data(course_id, enrolled_students, start_date, "psychometrics_report_csv1")
+
+        cls.arch.append(filename, file)
+        cls.arch.save_archive(course_id, "arch")
+
         task_progress.update_task_state(extra_meta=current_step)
 
         # Generating CSV2
-        current_step = {'step': 'Calculating CSV2'}
-        cls._get_csv2_data(course_id, start_date, "psychometrics_report_csv2")
-        task_progress.update_task_state(extra_meta=current_step)
-
-        # Generating CSV3
-        current_step = {'step': 'Calculating CSV3'}
-        cls._get_csv3_data(course_id, enrolled_students, start_date, "psychometrics_report_csv3")
-        task_progress.update_task_state(extra_meta=current_step)
-
-        # Generating CSV4
-        current_step = {'step': 'Calculating CSV4'}
-        cls._get_csv4_data(course_id, start_date, "psychometrics_report_csv4")
-        task_progress.update_task_state(extra_meta=current_step)
-
-        # Generating CSV5
-        current_step = {'step': 'Calculating CSV5'}
-        cls._get_csv5_data(course_id, start_date, "psychometrics_report_csv5")
-        task_progress.update_task_state(extra_meta=current_step)
-
-        # Generating course description json
-        current_step = {'step': 'Calculating description json'}
-        cls._get_course_json_data(course_id, start_date, "course")
-        task_progress.update_task_state(extra_meta=current_step)
+        # current_step = {'step': 'Calculating CSV2'}
+        # cls._get_csv2_data(course_id, start_date, "psychometrics_report_csv2")
+        # task_progress.update_task_state(extra_meta=current_step)
+        #
+        # # Generating CSV3
+        # current_step = {'step': 'Calculating CSV3'}
+        # cls._get_csv3_data(course_id, enrolled_students, start_date, "psychometrics_report_csv3")
+        # task_progress.update_task_state(extra_meta=current_step)
+        #
+        # # Generating CSV4
+        # current_step = {'step': 'Calculating CSV4'}
+        # cls._get_csv4_data(course_id, start_date, "psychometrics_report_csv4")
+        # task_progress.update_task_state(extra_meta=current_step)
+        #
+        # # Generating CSV5
+        # current_step = {'step': 'Calculating CSV5'}
+        # cls._get_csv5_data(course_id, start_date, "psychometrics_report_csv5")
+        # task_progress.update_task_state(extra_meta=current_step)
+        #
+        # # Generating course description json
+        # current_step = {'step': 'Calculating description json'}
+        # cls._get_course_json_data(course_id, start_date, "course")
+        # task_progress.update_task_state(extra_meta=current_step)
 
         return task_progress.update_task_state(extra_meta=current_step)
 
