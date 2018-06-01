@@ -164,14 +164,14 @@ class PsychometricsReport(object):
              } for c in chapters]
 
         def _viewed(c_pos, sequential, vertical, student):
-            _sm = StudentModule.objects.filter(module_type='sequential',
+            _sm = StudentModule.objects.filter(module_type='subsection',
                                                course_id=CourseKey.from_string(str(course_id)),
                                                student=student,
                                                module_state_key=BlockUsageLocator.from_string(sequential)
                                                ).first()
             if _sm:
                 position = json.loads(_sm.state)["position"]
-                rows.append([vertical_map[c_pos][sequential], str(vertical_map[c_pos][sequential].index(vertical)), vertical])
+                rows.append([vertical_map[c_pos][sequential], vertical])
 
                 if vertical_map[c_pos][sequential].index(vertical) <= position:
                     return 1
@@ -189,6 +189,7 @@ class PsychometricsReport(object):
                                 rows.append([
                                     student.id,
                                     vertical.split("@")[-1],
+                                    str(vertical_map[c_pos][subsection].index(vertical)),
                                     _viewed(c_pos, subsection, vertical, student)
                                 ])
         rows.insert(0, headers)
