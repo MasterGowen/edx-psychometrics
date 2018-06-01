@@ -189,7 +189,7 @@ class PsychometricsReport(object):
                                     student.id,
                                     vertical.split("@")[-1],
                                     _viewed(c_pos, subsection, vertical, student),
-                                    str(vertical_map[c_pos][subsection]),
+                                    str(vertical_map[c_pos][subsection][s]),
                                 ])
         rows.insert(0, headers)
 
