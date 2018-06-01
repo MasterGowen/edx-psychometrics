@@ -171,7 +171,7 @@ class PsychometricsReport(object):
                                                ).first()
             if _sm:
                 position = json.loads(_sm.state)["position"]
-                rows.append([vertical_map[c_pos][sequential], vertical])
+                # rows.append([vertical_map[c_pos][sequential], vertical])
 
                 if vertical_map[c_pos].index(vertical) <= position:
                     return 1
