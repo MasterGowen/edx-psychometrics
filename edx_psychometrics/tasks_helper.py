@@ -173,7 +173,7 @@ class PsychometricsReport(object):
                 position = json.loads(_sm.state)["position"]
 
                 for subsection in vertical_map[c_pos][sequential]:
-                    if sequential == subsection.keys()[0]:
+                    if sequential in subsection.keys():
                         return str([subsection, subsection[sequential], vertical])
 
 
