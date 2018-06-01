@@ -174,7 +174,7 @@ class PsychometricsReport(object):
 
                 for subsection in vertical_map[c_pos][sequential]:
                     if sequential == subsection.keys()[0]:
-                        return subsection[sequential].index(vertical)
+                        return str([subsection, subsection[sequential], vertical])
 
 
             #     if vertical_map[c_pos].index(vertical) <= position:
