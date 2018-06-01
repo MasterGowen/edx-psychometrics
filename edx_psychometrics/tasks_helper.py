@@ -172,12 +172,17 @@ class PsychometricsReport(object):
             if _sm:
                 position = json.loads(_sm.state)["position"]
 
-                if vertical_map[c_pos].index(vertical) <= position:
-                    return 1
-                else:
-                    return 0
-            else:
-                return 0
+                for subsection in vertical_map[c_pos][sequential]:
+                    if sequential == subsection.keys()[0]:
+                        return subsection[sequential].index(vertical)
+
+
+            #     if vertical_map[c_pos].index(vertical) <= position:
+            #         return 1
+            #     else:
+            #         return 0
+            # else:
+            #     return 0
 
         for student in enrolled_students:
             for c_pos, _chapter in enumerate(vertical_map):
@@ -189,7 +194,7 @@ class PsychometricsReport(object):
                                     student.id,
                                     vertical.split("@")[-1],
                                     _viewed(c_pos, subsection, vertical, student),
-                                    str(vertical_map[c_pos][subsection][s]),
+                                    # str(vertical_map[c_pos][subsection].index(s)),
                                 ])
         rows.insert(0, headers)
 
