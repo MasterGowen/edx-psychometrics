@@ -150,7 +150,7 @@ class PsychometricsReport(object):
 
     @classmethod
     def _get_csv3_data(cls, course_id, enrolled_students):
-        headers = ('user_id', 'content_piece_id', 'viewed')
+        headers = ('user_id', 'content_piece_id', 'viewed', 'subsection')
 
         rows = []
 
@@ -171,7 +171,6 @@ class PsychometricsReport(object):
                                                ).first()
             if _sm:
                 position = json.loads(_sm.state)["position"]
-                # rows.append([vertical_map[c_pos][sequential], vertical])
 
                 if vertical_map[c_pos].index(vertical) <= position:
                     return 1
@@ -189,8 +188,8 @@ class PsychometricsReport(object):
                                 rows.append([
                                     student.id,
                                     vertical.split("@")[-1],
+                                    _viewed(c_pos, subsection, vertical, student),
                                     str(vertical_map[c_pos][subsection]),
-                                    _viewed(c_pos, subsection, vertical, student)
                                 ])
         rows.insert(0, headers)
 
