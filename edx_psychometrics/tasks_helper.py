@@ -173,7 +173,7 @@ class PsychometricsReport(object):
                 position = json.loads(_sm.state)["position"]
                 rows.append([vertical_map[c_pos][sequential], vertical])
 
-                if vertical_map[c_pos][sequential].index(vertical) <= position:
+                if vertical_map[c_pos].index(vertical) <= position:
                     return 1
                 else:
                     return 0
@@ -189,7 +189,7 @@ class PsychometricsReport(object):
                                 rows.append([
                                     student.id,
                                     vertical.split("@")[-1],
-                                    str(vertical_map[c_pos][subsection].index(vertical)),
+                                    str(vertical_map[c_pos][subsection]),
                                     _viewed(c_pos, subsection, vertical, student)
                                 ])
         rows.insert(0, headers)
