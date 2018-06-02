@@ -146,7 +146,7 @@ class PsychometricsReport(object):
                         for input_state in state_inputs:
                             row = [
                                 input_state,
-                                # тип,
+                                # type,
                                 current_block['display_name'],
                                 key.split("@")[-1],
                                 module_order,
