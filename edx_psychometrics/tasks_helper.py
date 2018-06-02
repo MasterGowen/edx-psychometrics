@@ -16,6 +16,7 @@ from lms.djangoapps.grades.context import grading_context_for_course
 from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
 
 from django.contrib.auth.models import AnonymousUser
+from student.roles import CourseInstructorRole, CourseStaffRole
 
 from student.models import CourseEnrollment, user_by_anonymous_id
 from courseware.models import StudentModule
@@ -131,7 +132,12 @@ class PsychometricsReport(object):
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
         headers = ('item_id', 'item_type', 'item_name', 'module_id', 'module_order', 'module_name')
 
-        user = AnonymousUser()
+        # user = AnonymousUser()
+
+        instructors = set(CourseInstructorRole(CourseKey.from_string(course_id)).users_with_role())
+        # the page only lists staff and assumes they're a superset of instructors. Do a union to ensure.
+        user = list(set(CourseStaffRole(CourseKey.from_string(course_id)).users_with_role()).union(instructors))[0]
+
         module_order = 0
         datarows = []
         registered_loncapa_tags = responsetypes.registry.registered_tags()
