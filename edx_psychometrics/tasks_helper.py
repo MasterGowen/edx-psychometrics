@@ -147,7 +147,7 @@ class PsychometricsReport(object):
                         state_inputs = block.displayable_items()[0].input_state.keys()
                         loncapa_xml_tree = etree.XML(block.data)
                         response_types = [node.tag for node in loncapa_xml_tree.iter() if node.tag in registered_loncapa_tags]
-                        for idx, input_state in state_inputs:
+                        for idx, input_state in enumerate(state_inputs):
                             row = [
                                 input_state,
                                 response_types[idx],
