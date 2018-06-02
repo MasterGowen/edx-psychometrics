@@ -134,9 +134,9 @@ class PsychometricsReport(object):
 
         # user = AnonymousUser()
 
-        instructors = set(CourseInstructorRole(CourseKey.from_string(course_id)).users_with_role())
+        instructors = set(CourseInstructorRole(CourseKey.from_string(str(course_id))).users_with_role())
         # the page only lists staff and assumes they're a superset of instructors. Do a union to ensure.
-        user = list(set(CourseStaffRole(CourseKey.from_string(course_id)).users_with_role()).union(instructors))[0]
+        user = list(set(CourseStaffRole(CourseKey.from_string(str(course_id))).users_with_role()).union(instructors))[0]
 
         module_order = 0
         datarows = []
