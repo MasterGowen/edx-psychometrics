@@ -7,6 +7,8 @@ from collections import OrderedDict
 from datetime import datetime
 from itertools import chain
 from time import time
+from lxml import etree
+from capa import responsetypes
 
 from lms.djangoapps.instructor_task.tasks_helper.runner import TaskProgress
 from lms.djangoapps.instructor.utils import get_module_for_student
@@ -132,6 +134,7 @@ class PsychometricsReport(object):
         user = AnonymousUser()
         module_order = 0
         datarows = []
+        registered_loncapa_tags = responsetypes.registry.registered_tags()
 
         for key, value in structure.items():
             if value['block_type'] == 'vertical':
@@ -142,11 +145,12 @@ class PsychometricsReport(object):
                         usage_key = UsageKey.from_string(current_block['usage_key'])
                         block = get_module_for_student(user, usage_key)
                         state_inputs = block.displayable_items()[0].input_state.keys()
-                        print(current_block)
-                        for input_state in state_inputs:
+                        loncapa_xml_tree = etree.XML(block.data)
+                        response_types = [node.tag for node in loncapa_xml_tree.iter() if node.tag in registered_loncapa_tags]
+                        for idx, input_state in state_inputs:
                             row = [
                                 input_state,
-                                # type,
+                                response_types[idx],
                                 current_block['display_name'],
                                 key.split("@")[-1],
                                 module_order,
