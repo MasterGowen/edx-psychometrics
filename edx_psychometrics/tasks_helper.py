@@ -9,8 +9,11 @@ from itertools import chain
 from time import time
 
 from lms.djangoapps.instructor_task.tasks_helper.runner import TaskProgress
+from lms.djangoapps.instructor.utils import get_module_for_student
 from lms.djangoapps.grades.context import grading_context_for_course
 from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
+
+from django.contrib.auth.models import AnonymousUser
 
 from student.models import CourseEnrollment, user_by_anonymous_id
 from courseware.models import StudentModule
@@ -35,7 +38,6 @@ log = logging.getLogger(__name__)
 
 
 class PsychometricsReport(object):
-
     archive = PsychometricsReportStore()
 
     @classmethod
@@ -59,7 +61,7 @@ class PsychometricsReport(object):
 
         # Generating CSV2
         current_step = {'step': 'Calculating CSV2'}
-        file_csv2 = cls._get_csv2_data(course_id, )
+        file_csv2 = cls._get_csv2_data(course_id)
         cls.archive.append_csv("csv2", file_csv2)
         task_progress.update_task_state(extra_meta=current_step)
 
@@ -126,23 +128,49 @@ class PsychometricsReport(object):
     def _get_csv2_data(cls, course_id):
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
         headers = ('item_id', 'item_type', 'item_name', 'module_id', 'module_order', 'module_name')
-        datarows = []
+
+        user = AnonymousUser()
         module_order = 0
+        datarows = []
+
         for key, value in structure.items():
             if value['block_type'] == 'vertical':
                 for block in value['children']:
                     if structure[block]['block_type'] == 'problem':
                         current_block = structure[block]
-                        row = [
-                            current_block['usage_key'].split("@")[-1],
-                            current_block['block_type'],
-                            current_block['display_name'],
-                            key.split("@")[-1],
-                            module_order,
-                            value['display_name']
-                        ]
-                        datarows.append(row)
+                        # problem_usage_keys.append(current_block['usage_key'])
+                        usage_key = UsageKey.from_string(current_block['usage_key'])
+                        block = get_module_for_student(user, usage_key)
+                        state_inputs = block.displayable_items()[0].input_state.keys()
+                        print(current_block)
+                        for input_state in state_inputs:
+                            row = [
+                                input_state,
+                                # тип,
+                                current_block['display_name'],
+                                key.split("@")[-1],
+                                module_order,
+                                value['display_name']
+                            ]
+                            datarows.append(row)
                 module_order = module_order + 1
+        # datarows = []
+        # module_order = 0
+        # for key, value in structure.items():
+        #     if value['block_type'] == 'vertical':
+        #         for block in value['children']:
+        #             if structure[block]['block_type'] == 'problem':
+        #                 current_block = structure[block]
+        #                 row = [
+        #                     current_block['usage_key'].split("@")[-1],
+        #                     current_block['block_type'],
+        #                     current_block['display_name'],
+        #                     key.split("@")[-1],
+        #                     module_order,
+        #                     value['display_name']
+        #                 ]
+        #                 datarows.append(row)
+        #         module_order = module_order + 1
 
         datarows.insert(0, headers)
         file = write_to_csv_by_semicolon(datarows)
@@ -178,12 +206,12 @@ class PsychometricsReport(object):
                         return str([subsection, subsection[sequential], vertical])
 
 
-            #     if vertical_map[c_pos].index(vertical) <= position:
-            #         return 1
-            #     else:
-            #         return 0
-            # else:
-            #     return 0
+                        #     if vertical_map[c_pos].index(vertical) <= position:
+                        #         return 1
+                        #     else:
+                        #         return 0
+                        # else:
+                        #     return 0
 
         for student in enrolled_students:
             for c_pos, _chapter in enumerate(vertical_map):
@@ -282,16 +310,16 @@ class PsychometricsReport(object):
         }
         return course_data
 
-    # @classmethod
-    # def _graded_scorable_blocks_to_header(cls, course):
-    #     """
-    #     Returns an OrderedDict that maps a scorable block's id to its
-    #     headers in the final report.
-    #     """
-    #     scorable_blocks_map = []
-    #     grading_context = grading_context_for_course(course)
-    #     for assignment_type_name, subsection_infos in grading_context['all_graded_subsections_by_type'].iteritems():
-    #         for subsection_index, subsection_info in enumerate(subsection_infos, start=1):
-    #             for scorable_block in subsection_info['scored_descendants']:
-    #                 scorable_blocks_map.append(scorable_block.location)
-    #     return scorable_blocks_map
+        # @classmethod
+        # def _graded_scorable_blocks_to_header(cls, course):
+        #     """
+        #     Returns an OrderedDict that maps a scorable block's id to its
+        #     headers in the final report.
+        #     """
+        #     scorable_blocks_map = []
+        #     grading_context = grading_context_for_course(course)
+        #     for assignment_type_name, subsection_infos in grading_context['all_graded_subsections_by_type'].iteritems():
+        #         for subsection_index, subsection_info in enumerate(subsection_infos, start=1):
+        #             for scorable_block in subsection_info['scored_descendants']:
+        #                 scorable_blocks_map.append(scorable_block.location)
+        #     return scorable_blocks_map
