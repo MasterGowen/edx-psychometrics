@@ -156,7 +156,7 @@ class PsychometricsReport(object):
                                 value['display_name']
                             ]
                             datarows.append(row)
-                    if structure[block]['block_type'] == 'library_content':
+                    elif structure[block]['block_type'] == 'library_content':
                         for lib_item in structure[block]['children']:
                             current_block_lib = structure[lib_item]
                             usage_key = UsageKey.from_string(current_block_lib['usage_key'])
