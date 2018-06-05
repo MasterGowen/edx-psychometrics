@@ -222,7 +222,7 @@ class PsychometricsReport(object):
 
         def _viewed(_subsection, _vertical, _student):
             _sm = StudentModule.objects.filter(student=_student,
-                                               module_state_key=_subsection
+                                               module_state_key=_subsection.location
                                                ).first()
             if _sm:
                 position = json.loads(_sm.state)["position"]
