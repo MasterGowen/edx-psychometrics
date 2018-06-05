@@ -219,26 +219,22 @@ class PsychometricsReport(object):
              } for c in chapters]
 
         def _viewed(c_pos, sequential, vertical, student):
-            _sm = StudentModule.objects.filter(module_type='Subsection',
+            _sm = StudentModule.objects.filter(module_type='sequential',
                                                course_id=CourseKey.from_string(str(course_id)),
                                                student=student,
-                                               module_state_key=BlockUsageLocator.from_string(sequential)
+                                               module_state_key=BlockUsageLocator.from_string(vertical)
                                                ).first()
             if _sm:
                 position = json.loads(_sm.state)["position"]
-                return ("_sm exists!")
 
                 for subsection in vertical_map[c_pos][sequential]:
                     if sequential in subsection.keys():
-                        return str([subsection, subsection[sequential], vertical])
-
-
-                        #     if vertical_map[c_pos].index(vertical) <= position:
-                        #         return 1
-                        #     else:
-                        #         return 0
-                        # else:
-                        #     return 0
+                        if vertical_map[c_pos].index(vertical) <= position:
+                            return 1
+                        else:
+                            return 0
+                    else:
+                        return 0
 
         for student in enrolled_students:
             for c_pos, _chapter in enumerate(vertical_map):
@@ -248,7 +244,7 @@ class PsychometricsReport(object):
                             for vertical in verticals:
                                 rows.append([
                                     str(course_id),
-                                    subsection,
+                                    str(vertical),
                                     student.id,
                                     vertical.split("@")[-1],
                                     _viewed(c_pos, subsection, vertical, student),
