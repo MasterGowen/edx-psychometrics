@@ -218,11 +218,10 @@ class PsychometricsReport(object):
         for c in chapters:
             for s in c.get_children():
                 if not s.hide_from_toc:
-                    vertical_map[s] = [str(t.location) for t in s.get_children()]
+                    vertical_map[s] = [t.location for t in s.get_children()]
 
         def _viewed(_subsection, _vertical, _student):
-            _sm = StudentModule.objects.filter(course_id=CourseKey.from_string(str(course_id)),
-                                               student=_student,
+            _sm = StudentModule.objects.filter(student=_student,
                                                module_state_key=_subsection
                                                ).first()
             if _sm:
@@ -242,7 +241,7 @@ class PsychometricsReport(object):
                         str(BlockUsageLocator.to_string(subsection)),
                         str(vertical),
                         student.id,
-                        vertical.split("@")[-1],
+                        str(vertical).split("@")[-1],
                         _viewed(subsection, vertical, student),
                         # str(vertical_map[c_pos][subsection].index(s)),
                     ])
