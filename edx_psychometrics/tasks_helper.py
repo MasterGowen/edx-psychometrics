@@ -238,7 +238,7 @@ class PsychometricsReport(object):
             for subsection in vertical_map.keys():
                 for vertical in vertical_map[subsection]:
                     rows.append([
-                        str(BlockUsageLocator.to_string(subsection)),
+                        str(subsection),
                         str(vertical),
                         student.id,
                         str(vertical).split("@")[-1],
