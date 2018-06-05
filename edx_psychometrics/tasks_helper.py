@@ -242,8 +242,8 @@ class PsychometricsReport(object):
                         str(BlockUsageLocator.to_string(subsection)),
                         str(vertical),
                         student.id,
-                        # vertical.split("@")[-1],
-                        #_viewed(subsection, vertical, student),
+                        vertical.split("@")[-1],
+                        _viewed(subsection, vertical, student),
                         # str(vertical_map[c_pos][subsection].index(s)),
                     ])
         rows.insert(0, headers)
