@@ -120,7 +120,8 @@ class PsychometricsReport(object):
                                     s.student.id,
                                     item,
                                     1 if e.state["correct_map"][item]["correctness"] == "correct" else 0,
-                                    e.updated.astimezone(pytz.timezone(settings.TIME_ZONE)).strftime("%d.%m.%Y %H:%M:%S")
+                                    e.updated.astimezone(pytz.timezone(settings.TIME_ZONE)).strftime(
+                                        "%d.%m.%Y %H:%M:%S")
                                 ])
 
         rows.insert(0, headers)
@@ -151,7 +152,8 @@ class PsychometricsReport(object):
                         block = get_module_for_student(user, usage_key)
                         state_inputs = block.displayable_items()[0].input_state.keys()
                         loncapa_xml_tree = etree.XML(block.data)
-                        response_types = [node.tag for node in loncapa_xml_tree.iter() if node.tag in registered_loncapa_tags]
+                        response_types = [node.tag for node in loncapa_xml_tree.iter() if
+                                          node.tag in registered_loncapa_tags]
                         for idx, input_state in enumerate(state_inputs):
                             row = [
                                 input_state,
@@ -169,7 +171,8 @@ class PsychometricsReport(object):
                             block = get_module_for_student(user, usage_key)
                             state_inputs = block.displayable_items()[0].input_state.keys()
                             loncapa_xml_tree = etree.XML(block.data)
-                            response_types = [node.tag for node in loncapa_xml_tree.iter() if node.tag in registered_loncapa_tags]
+                            response_types = [node.tag for node in loncapa_xml_tree.iter() if
+                                              node.tag in registered_loncapa_tags]
                             for idx, input_state in enumerate(state_inputs):
                                 row = [
                                     input_state,
@@ -212,15 +215,14 @@ class PsychometricsReport(object):
         course = get_course_by_id(course_id)
         chapters = [chapter for chapter in course.get_children() if not chapter.hide_from_toc]
         vertical_map = [
-            {str(c.location): [  # chapter
-                                 {str(s.location): [str(t.location) for t in s.get_children()  # sequention:
-                                                    ]
-                                  } for s in c.get_children() if not s.hide_from_toc]
-             } for c in chapters]
+            {str(c.location): [
+                {str(s.location): [str(t.location) for t in s.get_children()
+                                   ]
+                 } for s in c.get_children() if not s.hide_from_toc]
+            } for c in chapters]
 
         def _viewed(c_pos, sequential, vertical, student):
-            _sm = StudentModule.objects.filter(module_type='sequential',
-                                               course_id=CourseKey.from_string(str(course_id)),
+            _sm = StudentModule.objects.filter(course_id=CourseKey.from_string(str(course_id)),
                                                student=student,
                                                module_state_key=BlockUsageLocator.from_string(vertical)
                                                ).first()
