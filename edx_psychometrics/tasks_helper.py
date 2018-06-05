@@ -1,30 +1,23 @@
 import logging
-import re
 import json
 import pytz
 from pytz import UTC
-from collections import OrderedDict
 from datetime import datetime
-from itertools import chain
 from time import time
 from lxml import etree
 from capa import responsetypes
 
 from lms.djangoapps.instructor_task.tasks_helper.runner import TaskProgress
 from lms.djangoapps.instructor.utils import get_module_for_student
-from lms.djangoapps.grades.context import grading_context_for_course
 from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
 
-from django.contrib.auth.models import AnonymousUser
 from student.roles import CourseInstructorRole, CourseStaffRole
-
 from student.models import CourseEnrollment, user_by_anonymous_id
 from courseware.models import StudentModule
 from courseware.courses import get_course_by_id
 from courseware.user_state_client import DjangoXBlockUserStateClient
 
 from opaque_keys.edx.keys import CourseKey, UsageKey
-from opaque_keys.edx.locator import BlockUsageLocator
 from xmodule.modulestore.django import modulestore
 
 from openedx.core.djangoapps.content.course_structures.models import CourseStructure
@@ -184,24 +177,6 @@ class PsychometricsReport(object):
                                 ]
                                 datarows.append(row)
                 module_order = module_order + 1
-        # datarows = []
-        # module_order = 0
-        # for key, value in structure.items():
-        #     if value['block_type'] == 'vertical':
-        #         for block in value['children']:
-        #             if structure[block]['block_type'] == 'problem':
-        #                 current_block = structure[block]
-        #                 row = [
-        #                     current_block['usage_key'].split("@")[-1],
-        #                     current_block['block_type'],
-        #                     current_block['display_name'],
-        #                     key.split("@")[-1],
-        #                     module_order,
-        #                     value['display_name']
-        #                 ]
-        #                 datarows.append(row)
-        #         module_order = module_order + 1
-
         datarows.insert(0, headers)
         file = write_to_csv_by_semicolon(datarows)
         return file
@@ -218,11 +193,11 @@ class PsychometricsReport(object):
         for c in chapters:
             for s in c.get_children():
                 if not s.hide_from_toc:
-                    vertical_map[s] = [t.location for t in s.get_children()]
+                    vertical_map[s.location] = [t.location for t in s.get_children()]
 
         def _viewed(_subsection, _vertical, _student):
             _sm = StudentModule.objects.filter(student=_student,
-                                               module_state_key=_subsection.location
+                                               module_state_key=_subsection
                                                ).first()
             if _sm:
                 position = json.loads(_sm.state)["position"]
@@ -238,12 +213,10 @@ class PsychometricsReport(object):
             for subsection in vertical_map.keys():
                 for vertical in vertical_map[subsection]:
                     rows.append([
-                        str(subsection),
-                        str(vertical),
                         student.id,
                         str(vertical).split("@")[-1],
                         _viewed(subsection, vertical, student),
-                        # str(vertical_map[c_pos][subsection].index(s)),
+                        str(subsection).split("@")[-1],
                     ])
         rows.insert(0, headers)
 
@@ -288,9 +261,7 @@ class PsychometricsReport(object):
             for student_item, submission, score in all_submission_information:
                 max_score = score.get('points_possible')
                 assessments = _use_read_replica(
-                    Assessment.objects.prefetch_related('parts').
-                        prefetch_related('rubric').
-                        filter(
+                    Assessment.objects.prefetch_related('parts').prefetch_related('rubric').filter(
                         submission_uuid=submission['uuid'],
                     )
                 )
@@ -329,17 +300,3 @@ class PsychometricsReport(object):
             "long_name": get_course_by_id(CourseKey.from_string(str(course_id))).display_name
         }
         return course_data
-
-        # @classmethod
-        # def _graded_scorable_blocks_to_header(cls, course):
-        #     """
-        #     Returns an OrderedDict that maps a scorable block's id to its
-        #     headers in the final report.
-        #     """
-        #     scorable_blocks_map = []
-        #     grading_context = grading_context_for_course(course)
-        #     for assignment_type_name, subsection_infos in grading_context['all_graded_subsections_by_type'].iteritems():
-        #         for subsection_index, subsection_info in enumerate(subsection_infos, start=1):
-        #             for scorable_block in subsection_info['scored_descendants']:
-        #                 scorable_blocks_map.append(scorable_block.location)
-        #     return scorable_blocks_map
