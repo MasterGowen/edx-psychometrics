@@ -218,12 +218,12 @@ class PsychometricsReport(object):
         for c in chapters:
             for s in c.get_children():
                 if not s.hide_from_toc:
-                    vertical_map[str(s)] = [str(t.location) for t in s.get_children()]
+                    vertical_map[s] = [str(t.location) for t in s.get_children()]
 
         def _viewed(_subsection, _vertical, _student):
             _sm = StudentModule.objects.filter(course_id=CourseKey.from_string(str(course_id)),
                                                student=_student,
-                                               module_state_key=BlockUsageLocator.from_string(_subsection)
+                                               module_state_key=_subsection
                                                ).first()
             if _sm:
                 position = json.loads(_sm.state)["position"]
@@ -239,7 +239,7 @@ class PsychometricsReport(object):
             for subsection in vertical_map.keys():
                 for vertical in vertical_map[subsection]:
                     rows.append([
-                        str(subsection),
+                        str(BlockUsageLocator.to_string(subsection)),
                         str(vertical),
                         student.id,
                         # vertical.split("@")[-1],
