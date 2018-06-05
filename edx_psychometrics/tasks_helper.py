@@ -245,11 +245,11 @@ class PsychometricsReport(object):
                         for verticals in s.values():
                             for vertical in verticals:
                                 rows.append([
-                                    str(s.key()),
+                                    str(s.keys()),
                                     str(vertical),
                                     student.id,
                                     vertical.split("@")[-1],
-                                    _viewed(c_pos, str(s.key()), vertical, student),
+                                    _viewed(c_pos, str(s.keys()[0]), vertical, student),
                                     # str(vertical_map[c_pos][subsection].index(s)),
                                 ])
         rows.insert(0, headers)
