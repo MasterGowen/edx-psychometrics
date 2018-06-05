@@ -224,7 +224,7 @@ class PsychometricsReport(object):
         def _viewed(c_pos, sequential, vertical, student):
             _sm = StudentModule.objects.filter(course_id=CourseKey.from_string(str(course_id)),
                                                student=student,
-                                               module_state_key=BlockUsageLocator.from_string(vertical)
+                                               module_state_key=BlockUsageLocator.from_string(sequential)
                                                ).first()
             if _sm:
                 position = json.loads(_sm.state)["position"]
@@ -249,7 +249,7 @@ class PsychometricsReport(object):
                                     str(vertical),
                                     student.id,
                                     vertical.split("@")[-1],
-                                    _viewed(c_pos, subsection, vertical, student),
+                                    _viewed(c_pos, s, vertical, student),
                                     # str(vertical_map[c_pos][subsection].index(s)),
                                 ])
         rows.insert(0, headers)
