@@ -120,7 +120,7 @@ class PsychometricsReport(object):
                                     s.student.id,
                                     item,
                                     1 if e.state["correct_map"][item]["correctness"] == "correct" else 0,
-                                    e.updated.astimezone(pytz.timezone(settings.TIME_ZONE))
+                                    e.updated.astimezone(pytz.timezone(settings.TIME_ZONE)).strftime("%d.%m.%Y %H.%M.%S")
                                 ])
 
         rows.insert(0, headers)
