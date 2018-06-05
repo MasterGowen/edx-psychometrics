@@ -214,44 +214,38 @@ class PsychometricsReport(object):
 
         course = get_course_by_id(course_id)
         chapters = [chapter for chapter in course.get_children() if not chapter.hide_from_toc]
-        vertical_map = [
-            {str(c.location): [
-                {str(s.location): [str(t.location) for t in s.get_children()
-                                   ]
-                 } for s in c.get_children() if not s.hide_from_toc]
-            } for c in chapters]
+        vertical_map = {}
+        for c in chapters:
+            for s in c.get_children():
+                if not s.hide_from_toc:
+                    vertical_map[str(s)] = [str(t.location) for t in s.get_children()]
 
-        def _viewed(c_pos, sequential, vertical, student):
+        def _viewed(_subsection, _vertical, _student):
             _sm = StudentModule.objects.filter(course_id=CourseKey.from_string(str(course_id)),
-                                               student=student,
-                                               module_state_key=BlockUsageLocator.from_string(sequential)
+                                               student=_student,
+                                               module_state_key=BlockUsageLocator.from_string(_subsection)
                                                ).first()
             if _sm:
                 position = json.loads(_sm.state)["position"]
 
-                for subsection in vertical_map[c_pos][sequential]:
-                    if sequential in subsection.keys():
-                        if vertical_map[c_pos].index(vertical) <= position:
-                            return 1
-                        else:
-                            return 0
-                    else:
-                        return 0
+                if vertical_map[_subsection].index(_vertical) <= position:
+                    return 1
+                else:
+                    return 0
+            else:
+                return 0
 
         for student in enrolled_students:
-            for c_pos, _chapter in enumerate(vertical_map):
-                for subsection, sequences in _chapter.items():
-                    for s in sequences:
-                        for verticals in s.values():
-                            for vertical in verticals:
-                                rows.append([
-                                    str(s.keys()),
-                                    str(vertical),
-                                    student.id,
-                                    vertical.split("@")[-1],
-                                    _viewed(c_pos, str(s.keys()[0]), vertical, student),
-                                    # str(vertical_map[c_pos][subsection].index(s)),
-                                ])
+            for subsection in vertical_map.keys():
+                for vertical in vertical_map[subsection]:
+                    rows.append([
+                        str(subsection),
+                        str(vertical),
+                        student.id,
+                        vertical.split("@")[-1],
+                        _viewed(subsection, vertical, student),
+                        # str(vertical_map[c_pos][subsection].index(s)),
+                    ])
         rows.insert(0, headers)
 
         file = write_to_csv_by_semicolon(rows)
