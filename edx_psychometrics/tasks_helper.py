@@ -219,7 +219,7 @@ class PsychometricsReport(object):
              } for c in chapters]
 
         def _viewed(c_pos, sequential, vertical, student):
-            _sm = StudentModule.objects.filter(module_type='subsection',
+            _sm = StudentModule.objects.filter(module_type='Subsection',
                                                course_id=CourseKey.from_string(str(course_id)),
                                                student=student,
                                                module_state_key=BlockUsageLocator.from_string(sequential)
