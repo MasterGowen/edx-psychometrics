@@ -9,7 +9,7 @@ from capa import responsetypes
 
 from lms.djangoapps.instructor_task.tasks_helper.runner import TaskProgress
 from lms.djangoapps.instructor.utils import get_module_for_student
-from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
+from lms.djangoapps.grades.new.course_grade_factory import CourseGradeFactory
 
 from student.roles import CourseInstructorRole, CourseStaffRole
 from student.models import CourseEnrollment, user_by_anonymous_id
@@ -25,8 +25,7 @@ from openedx.core.djangoapps.content.course_structures.models import CourseStruc
 # ORA
 from openassessment.assessment.models import Assessment
 
-from edx_psychometrics.utils import get_course_item_submissions, _use_read_replica, \
-    write_to_csv_by_semicolon, PsychometricsReportStore
+from edx_psychometrics.utils import get_course_item_submissions, _use_read_replica, write_to_csv_by_semicolon, PsychometricsReportStore
 
 from django.conf import settings
 
