@@ -160,8 +160,16 @@ class PsychometricsReport(object):
                                     value['display_name']
                                 ]
                                 datarows.append(row)
-                        except:
-                            pass
+                        except Exception as e:
+                            row = [
+                                    str(e),
+                                    '',
+                                    '',
+                                    '',
+                                    '',
+                                    '',
+                                ]
+                            datarows.append(row)
                     elif structure[block]['block_type'] == 'library_content':
                         for lib_item in structure[block]['children']:
                             current_block_lib = structure[lib_item]
