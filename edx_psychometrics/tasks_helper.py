@@ -9,7 +9,7 @@ from capa import responsetypes
 
 from lms.djangoapps.instructor_task.tasks_helper.runner import TaskProgress
 from lms.djangoapps.instructor.utils import get_module_for_student
-from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
+from lms.djangoapps.grades.new.course_grade_factory import CourseGradeFactory
 
 from student.roles import CourseInstructorRole, CourseStaffRole
 from student.models import CourseEnrollment, user_by_anonymous_id
@@ -160,16 +160,8 @@ class PsychometricsReport(object):
                                     value['display_name']
                                 ]
                                 datarows.append(row)
-                        except Exception as e:
-                            row = [
-                                    str(e),
-                                    '',
-                                    '',
-                                    '',
-                                    '',
-                                    '',
-                                ]
-                            datarows.append(row)
+                        except:
+                            pass
                     elif structure[block]['block_type'] == 'library_content':
                         for lib_item in structure[block]['children']:
                             current_block_lib = structure[lib_item]
