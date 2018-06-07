@@ -146,6 +146,9 @@ class PsychometricsReport(object):
                         loncapa_xml_tree = etree.XML(block.data)
                         response_types = [node.tag for node in loncapa_xml_tree.iter() if
                                           node.tag in registered_loncapa_tags]
+                        if len(state_inputs) > len(response_types):
+                            while len(state_inputs) != len(response_types):
+                                response_types.append(response_types[-1])
                         for idx, input_state in enumerate(state_inputs):
                             row = [
                                 input_state,
@@ -166,6 +169,9 @@ class PsychometricsReport(object):
                                 loncapa_xml_tree = etree.XML(block.data)
                                 response_types = [node.tag for node in loncapa_xml_tree.iter() if
                                                   node.tag in registered_loncapa_tags]
+                                if len(state_inputs) > len(response_types):
+                                    while len(state_inputs) != len(response_types):
+                                        response_types.append(response_types[-1])
                                 for idx, input_state in enumerate(state_inputs):
                                     row = [
                                         input_state,
