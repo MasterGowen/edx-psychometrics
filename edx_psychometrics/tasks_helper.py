@@ -159,22 +159,23 @@ class PsychometricsReport(object):
                     elif structure[block]['block_type'] == 'library_content':
                         for lib_item in structure[block]['children']:
                             current_block_lib = structure[lib_item]
-                            usage_key = UsageKey.from_string(current_block_lib['usage_key'])
-                            block = get_module_for_student(user, usage_key)
-                            state_inputs = block.displayable_items()[0].input_state.keys()
-                            loncapa_xml_tree = etree.XML(block.data)
-                            response_types = [node.tag for node in loncapa_xml_tree.iter() if
-                                              node.tag in registered_loncapa_tags]
-                            for idx, input_state in enumerate(state_inputs):
-                                row = [
-                                    input_state,
-                                    response_types[idx],
-                                    current_block_lib['display_name'],
-                                    key.split("@")[-1],
-                                    module_order,
-                                    value['display_name']
-                                ]
-                                datarows.append(row)
+                            if current_block_lib['block_type'] == 'problem':
+                                usage_key = UsageKey.from_string(current_block_lib['usage_key'])
+                                block = get_module_for_student(user, usage_key)
+                                state_inputs = block.displayable_items()[0].input_state.keys()
+                                loncapa_xml_tree = etree.XML(block.data)
+                                response_types = [node.tag for node in loncapa_xml_tree.iter() if
+                                                  node.tag in registered_loncapa_tags]
+                                for idx, input_state in enumerate(state_inputs):
+                                    row = [
+                                        input_state,
+                                        response_types[idx],
+                                        current_block_lib['display_name'],
+                                        key.split("@")[-1],
+                                        module_order,
+                                        value['display_name']
+                                    ]
+                                    datarows.append(row)
                 module_order = module_order + 1
         datarows.insert(0, headers)
         file = write_to_csv_by_semicolon(datarows)
