@@ -237,18 +237,20 @@ class PsychometricsReport(object):
         datarows = []
         module_order = 0
         for key, value in structure.items():
-            if value['block_type'] == 'vertical':
+            if value['block_type'] == 'sequential':
                 for block in value['children']:
                     current_block = structure[block]
-                    row = [
-                        current_block['usage_key'].split("@")[-1],
-                        current_block['block_type'],
-                        current_block['display_name'],
-                        key.split("@")[-1],
-                        module_order,
-                        value['display_name']
-                    ]
-                    datarows.append(row)
+                    for content in current_block['children']:
+                        current_content = structure[content]
+                        row = [
+                            current_content['usage_key'].split("@")[-1],
+                            current_content['block_type'],
+                            current_content['display_name'],
+                            key.split("@")[-1],
+                            module_order,
+                            value['display_name']
+                        ]
+                        datarows.append(row)
                 module_order = module_order + 1
 
         datarows.insert(0, headers)
