@@ -9,7 +9,7 @@ from capa import responsetypes
 
 from lms.djangoapps.instructor_task.tasks_helper.runner import TaskProgress
 from lms.djangoapps.instructor.utils import get_module_for_student
-from lms.djangoapps.grades.new.course_grade_factory import CourseGradeFactory
+from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
 
 from student.roles import CourseInstructorRole, CourseStaffRole
 from student.models import CourseEnrollment, user_by_anonymous_id
