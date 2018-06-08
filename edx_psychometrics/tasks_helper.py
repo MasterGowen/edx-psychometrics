@@ -235,23 +235,22 @@ class PsychometricsReport(object):
         headers = (
             'content_piece_id', 'content_piece_type', 'content_piece_name', 'module_id', 'module_order', 'module_name')
         datarows = []
+        sequentials = [s for s in structure.values() if s['block_type'] == 'sequential']
         module_order = 0
-        for key, value in structure.items():
-            if value['block_type'] == 'sequential':
-                for block in value['children']:
-                    current_block = structure[block]
-                    for content in current_block['children']:
-                        current_content = structure[content]
-                        row = [
-                            current_content['usage_key'].split("@")[-1],
-                            current_content['block_type'],
-                            current_content['display_name'],
-                            key.split("@")[-1],
-                            module_order,
-                            value['display_name']
-                        ]
-                        datarows.append(row)
-                module_order = module_order + 1
+        for sequential in sequentials:
+            for block in sequential['children']:
+                print(block)
+                for item in structure[block]['children']:
+                    row = [
+                        structure[item]['usage_key'].split("@")[-1],
+                        structure[item]['block_type'],
+                        structure[item]['display_name'],
+                        sequential['usage_key'].split("@")[-1],
+                        module_order,
+                        sequential['display_name']
+                    ]
+                    datarows.append(row)
+            module_order += 1
 
         datarows.insert(0, headers)
         file = write_to_csv_by_semicolon(datarows)
