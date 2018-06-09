@@ -235,21 +235,37 @@ class PsychometricsReport(object):
         headers = (
             'content_piece_id', 'content_piece_type', 'content_piece_name', 'module_id', 'module_order', 'module_name')
         datarows = []
-        sequentials = [s for s in structure.values() if s['block_type'] == 'sequential']
+        # sequentials = [s for s in structure.values() if s['block_type'] == 'sequential']
+        # module_order = 0
+        # for sequential in sequentials:
+        #     for block in sequential['children']:
+        #         for item in structure[block]['children']:
+        #             row = [
+        #                 structure[item]['usage_key'].split("@")[-1],
+        #                 structure[item]['block_type'],
+        #                 structure[item]['display_name'],
+        #                 sequential['usage_key'].split("@")[-1],
+        #                 module_order,
+        #                 sequential['display_name']
+        #             ]
+        #             datarows.append(row)
+        #     module_order += 1
+
+        chapters = [s for s in structure.values() if s['block_type'] == 'chapter']
         module_order = 0
-        for sequential in sequentials:
-            for block in sequential['children']:
-                print(block)
-                for item in structure[block]['children']:
-                    row = [
-                        structure[item]['usage_key'].split("@")[-1],
-                        structure[item]['block_type'],
-                        structure[item]['display_name'],
-                        sequential['usage_key'].split("@")[-1],
-                        module_order,
-                        sequential['display_name']
-                    ]
-                    datarows.append(row)
+        for chapter in chapters:
+            for sequential in chapter['children']:
+                for block in sequential['children']:
+                    for item in structure[block]['children']:
+                        row = [
+                            structure[item]['usage_key'].split("@")[-1],
+                            structure[item]['block_type'],
+                            structure[item]['display_name'],
+                            chapter['usage_key'].split("@")[-1],
+                            module_order,
+                            chapter['display_name']
+                        ]
+                        datarows.append(row)
             module_order += 1
 
         datarows.insert(0, headers)
