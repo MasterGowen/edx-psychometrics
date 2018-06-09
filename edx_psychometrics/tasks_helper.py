@@ -250,7 +250,7 @@ class PsychometricsReport(object):
         #             ]
         #             datarows.append(row)
         #     module_order += 1
-`
+
         datarows = []
         chapters = [s for s in structure.values() if s['block_type'] == 'chapter']
         module_order = 0
