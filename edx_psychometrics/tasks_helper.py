@@ -234,7 +234,7 @@ class PsychometricsReport(object):
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
         headers = (
             'content_piece_id', 'content_piece_type', 'content_piece_name', 'module_id', 'module_order', 'module_name')
-        datarows = []
+        # datarows = []
         # sequentials = [s for s in structure.values() if s['block_type'] == 'sequential']
         # module_order = 0
         # for sequential in sequentials:
@@ -250,12 +250,13 @@ class PsychometricsReport(object):
         #             ]
         #             datarows.append(row)
         #     module_order += 1
-
+`
+        datarows = []
         chapters = [s for s in structure.values() if s['block_type'] == 'chapter']
         module_order = 0
         for chapter in chapters:
             for sequential in chapter['children']:
-                for block in sequential['children']:
+                for block in structure[sequential]['children']:
                     for item in structure[block]['children']:
                         row = [
                             structure[item]['usage_key'].split("@")[-1],
