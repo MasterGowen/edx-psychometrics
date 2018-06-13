@@ -280,10 +280,18 @@ class PsychometricsReport(object):
                                                         qualifiers={'category': 'openassessment'})
         rows = []
         for openassessment_block in openassessment_blocks:
+
+            # max_score = 0
+            # for criterion in openassessment_block.rubric_criteria:
+            #     criterion_points = []
+            #     for option in criterion['options']:
+            #         criterion_points.append(option['points'])
+            #     max_score += max(criterion_points)
+
             x_block_id = openassessment_block.get_xblock_id()
             all_submission_information = get_course_item_submissions(course_id, x_block_id, 'openassessment')
             for student_item, submission, score in all_submission_information:
-                max_score = score.get('points_possible')
+                # max_score = score.get('points_possible')
                 assessments = _use_read_replica(
                     Assessment.objects.prefetch_related('parts').prefetch_related('rubric').filter(
                         submission_uuid=submission['uuid'],
@@ -291,6 +299,7 @@ class PsychometricsReport(object):
                 )
                 for assessment in assessments:
                     scorer_points = 0
+                    max_score = int(assessment.points_possible)
                     for part in assessment.parts.order_by('criterion__order_num'):
                         if part.option is not None:
                             scorer_points += part.option.points
