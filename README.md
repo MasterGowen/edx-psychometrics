@@ -47,3 +47,4 @@ if settings.FEATURES.get("ALLOW_PSY_REPORT_DOWNLOADS"):
 
 Кнопка запуска задачи генерации архива содержащего психометрические данные.
 .. image:: .readmeimg/st1.jpg
+![Изображение кнопки запуска](.readmeimg/st1.jpg)
