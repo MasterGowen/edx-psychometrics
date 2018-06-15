@@ -234,22 +234,40 @@ class PsychometricsReport(object):
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
         headers = (
             'content_piece_id', 'content_piece_type', 'content_piece_name', 'module_id', 'module_order', 'module_name')
+        # datarows = []
+        # sequentials = [s for s in structure.values() if s['block_type'] == 'sequential']
+        # module_order = 0
+        # for sequential in sequentials:
+        #     for block in sequential['children']:
+        #         for item in structure[block]['children']:
+        #             row = [
+        #                 structure[item]['usage_key'].split("@")[-1],
+        #                 structure[item]['block_type'],
+        #                 structure[item]['display_name'],
+        #                 sequential['usage_key'].split("@")[-1],
+        #                 module_order,
+        #                 sequential['display_name']
+        #             ]
+        #             datarows.append(row)
+        #     module_order += 1
+
         datarows = []
+        chapters = [s for s in structure.values() if s['block_type'] == 'chapter']
         module_order = 0
-        for key, value in structure.items():
-            if value['block_type'] == 'vertical':
-                for block in value['children']:
-                    current_block = structure[block]
-                    row = [
-                        current_block['usage_key'].split("@")[-1],
-                        current_block['block_type'],
-                        current_block['display_name'],
-                        key.split("@")[-1],
-                        module_order,
-                        value['display_name']
-                    ]
-                    datarows.append(row)
-                module_order = module_order + 1
+        for chapter in chapters:
+            for sequential in chapter['children']:
+                for block in structure[sequential]['children']:
+                    for item in structure[block]['children']:
+                        row = [
+                            structure[item]['usage_key'].split("@")[-1],
+                            structure[item]['block_type'],
+                            structure[item]['display_name'],
+                            chapter['usage_key'].split("@")[-1],
+                            module_order,
+                            chapter['display_name']
+                        ]
+                        datarows.append(row)
+            module_order += 1
 
         datarows.insert(0, headers)
         file = write_to_csv_by_semicolon(datarows)
@@ -262,10 +280,18 @@ class PsychometricsReport(object):
                                                         qualifiers={'category': 'openassessment'})
         rows = []
         for openassessment_block in openassessment_blocks:
+
+            # max_score = 0
+            # for criterion in openassessment_block.rubric_criteria:
+            #     criterion_points = []
+            #     for option in criterion['options']:
+            #         criterion_points.append(option['points'])
+            #     max_score += max(criterion_points)
+
             x_block_id = openassessment_block.get_xblock_id()
             all_submission_information = get_course_item_submissions(course_id, x_block_id, 'openassessment')
             for student_item, submission, score in all_submission_information:
-                max_score = score.get('points_possible')
+                # max_score = score.get('points_possible')
                 assessments = _use_read_replica(
                     Assessment.objects.prefetch_related('parts').prefetch_related('rubric').filter(
                         submission_uuid=submission['uuid'],
@@ -273,6 +299,7 @@ class PsychometricsReport(object):
                 )
                 for assessment in assessments:
                     scorer_points = 0
+                    max_score = int(assessment.points_possible)
                     for part in assessment.parts.order_by('criterion__order_num'):
                         if part.option is not None:
                             scorer_points += part.option.points
