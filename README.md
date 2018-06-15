@@ -43,7 +43,7 @@ if settings.FEATURES.get("ALLOW_PSY_REPORT_DOWNLOADS"):
 /edx/bin/supervisorctl restart edxapp_worker:
 ```
 
-## Испольование:
+## Использование:
 
 Кнопка запуска задачи генерации архива содержащего психометрические данные.
-.. image:: .readmeimg/st1.png
+.. image:: .readmeimg/st1.jpg
