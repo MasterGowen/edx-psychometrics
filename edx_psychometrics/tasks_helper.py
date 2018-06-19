@@ -128,7 +128,7 @@ class PsychometricsReport(object):
         # the page only lists staff and assumes they're a superset of instructors. Do a union to ensure.
         user = list(set(CourseStaffRole(CourseKey.from_string(str(course_id))).users_with_role()).union(instructors))[0]
 
-        module_order = 0
+        module_order = 1
         datarows = []
         registered_loncapa_tags = responsetypes.registry.registered_tags()
 
@@ -184,7 +184,7 @@ class PsychometricsReport(object):
                                             chapter['display_name']
                                         ]
                                         datarows.append(row)
-            module_order = module_order + 1
+            module_order += 1
         datarows.insert(0, headers)
         file = write_to_csv_by_semicolon(datarows)
         return file
@@ -255,7 +255,7 @@ class PsychometricsReport(object):
 
         datarows = []
         chapters = [s for s in structure.values() if s['block_type'] == 'chapter']
-        module_order = 0
+        module_order = 1
         for chapter in chapters:
             for sequential in chapter['children']:
                 for block in structure[sequential]['children']:
