@@ -157,9 +157,9 @@ class PsychometricsReport(object):
                                         input_state,
                                         response_types[idx],
                                         item['display_name'],
-                                        key.split("@")[-1],
+                                        chapter['usage_key'].split("@")[-1],
                                         module_order,
-                                        value['display_name']
+                                        chapter['display_name']
                                     ]
                                     datarows.append(row)
                             except:
@@ -179,7 +179,7 @@ class PsychometricsReport(object):
                                             input_state,
                                             response_types[idx],
                                             current_block_lib['display_name'],
-                                            key.split("@")[-1],
+                                            chapter['usage_key'].split("@")[-1],
                                             module_order,
                                             chapter['display_name']
                                         ]
