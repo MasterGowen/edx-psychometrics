@@ -192,6 +192,7 @@ class PsychometricsReport(object):
     @classmethod
     def _get_csv3_data(cls, course_id, enrolled_students):
         headers = ('user_id', 'content_piece_id', 'viewed', 'subsection')
+        structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
 
         rows = []
 
@@ -220,12 +221,13 @@ class PsychometricsReport(object):
         for student in enrolled_students:
             for subsection in vertical_map.keys():
                 for vertical in vertical_map[subsection]:
-                    rows.append([
-                        student.id,
-                        str(vertical).split("@")[-1],
-                        _viewed(subsection, vertical, student),
-                        str(subsection).split("@")[-1],
-                    ])
+                    for block in structure[vertical]["children"]:
+                        rows.append([
+                            student.id,
+                            str(block).split("@")[-1],
+                            _viewed(subsection, vertical, student),
+                            str(subsection).split("@")[-1],
+                        ])
         rows.insert(0, headers)
 
         file = write_to_csv_by_semicolon(rows)
