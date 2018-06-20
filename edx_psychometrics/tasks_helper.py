@@ -262,15 +262,16 @@ class PsychometricsReport(object):
             for sequential in chapter['children']:
                 for block in structure[sequential]['children']:
                     for item in structure[block]['children']:
-                        row = [
-                            structure[item]['usage_key'].split("@")[-1],
-                            structure[item]['block_type'],
-                            structure[item]['display_name'],
-                            chapter['usage_key'].split("@")[-1],
-                            module_order,
-                            chapter['display_name']
-                        ]
-                        datarows.append(row)
+                        if structure[item]['block_type'] == 'video': # !!! only video blocks !!!
+                            row = [
+                                structure[item]['usage_key'].split("@")[-1],
+                                structure[item]['block_type'],
+                                structure[item]['display_name'],
+                                chapter['usage_key'].split("@")[-1],
+                                module_order,
+                                chapter['display_name']
+                            ]
+                            datarows.append(row)
             module_order += 1
 
         datarows.insert(0, headers)
