@@ -4,12 +4,8 @@
 
 1. Установка пакета `edx-psychometrics`: `sudo /edx/bin/pip.edxapp install git+https://github.com/MasterGowen/edx-psychometrics@master`
 
-2. `lms/envs/aws.py:`
-```
-FEATURES["ALLOW_PSY_REPORT_DOWNLOADS"] = True
-if FEATURES.get("ALLOW_PSY_REPORT_DOWNLOADS"):
-    OPTIONAL_APPS += ("edx-psychometrics",)
-```
+2. `lms/envs/common.py:`
+В `OPTIONAL_APPS` добавить `('edx_psychometrics', None),`
 
 3. `/lms/djangoapps/instructor/views/instructor_dashboard.py`: 
 ```
