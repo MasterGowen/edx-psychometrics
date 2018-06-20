@@ -221,7 +221,7 @@ class PsychometricsReport(object):
         for student in enrolled_students:
             for subsection in vertical_map.keys():
                 for vertical in vertical_map[subsection]:
-                    for block in structure[vertical]["children"]:
+                    for block in structure[str(vertical)]["children"]:
                         rows.append([
                             student.id,
                             str(block).split("@")[-1],
