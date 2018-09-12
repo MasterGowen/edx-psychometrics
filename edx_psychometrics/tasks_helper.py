@@ -222,12 +222,13 @@ class PsychometricsReport(object):
             for subsection in vertical_map.keys():
                 for vertical in vertical_map[subsection]:
                     for block in structure[str(vertical)]["children"]:
-                        rows.append([
-                            student.id,
-                            str(block).split("@")[-1],
-                            _viewed(subsection, vertical, student),
-                            str(subsection).split("@")[-1],
-                        ])
+                        if "video" in block:
+                            rows.append([
+                                student.id,
+                                str(block).split("@")[-1],
+                                _viewed(subsection, vertical, student),
+                                str(subsection).split("@")[-1],
+                            ])
         rows.insert(0, headers)
 
         file = write_to_csv_by_semicolon(rows)
