@@ -97,7 +97,7 @@ class PsychometricsReport(object):
                 module_type='problem'
             )
 
-            log.info("SM:" + student_modules)
+            log.info("SM:" + str(student_modules))
 
             for s in student_modules:
                 if "correct_map" in s.state:
