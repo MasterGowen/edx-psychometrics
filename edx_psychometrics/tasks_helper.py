@@ -1,33 +1,28 @@
-import logging
 import json
-import pytz
-from pytz import UTC
+import logging
 from datetime import datetime
 from time import time
-from lxml import etree
+
+import pytz
 from capa import responsetypes
-
-from lms.djangoapps.instructor_task.tasks_helper.runner import TaskProgress
-from lms.djangoapps.instructor.utils import get_module_for_student
-from lms.djangoapps.grades.new.course_grade_factory import CourseGradeFactory
-
-from student.roles import CourseInstructorRole, CourseStaffRole
-from student.models import CourseEnrollment, user_by_anonymous_id
-from courseware.models import StudentModule
 from courseware.courses import get_course_by_id
+from courseware.models import StudentModule
 from courseware.user_state_client import DjangoXBlockUserStateClient
-
+from django.conf import settings
+from lms.djangoapps.grades.new.course_grade_factory import CourseGradeFactory
+from lms.djangoapps.instructor.utils import get_module_for_student
+from lms.djangoapps.instructor_task.tasks_helper.runner import TaskProgress
+from lxml import etree
 from opaque_keys.edx.keys import CourseKey, UsageKey
-from xmodule.modulestore.django import modulestore
-
-from openedx.core.djangoapps.content.course_structures.models import CourseStructure
-
 # ORA
 from openassessment.assessment.models import Assessment
+from openedx.core.djangoapps.content.course_structures.models import CourseStructure
+from pytz import UTC
+from student.models import CourseEnrollment, user_by_anonymous_id
+from student.roles import CourseInstructorRole, CourseStaffRole
+from xmodule.modulestore.django import modulestore
 
 from edx_psychometrics.utils import get_course_item_submissions, _use_read_replica, write_to_csv_by_semicolon, PsychometricsReportStore
-
-from django.conf import settings
 
 log = logging.getLogger(__name__)
 
@@ -101,6 +96,8 @@ class PsychometricsReport(object):
                 course_id=course_id,
                 module_type='problem'
             )
+
+            log.info("SM:" + student_modules)
 
             for s in student_modules:
                 if "correct_map" in s.state:
@@ -264,7 +261,7 @@ class PsychometricsReport(object):
             for sequential in chapter['children']:
                 for block in structure[sequential]['children']:
                     for item in structure[block]['children']:
-                        if structure[item]['block_type'] == 'video': # !!! only video blocks !!!
+                        if structure[item]['block_type'] == 'video':  # !!! only video blocks !!!
                             row = [
                                 structure[item]['usage_key'].split("@")[-1],
                                 structure[item]['block_type'],
