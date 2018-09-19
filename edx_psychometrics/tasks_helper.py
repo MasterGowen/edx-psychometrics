@@ -103,17 +103,20 @@ class PsychometricsReport(object):
                 if s.state:
                     if "correct_map" in s.state:
                         log.info("Get history:" + student.username)
-                        history_entries = list(user_state_client.get_history(student.username, s.module_state_key))
-                        for e in history_entries:
-                            if "correct_map" in e.state:
-                                for item in e.state["correct_map"]:
-                                    rows.append([
-                                        s.student.id,
-                                        item,
-                                        1 if e.state["correct_map"][item]["correctness"] == "correct" else 0,
-                                        e.updated.astimezone(pytz.timezone(settings.TIME_ZONE)).strftime(
-                                            "%d.%m.%Y %H:%M:%S")
-                                    ])
+                        try:
+                            history_entries = list(user_state_client.get_history(student.username, s.module_state_key))
+                            for e in history_entries:
+                                if "correct_map" in e.state:
+                                    for item in e.state["correct_map"]:
+                                        rows.append([
+                                            s.student.id,
+                                            item,
+                                            1 if e.state["correct_map"][item]["correctness"] == "correct" else 0,
+                                            e.updated.astimezone(pytz.timezone(settings.TIME_ZONE)).strftime(
+                                                "%d.%m.%Y %H:%M:%S")
+                                        ])
+                        except Exception as e:
+                            log.info("Get history: " + str(e))
 
         rows.insert(0, headers)
         file = write_to_csv_by_semicolon(rows)
