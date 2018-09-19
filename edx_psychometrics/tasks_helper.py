@@ -33,7 +33,7 @@ class PsychometricsReport(object):
     @classmethod
     def generate(cls, _xmodule_instance_args, _entry_id, course_id, task_input, action_name):
         """
-        For a given `course_id`, generate a 5 CSV file containing
+        For a given `course_id`, generate a 5 CSV files containing
         information about the learning process
         """
         start_time = time()
@@ -183,6 +183,17 @@ class PsychometricsReport(object):
                                             chapter['display_name']
                                         ]
                                         datarows.append(row)
+                        elif item['block_type'] == 'openassessment':
+                            row = [
+                                item['usage_key'].split("@")[-1],
+                                item['block_type'],
+                                item['display_name'],
+                                chapter['usage_key'].split("@")[-1],
+                                module_order,
+                                chapter['display_name']
+                            ]
+                            datarows.append(row)
+
             module_order = module_order + 1
         datarows.insert(0, headers)
         file = write_to_csv_by_semicolon(datarows)
