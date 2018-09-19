@@ -97,12 +97,9 @@ class PsychometricsReport(object):
                 module_type='problem'
             )
 
-            log.info("SM:" + str(student_modules))
-
             for s in student_modules:
                 if s.state:
                     if "correct_map" in s.state:
-                        log.info("Get history:" + student.username)
                         try:
                             history_entries = list(user_state_client.get_history(student.username, s.module_state_key))
                             for e in history_entries:
