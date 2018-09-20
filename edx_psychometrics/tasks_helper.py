@@ -194,6 +194,17 @@ class PsychometricsReport(object):
                             ]
                             datarows.append(row)
 
+                        elif item['block_type'] == 'edx_sga':
+                            row = [
+                                item['usage_key'].split("@")[-1],
+                                item['block_type'],
+                                item['display_name'],
+                                chapter['usage_key'].split("@")[-1],
+                                module_order,
+                                chapter['display_name']
+                            ]
+                            datarows.append(row)
+
             module_order = module_order + 1
         datarows.insert(0, headers)
         file = write_to_csv_by_semicolon(datarows)
