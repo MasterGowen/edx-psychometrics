@@ -2,6 +2,7 @@ import json
 import logging
 from datetime import datetime
 from time import time
+import collections
 
 import pytz
 from capa import responsetypes
@@ -42,16 +43,25 @@ class PsychometricsReport(object):
         task_progress = TaskProgress(action_name, num_reports, start_time)
 
         enrolled_students = CourseEnrollment.objects.users_enrolled_in(course_id, include_inactive=True)
+        problems = []
 
         # Generating Generating CSV1
         current_step = {'step': 'Calculating CSV1'}
-        file_csv1 = cls._get_csv1_data(course_id, enrolled_students)
-        cls.archive.append_csv("csv1", file_csv1)
+        rows1, problems = cls._get_csv1_data(course_id, enrolled_students, problems)
         task_progress.update_task_state(extra_meta=current_step)
 
         # Generating CSV2
         current_step = {'step': 'Calculating CSV2'}
-        file_csv2 = cls._get_csv2_data(course_id)
+        rows2, problems = cls._get_csv2_data(course_id, problems)
+
+        problems = [item for item, count in collections.Counter(problems).items() if count > 1]
+        problems.append("item_id")
+        rows1 = [r for r in rows1 if r[1] in problems]
+        rows2 = [r for r in rows2 if r[0] in problems]
+
+        file_csv1 = write_to_csv_by_semicolon(rows1)
+        cls.archive.append_csv("csv1", file_csv1)
+        file_csv2 = write_to_csv_by_semicolon(rows2)
         cls.archive.append_csv("csv2", file_csv2)
         task_progress.update_task_state(extra_meta=current_step)
 
@@ -84,7 +94,7 @@ class PsychometricsReport(object):
         return task_progress.update_task_state(extra_meta=current_step)
 
     @classmethod
-    def _get_csv1_data(cls, course_id, enrolled_students):
+    def _get_csv1_data(cls, course_id, enrolled_students, problems):
         user_state_client = DjangoXBlockUserStateClient()
         course = get_course_by_id(course_id)
         headers = ('user_id', 'item_id', 'correct', 'time')
@@ -115,12 +125,12 @@ class PsychometricsReport(object):
                         except Exception as e:
                             log.info("Get history: " + str(e))
 
+        problems += [r[1]for r in rows]
         rows.insert(0, headers)
-        file = write_to_csv_by_semicolon(rows)
-        return file
+        return rows, list(set(problems))
 
     @classmethod
-    def _get_csv2_data(cls, course_id):
+    def _get_csv2_data(cls, course_id, problems):
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
         headers = ('item_id', 'item_type', 'item_name', 'module_id', 'module_order', 'module_name')
         instructors = set(CourseInstructorRole(CourseKey.from_string(str(course_id))).users_with_role())
@@ -128,7 +138,7 @@ class PsychometricsReport(object):
         user = list(set(CourseStaffRole(CourseKey.from_string(str(course_id))).users_with_role()).union(instructors))[0]
 
         module_order = 0
-        datarows = []
+        datarows2 = []
         registered_loncapa_tags = responsetypes.registry.registered_tags()
 
         chapters = [s for s in structure.values() if s['block_type'] == 'chapter']
@@ -160,7 +170,7 @@ class PsychometricsReport(object):
                                         module_order,
                                         chapter['display_name']
                                     ]
-                                    datarows.append(row)
+                                    datarows2.append(row)
                             except:
                                 pass
                         elif item['block_type'] == 'library_content':
@@ -182,7 +192,7 @@ class PsychometricsReport(object):
                                             module_order,
                                             chapter['display_name']
                                         ]
-                                        datarows.append(row)
+                                        datarows2.append(row)
                         elif item['block_type'] == 'openassessment':
                             row = [
                                 item['usage_key'].split("@")[-1],
@@ -192,7 +202,7 @@ class PsychometricsReport(object):
                                 module_order,
                                 chapter['display_name']
                             ]
-                            datarows.append(row)
+                            datarows2.append(row)
 
                         elif item['block_type'] == 'edx_sga':
                             row = [
@@ -203,12 +213,13 @@ class PsychometricsReport(object):
                                 module_order,
                                 chapter['display_name']
                             ]
-                            datarows.append(row)
+                            datarows2.append(row)
 
             module_order = module_order + 1
-        datarows.insert(0, headers)
-        file = write_to_csv_by_semicolon(datarows)
-        return file
+        problems += [r[0] for r in datarows2]
+        datarows2.insert(0, headers)
+
+        return datarows2, problems
 
     @classmethod
     def _get_csv3_data(cls, course_id, enrolled_students):
