@@ -56,9 +56,11 @@ class PsychometricsReport(object):
 
         problems = [item for item, count in collections.Counter(problems).items() if count > 1]
         problems.append("item_id")
+        log.warning(str(problems))
         rows1 = [r for r in rows1 if r[1] in problems]
         rows2 = [r for r in rows2 if r[0] in problems]
-
+        log.warning(str(rows1))
+        log.warning(str(rows2))
         file_csv1 = write_to_csv_by_semicolon(rows1)
         cls.archive.append_csv("csv1", file_csv1)
         file_csv2 = write_to_csv_by_semicolon(rows2)
