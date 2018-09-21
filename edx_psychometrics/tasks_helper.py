@@ -128,6 +128,7 @@ class PsychometricsReport(object):
                             log.info("Get history: " + str(e))
 
         problems += [r[1]for r in rows]
+        log.warning(str(problems))
         rows.insert(0, headers)
         return rows, list(set(problems))
 
@@ -219,6 +220,7 @@ class PsychometricsReport(object):
 
             module_order = module_order + 1
         problems += [r[0] for r in datarows2]
+        log.warning(str(problems))
         datarows2.insert(0, headers)
 
         return datarows2, problems
