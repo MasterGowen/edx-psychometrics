@@ -24,7 +24,7 @@ def get_psychometrics_data(entry_id, xmodule_instance_args):
 
 
 @task(base=BaseInstructorTask, routing_key=settings.GRADES_DOWNLOAD_ROUTING_KEY)
-def get_views_data():
+def get_views_data(entry_id, xmodule_instance_args):
     """
     Generate views reports archive.
     """

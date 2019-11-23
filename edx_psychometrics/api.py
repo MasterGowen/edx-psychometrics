@@ -10,7 +10,7 @@ from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey, UsageKey
 from util.json_request import JsonResponse
 from lms.djangoapps.instructor.views.api import require_level, common_exceptions_400
-from .tasks import get_psychometrics_data as get_psychometrics_data_task
+from .tasks import get_psychometrics_data as get_psychometrics_data_task, get_views_data_task
 
 from lms.djangoapps.instructor_task.api_helper import submit_task
 
@@ -47,6 +47,36 @@ def get_psychometrics_data(request, course_id):
     course_key = CourseKey.from_string(course_id)
     report_type = _('get_psychometrics_data')
     submit_get_psychometrics_data(request, course_key)
+    success_status = SUCCESS_MESSAGE_TEMPLATE.format(report_type=report_type)
+
+    return JsonResponse({"status": success_status})
+
+
+def submit_get_views_data(request, course_key):
+    """
+    AlreadyRunningError is raised if an views report is already being generated.
+    """
+    task_type = 'get_views_data'
+    task_class = get_views_data_task
+    task_input = {}
+    task_key = ''
+
+    return submit_task(request, task_type, task_class, course_key, task_input, task_key)
+
+
+@transaction.non_atomic_requests
+@require_POST
+@ensure_csrf_cookie
+@cache_control(no_cache=True, no_store=True, must_revalidate=True)
+@require_level('staff')
+@common_exceptions_400
+def get_views_data(request, course_id):
+    """
+    Pushes a Celery task which will aggregate views data.
+    """
+    course_key = CourseKey.from_string(course_id)
+    report_type = _('get_views_data')
+    submit_get_views_data(request, course_key)
     success_status = SUCCESS_MESSAGE_TEMPLATE.format(report_type=report_type)
 
     return JsonResponse({"status": success_status})
