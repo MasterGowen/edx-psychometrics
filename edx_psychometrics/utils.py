@@ -65,12 +65,12 @@ class ViewsReportStore(object):
 
     def save_csv(self, course_id, filename, cvs_file, timestamp, config_name='GRADES_DOWNLOAD'):
         report_store = ReportStore.from_config(config_name)
-        csv_filename = u"{filename}_{course}_{timestamp_str}.zip".format(
+        csv_filename = u"{filename}_{course}_{timestamp_str}.csv".format(
             filename=filename,
             course=get_valid_filename(unicode("_").join([course_id.org, course_id.course, course_id.run])),
             timestamp_str=timestamp.strftime("%Y-%m-%d-%H%M")
         )
-        report_store.store(course_id, csv_filename, cvs_file.read())
+        report_store.store(course_id, csv_filename, cvs_file)
 
     # def append_json(self, filename, data):
     #     json_filename = u"{filename}.json".format(filename=filename)
