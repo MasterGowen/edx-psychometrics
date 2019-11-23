@@ -23,9 +23,77 @@ from student.models import CourseEnrollment, user_by_anonymous_id
 from student.roles import CourseInstructorRole, CourseStaffRole
 from xmodule.modulestore.django import modulestore
 
-from edx_psychometrics.utils import get_course_item_submissions, _use_read_replica, write_to_csv_by_semicolon, PsychometricsReportStore
+from edx_psychometrics.utils import get_course_item_submissions, _use_read_replica, write_to_csv_by_semicolon, PsychometricsReportStore, ViewsReportStore
 
 log = logging.getLogger(__name__)
+
+
+class ViewsReport(object):
+    views_reports_store = ViewsReportStore()
+
+    @classmethod
+    def generate(cls, _xmodule_instance_args, _entry_id, course_id, task_input, action_name):
+        # """
+        # For a given `course_id`, generate a CSV file containing
+        # information about the sections views
+        # """
+
+        start_time = time()
+        start_date = datetime.now(UTC)
+        num_reports = 1
+        task_progress = TaskProgress(action_name, num_reports, start_time)
+
+        enrolled_students = CourseEnrollment.objects.users_enrolled_in(course_id, include_inactive=True)
+        problems = []
+
+        # Generating Generating CSV1
+        current_step = {'step': 'Calculating views'}
+        rows1, problems = cls._get_csv1_data(course_id, enrolled_students, problems)
+        file_csv1 = write_to_csv_by_semicolon(rows1)
+        cls.views_reports_store.save_csv(course_id, "views", file_csv1, start_date)
+
+        # task_progress.update_task_state(extra_meta=current_step)
+        #
+
+        # cls.archive.save_archive(course_id, "psychometrics_data", start_date)
+
+        return task_progress.update_task_state(extra_meta=current_step)
+
+    @classmethod
+    def _get_csv1_data(cls, course_id, enrolled_students, problems):
+        user_state_client = DjangoXBlockUserStateClient()
+        course = get_course_by_id(course_id)
+        headers = ('user_id', 'item_id', 'correct', 'time')
+        rows = []
+
+        for student, course_grade, error in CourseGradeFactory().iter(enrolled_students, course):
+            student_modules = StudentModule.objects.filter(
+                student=student,
+                course_id=course_id,
+                module_type='problem'
+            )
+
+            for s in student_modules:
+                if s.state:
+                    if "correct_map" in s.state:
+                        try:
+                            history_entries = list(user_state_client.get_history(student.username, s.module_state_key))
+                            for e in history_entries:
+                                if "correct_map" in e.state:
+                                    for item in e.state["correct_map"]:
+                                        rows.append([
+                                            s.student.id,
+                                            item,
+                                            1 if e.state["correct_map"][item]["correctness"] == "correct" else 0,
+                                            e.updated.astimezone(pytz.timezone(settings.TIME_ZONE)).strftime(
+                                                "%d.%m.%Y %H:%M:%S")
+                                        ])
+                        except Exception as e:
+                            log.info("Get history: " + str(e))
+
+        problems += [r[1] for r in rows]
+        rows.insert(0, headers)
+        return rows, list(set(problems))
 
 
 class PsychometricsReport(object):
