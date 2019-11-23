@@ -33,11 +33,10 @@ class ViewsReport(object):
 
     @classmethod
     def generate(cls, _xmodule_instance_args, _entry_id, course_id, task_input, action_name):
-        # """
-        # For a given `course_id`, generate a CSV file containing
-        # information about the sections views
-        # """
-
+        """
+        For a given `course_id`, generate a CSV file containing
+        information about the sections views
+        """
         start_time = time()
         start_date = datetime.now(UTC)
         num_reports = 1
@@ -46,21 +45,18 @@ class ViewsReport(object):
         enrolled_students = CourseEnrollment.objects.users_enrolled_in(course_id, include_inactive=True)
         problems = []
 
-        # Generating Generating CSV1
         current_step = {'step': 'Calculating views'}
-        rows1, problems = cls._get_csv1_data(course_id, enrolled_students, problems)
+        rows1, problems = cls._get_views_data(course_id, enrolled_students, problems)
         file_csv1 = write_to_csv_by_semicolon(rows1)
         cls.views_reports_store.save_csv(course_id, "views", file_csv1, start_date)
 
         # task_progress.update_task_state(extra_meta=current_step)
         #
 
-        # cls.archive.save_archive(course_id, "psychometrics_data", start_date)
-
         return task_progress.update_task_state(extra_meta=current_step)
 
     @classmethod
-    def _get_csv1_data(cls, course_id, enrolled_students, problems):
+    def _get_views_data(cls, course_id, enrolled_students, problems):
         user_state_client = DjangoXBlockUserStateClient()
         course = get_course_by_id(course_id)
         headers = ('user_id', 'item_id', 'correct', 'time')

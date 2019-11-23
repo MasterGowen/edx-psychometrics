@@ -56,12 +56,6 @@ class PsychometricsReportStore(object):
 
 
 class ViewsReportStore(object):
-    # def __init__(self):
-    #     self.archive = PsychometricsZipFile()
-    #
-    # def append_csv(self, filename, output_buffer):
-    #     csv_filename = u"{filename}.csv".format(filename=filename)
-    #     self.archive.write(csv_filename, output_buffer.read())
 
     def save_csv(self, course_id, filename, cvs_file, timestamp, config_name='GRADES_DOWNLOAD'):
         report_store = ReportStore.from_config(config_name)
@@ -71,19 +65,6 @@ class ViewsReportStore(object):
             timestamp_str=timestamp.strftime("%Y-%m-%d-%H%M")
         )
         report_store.store(course_id, csv_filename, cvs_file)
-
-    # def append_json(self, filename, data):
-    #     json_filename = u"{filename}.json".format(filename=filename)
-    #     self.archive.write(json_filename, json.dumps(data))
-    #
-    # def save_archive(self, course_id, filename, timestamp, config_name='GRADES_DOWNLOAD'):
-    #     report_store = ReportStore.from_config(config_name)
-    #     zip_file_name = u"{filename}_{course}_{timestamp_str}.zip".format(
-    #         filename=filename,
-    #         course=get_valid_filename(unicode("_").join([course_id.org, course_id.course, course_id.run])),
-    #         timestamp_str=timestamp.strftime("%Y-%m-%d-%H%M")
-    #     )
-    #     report_store.store(course_id, zip_file_name, self.archive.read())
 
 
 def write_to_csv_by_semicolon(rows):
