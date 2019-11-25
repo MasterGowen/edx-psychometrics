@@ -43,21 +43,15 @@ class ViewsReport(object):
         task_progress = TaskProgress(action_name, num_reports, start_time)
 
         enrolled_students = CourseEnrollment.objects.users_enrolled_in(course_id, include_inactive=True)
-        problems = []
 
         current_step = {'step': 'Calculating views'}
-        rows1, problems = cls._get_views_data(course_id, enrolled_students, problems)
-        file_csv1 = write_to_csv_by_semicolon(rows1)
-        cls.views_reports_store.save_csv(course_id, "views", file_csv1, start_date)
-
-        # task_progress.update_task_state(extra_meta=current_step)
-        #
-
+        views_rows = cls._get_views_data(course_id, enrolled_students)
+        csv_file = write_to_csv_by_semicolon(views_rows)
+        cls.views_reports_store.save_csv(course_id, "views", csv_file, start_date)
         return task_progress.update_task_state(extra_meta=current_step)
 
     @classmethod
-    def _get_views_data(cls, course_id, enrolled_students, problems):
-        user_state_client = DjangoXBlockUserStateClient()
+    def _get_views_data(cls, course_id, enrolled_students):
         course = get_course_by_id(course_id)
         rows = []
         headers = ['user_id']
@@ -73,17 +67,11 @@ class ViewsReport(object):
                 for item in subsection.get_children():
                     module = StudentModule.objects.filter(student=student, module_type='sequential',
                                                           module_state_key=item.location).first()
-                    if module:
-                        row.append(1)
-                    else:
-                        row.append(0)
+                    row.append(1 if module else 0)
             rows.append(row)
 
         rows.insert(0, headers)
-
-        # problems += [r[1] for r in rows]
-        # rows.insert(0, headers)
-        return rows, list(set(problems))
+        return rows
 
 
 class PsychometricsReport(object):
