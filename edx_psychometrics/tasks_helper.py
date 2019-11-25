@@ -77,9 +77,9 @@ class ViewsReport(object):
                         row.append(1)
                     else:
                         row.append(0)
+            rows.append(row)
 
         rows.insert(0, headers)
-
 
         # problems += [r[1] for r in rows]
         # rows.insert(0, headers)
