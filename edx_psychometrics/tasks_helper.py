@@ -35,7 +35,7 @@ class ViewsReport(object):
     def generate(cls, _xmodule_instance_args, _entry_id, course_id, task_input, action_name):
         """
         For a given `course_id`, generate a CSV file containing
-        information about the sections views
+        information about the subsections views
         """
         start_time = time()
         start_date = datetime.now(UTC)
@@ -63,10 +63,10 @@ class ViewsReport(object):
 
         for student in enrolled_students:
             row = [str(student)]
-            for subsection in sections:
-                for item in subsection.get_children():
+            for section in sections:
+                for subsection in section.get_children():
                     module = StudentModule.objects.filter(student=student, module_type='sequential',
-                                                          module_state_key=item.location).first()
+                                                          module_state_key=subsection.location).first()
                     row.append(1 if module else 0)
             rows.append(row)
 
