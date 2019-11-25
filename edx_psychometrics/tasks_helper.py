@@ -62,13 +62,12 @@ class ViewsReport(object):
         rows = []
         headers = ['user_id']
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
-        sections = [s for s in course.get_children() if not chapter.hide_from_toc]
+        sections = [s for s in course.get_children() if not s.hide_from_toc]
 
         for subsection in sections:
             headers += [structure[str(sub.location)]['display_name'] for sub in subsection.get_children()]
 
         for student in enrolled_students:
-            # print(student, "----------------------------------------------")
             row = [str(student)]
             for subsection in sections:
                 for item in subsection.get_children():
