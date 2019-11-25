@@ -59,35 +59,42 @@ class ViewsReport(object):
     def _get_views_data(cls, course_id, enrolled_students, problems):
         user_state_client = DjangoXBlockUserStateClient()
         course = get_course_by_id(course_id)
-        headers = ('user_id', 'item_id', 'correct', 'time')
+        headers = ['user_id']
+        # headers = ('user_id', 'item_id', 'correct', 'time')
         rows = []
+        structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
+        sections = [s for s in course.get_children() if not s.hide_from_toc]
+        # headers = []
+        for subsection in sections:
+            # print([structure[str(sub.location)]['display_name'] for sub in subsection.get_children()])
+            headers += [structure[str(sub.location)]['display_name'] for sub in subsection.get_children()]
 
-        for student, course_grade, error in CourseGradeFactory().iter(enrolled_students, course):
-            student_modules = StudentModule.objects.filter(
-                student=student,
-                course_id=course_id,
-                module_type='problem'
-            )
-
-            for s in student_modules:
-                if s.state:
-                    if "correct_map" in s.state:
-                        try:
-                            history_entries = list(user_state_client.get_history(student.username, s.module_state_key))
-                            for e in history_entries:
-                                if "correct_map" in e.state:
-                                    for item in e.state["correct_map"]:
-                                        rows.append([
-                                            s.student.id,
-                                            item,
-                                            1 if e.state["correct_map"][item]["correctness"] == "correct" else 0,
-                                            e.updated.astimezone(pytz.timezone(settings.TIME_ZONE)).strftime(
-                                                "%d.%m.%Y %H:%M:%S")
-                                        ])
-                        except Exception as e:
-                            log.info("Get history: " + str(e))
-
-        problems += [r[1] for r in rows]
+        # for student, course_grade, error in CourseGradeFactory().iter(enrolled_students, course):
+        #     student_modules = StudentModule.objects.filter(
+        #         student=student,
+        #         course_id=course_id,
+        #         module_type='problem'
+        #     )
+        #
+        #     for s in student_modules:
+        #         if s.state:
+        #             if "correct_map" in s.state:
+        #                 try:
+        #                     history_entries = list(user_state_client.get_history(student.username, s.module_state_key))
+        #                     for e in history_entries:
+        #                         if "correct_map" in e.state:
+        #                             for item in e.state["correct_map"]:
+        #                                 rows.append([
+        #                                     s.student.id,
+        #                                     item,
+        #                                     1 if e.state["correct_map"][item]["correctness"] == "correct" else 0,
+        #                                     e.updated.astimezone(pytz.timezone(settings.TIME_ZONE)).strftime(
+        #                                         "%d.%m.%Y %H:%M:%S")
+        #                                 ])
+        #                 except Exception as e:
+        #                     log.info("Get history: " + str(e))
+        #
+        # problems += [r[1] for r in rows]
         rows.insert(0, headers)
         return rows, list(set(problems))
 
