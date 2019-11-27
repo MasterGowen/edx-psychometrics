@@ -9,7 +9,11 @@
 2. `/edxapp/edx-platform/lms/envs/common.py`:
 В `OPTIONAL_APPS` добавить `'edx_psychometrics',`
 
-3. `/edxapp/edx-platform/lms/envs/aws.py`: 
+3. `/edxapp/lms.env.json`:
+во FEATURES добавить
+`"ALLOW_PSY_REPORT_DOWNLOADS": true`
+
+4. `/edxapp/edx-platform/lms/envs/aws.py`: 
 ```
 # PSYCHOMETRICS
 import imp
@@ -20,7 +24,7 @@ except ImportError:
     FEATURES["ALLOW_PSY_REPORT_DOWNLOADS"] = False
 ```
 
-4. `/edxapp/edx-platform/lms/djangoapps/instructor/views/instructor_dashboard.py`:
+5. `/edxapp/edx-platform/lms/djangoapps/instructor/views/instructor_dashboard.py`:
 в фукнкцию `_section_data_download` добавить
 ```
     if settings.FEATURES.get("ALLOW_PSY_REPORT_DOWNLOADS"):
@@ -28,14 +32,14 @@ except ImportError:
         section_data['get_views_data_url'] = reverse('get_views_data', kwargs={'course_id': unicode(course_key)})
 ```
 
-5. `/edxapp/edx-platform/lms/djangoapps/instructor/views/api_urls.py`:
+6. `/edxapp/edx-platform/lms/djangoapps/instructor/views/api_urls.py`:
 ```
 if settings.FEATURES.get("ALLOW_PSY_REPORT_DOWNLOADS"):
     urlpatterns += patterns("", url(r'get_psychometrics_data', 'edx_psychometrics.api.get_psychometrics_data', name='get_psychometrics_data'))
     urlpatterns += patterns("", url(r'get_views_data',  'edx_psychometrics.api.get_views_data', name='get_views_data'))
 ```
 
-6. Добавление кнопки загрузки данных в шаблон instructor_dashboard (`/edxapp/edx-platform/lms/templates/instructor/instructor_dashboard_2/data_download.html`):
+7. Добавление кнопки загрузки данных в шаблон instructor_dashboard (`/edxapp/edx-platform/lms/templates/instructor/instructor_dashboard_2/data_download.html`):
 ```
   %if settings.FEATURES.get('ALLOW_PSY_REPORT_DOWNLOADS'):
   <div class="psychometrics">
@@ -49,13 +53,13 @@ if settings.FEATURES.get("ALLOW_PSY_REPORT_DOWNLOADS"):
   </div>
   %endif
 ``` 
-7. Перезапуск edxapp и edxapp_worker:
+8. Перезапуск edxapp и edxapp_worker:
 ```
 /edx/bin/supervisorctl restart edxapp:
 /edx/bin/supervisorctl restart edxapp_worker:
 ```
 
-8. Чудо-строка
+9. Чудо-строка
 ```
 sudo /edx/bin/pip.edxapp uninstall -y edx-psychometrics; 
 sudo /edx/bin/pip.edxapp install git+https://github.com/MasterGowen/edx-psychometrics@master; 
