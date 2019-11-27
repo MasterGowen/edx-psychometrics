@@ -7,7 +7,7 @@
 1. Установка пакета `edx-psychometrics`: `sudo /edx/bin/pip.edxapp install git+https://github.com/MasterGowen/edx-psychometrics@master`
 
 2. `lms/envs/common.py:`
-В `OPTIONAL_APPS` добавить `('edx_psychometrics', None),`
+В `OPTIONAL_APPS` добавить `'edx_psychometrics',`
 
 3. `/lms/djangoapps/instructor/views/instructor_dashboard.py`: 
 ```
