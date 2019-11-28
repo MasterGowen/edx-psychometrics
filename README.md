@@ -4,16 +4,16 @@
 
 ## Установка:
 
-1. Установка пакета `edx-psychometrics`: `sudo /edx/bin/pip.edxapp install git+https://github.com/MasterGowen/edx-psychometrics@master`
+1. Установка пакета `edx-psychometrics`: `sudo /edx/bin/pip.edxapp install -e git+https://github.com/MasterGowen/edx-psychometrics@master#egg=edx_psychometrics`
 
-2. `/edxapp/edx-platform/lms/envs/common.py`:
+2. `/edx/app/edxapp/edx-platform/lms/envs/common.py`:
 В `OPTIONAL_APPS` добавить `'edx_psychometrics',`
 
-3. `/edxapp/lms.env.json`:
+3. `/edx/app/edxapp/lms.env.json`:
 во FEATURES добавить
 `"ALLOW_PSY_REPORT_DOWNLOADS": true`
 
-4. `/edxapp/edx-platform/lms/envs/aws.py`: 
+4. `/edx/app/edxapp/edx-platform/lms/envs/aws.py`: 
 ```
 # PSYCHOMETRICS
 import imp
@@ -24,7 +24,7 @@ except ImportError:
     FEATURES["ALLOW_PSY_REPORT_DOWNLOADS"] = False
 ```
 
-5. `/edxapp/edx-platform/lms/djangoapps/instructor/views/instructor_dashboard.py`:
+5. `/edx/app/edxapp/edx-platform/lms/djangoapps/instructor/views/instructor_dashboard.py`:
 в фукнкцию `_section_data_download` добавить
 ```
     if settings.FEATURES.get("ALLOW_PSY_REPORT_DOWNLOADS"):
@@ -32,7 +32,7 @@ except ImportError:
         section_data['get_views_data_url'] = reverse('get_views_data', kwargs={'course_id': unicode(course_key)})
 ```
 
-6. `/edxapp/edx-platform/lms/djangoapps/instructor/views/api_urls.py`:
+6. `/edx/app/edxapp/edx-platform/lms/djangoapps/instructor/views/api_urls.py`:
 ```
 if settings.FEATURES.get("ALLOW_PSY_REPORT_DOWNLOADS"):
     urlpatterns += patterns("", url(r'get_psychometrics_data', 'edx_psychometrics.api.get_psychometrics_data', name='get_psychometrics_data'))
