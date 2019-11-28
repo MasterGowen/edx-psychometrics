@@ -54,7 +54,7 @@ class ViewsReport(object):
     def _get_views_data(cls, course_id, enrolled_students):
         course = get_course_by_id(course_id)
         rows = []
-        headers = ['user_id']
+        headers = ['user_id', 'email']
         structure = CourseStructure.objects.get(course_id=course_id).ordered_blocks
         sections = [s for s in course.get_children() if not s.hide_from_toc]
 
@@ -62,7 +62,7 @@ class ViewsReport(object):
             headers += [structure[str(sub.location)]['display_name'] for sub in subsection.get_children()]
 
         for student in enrolled_students:
-            row = [str(student)]
+            row = [str(student), student.email]
             for section in sections:
                 for subsection in section.get_children():
                     module = StudentModule.objects.filter(student=student, module_type='sequential',
@@ -368,7 +368,7 @@ class PsychometricsReport(object):
             # for criterion in openassessment_block.rubric_criteria:
             #     criterion_points = []
             #     for option in criterion['options']:
-            #         criterion_points.append(option['points'])
+            #         criterion_points.append(option['points'])write_to_csv_by_semicolon
             #     max_score += max(criterion_points)
 
             x_block_id = openassessment_block.get_xblock_id()
