@@ -55,8 +55,8 @@ if settings.FEATURES.get("ALLOW_PSY_REPORT_DOWNLOADS"):
 ``` 
 8. Перезапуск edxapp и edxapp_worker:
 ```
-/edx/bin/supervisorctl restart edxapp:
-/edx/bin/supervisorctl restart edxapp_worker:
+sudo /edx/bin/supervisorctl restart edxapp:
+sudo /edx/bin/supervisorctl restart edxapp_worker:
 ```
 
 9. Чудо-строка
