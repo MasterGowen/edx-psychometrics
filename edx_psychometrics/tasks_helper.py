@@ -23,9 +23,51 @@ from student.models import CourseEnrollment, user_by_anonymous_id
 from student.roles import CourseInstructorRole, CourseStaffRole
 from xmodule.modulestore.django import modulestore
 
-from edx_psychometrics.utils import get_course_item_submissions, _use_read_replica, write_to_csv_by_semicolon, PsychometricsReportStore, ViewsReportStore
+from edx_psychometrics.utils import get_course_item_submissions, _use_read_replica, write_to_csv_by_semicolon, \
+    PsychometricsReportStore, ViewsReportStore, EnrollmentsReportStore
 
 log = logging.getLogger(__name__)
+
+
+class EnrollmentsReport(object):
+    enrollments_reports_store = EnrollmentsReportStore()
+
+    @classmethod
+    def generate(cls, _xmodule_instance_args, _entry_id, course_id, task_input, action_name):
+        """
+        For a given `course_id`, generate a CSV file containing
+        information about the course enrollments
+        """
+        start_time = time()
+        start_date = datetime.now(UTC)
+        num_reports = 1
+        task_progress = TaskProgress(action_name, num_reports, start_time)
+
+        enrolled_students = CourseEnrollment.objects.users_enrolled_in(course_id, include_inactive=True)
+
+        current_step = {'step': 'Get enrollments'}
+        views_rows = cls._get_views_data(course_id, enrolled_students)
+        csv_file = write_to_csv_by_semicolon(views_rows)
+        cls.enrollments_reports_store.save_csv(course_id, "enrollments", csv_file, start_date)
+        return task_progress.update_task_state(extra_meta=current_step)
+
+    @classmethod
+    def _get_views_data(cls, course_id, enrolled_students):
+        course = get_course_by_id(course_id)
+        rows = []
+        headers = ['user_id', 'email', "created", "mode"]
+
+        for student in enrolled_students:
+            row = [str(student), student.email]
+            enrollment = CourseEnrollment.objects.get_enrollment(user=student, course_key=course_id)
+            row += [
+                enrollment.created,
+                enrollment.mode
+            ]
+            rows.append(row)
+
+        rows.insert(0, headers)
+        return rows
 
 
 class ViewsReport(object):
