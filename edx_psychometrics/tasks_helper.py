@@ -59,12 +59,13 @@ class EnrollmentsReport(object):
 
         for student in enrolled_students:
             row = [str(student), student.email]
-            enrollment = CourseEnrollment.default_objects.filter(user=student, course_id=course_id)
-            row += [
-                enrollment.created,
-                enrollment.mode
-            ]
-            rows.append(row)
+            enrollments = CourseEnrollment.default_objects.filter(user=student, course_id=course_id)
+            for enrollment in enrollments:
+                row += [
+                    enrollment.created,
+                    enrollment.mode
+                ]
+                rows.append(row)
 
         rows.insert(0, headers)
         return rows
