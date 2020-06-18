@@ -62,7 +62,7 @@ class EnrollmentsReport(object):
             enrollments = CourseEnrollment.default_objects.filter(user=student, course_id=course_id)
             for enrollment in enrollments:
                 row += [
-                    enrollment.created,
+                    enrollment.created.strftime("%d.%m.%Y"),
                     enrollment.mode
                 ]
                 rows.append(row)
